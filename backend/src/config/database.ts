@@ -21,7 +21,6 @@ export const createConnection = async (): Promise<mysql.Pool> => {
     keepAliveInitialDelay: 0,
     // Uzak sunucu için timeout ayarları
     connectTimeout: 60000, // 60 saniye
-    acquireTimeout: 60000,
     timeout: 60000,
   };
 

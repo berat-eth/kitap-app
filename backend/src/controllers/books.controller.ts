@@ -1,19 +1,32 @@
 import { Response } from 'express';
+import { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest, Book, BookFilters, PaginationParams } from '../types';
 import { getPool } from '../config/database';
 import { successResponse, errorResponse, paginatedResponse, getOffset } from '../utils/helpers';
 import { paginationSchema, categoryFilterSchema } from '../utils/validators';
 
+interface BookRow extends Book, RowDataPacket {}
+interface BookWithCategoryRow extends Book, RowDataPacket {
+  category_name: string;
+  category_slug: string;
+  chapter_count: number;
+}
+interface CountRow extends RowDataPacket {
+  total: number;
+}
+
 export class BooksController {
   static async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { page = 1, limit = 20, category, search, featured, published } = req.query;
-      const pool = getPool();
-      const offset = getOffset(Number(page), Number(limit));
 
+      const pool = getPool();
       let query = `
-        SELECT b.*, c.name as category_name, c.slug as category_slug,
-               COUNT(DISTINCT ch.id) as chapter_count
+        SELECT 
+          b.*,
+          c.name as category_name,
+          c.slug as category_slug,
+          COUNT(ch.id) as chapter_count
         FROM books b
         LEFT JOIN categories c ON b.category_id = c.id
         LEFT JOIN chapters ch ON b.id = ch.book_id
@@ -32,29 +45,20 @@ export class BooksController {
         params.push(searchTerm, searchTerm, searchTerm);
       }
 
-      if (featured === 'true') {
-        query += ' AND b.is_featured = true';
+      if (featured !== undefined) {
+        query += ' AND b.is_featured = ?';
+        params.push(featured === 'true' ? 1 : 0);
       }
 
       if (published !== undefined) {
-        query += published === 'true' ? ' AND b.is_published = true' : ' AND b.is_published = false';
-      } else {
-        // Default: only show published books for non-admin users
-        if (!req.user || req.user.role !== 'admin') {
-          query += ' AND b.is_published = true';
-        }
+        query += ' AND b.is_published = ?';
+        params.push(published === 'true' ? 1 : 0);
       }
 
-      query += ' GROUP BY b.id ORDER BY b.created_at DESC LIMIT ? OFFSET ?';
-      params.push(Number(limit), offset);
+      query += ' GROUP BY b.id ORDER BY b.created_at DESC';
 
-      const [books] = await pool.execute<Array<Book & { category_name: string; category_slug: string; chapter_count: number }>>(
-        query,
-        params
-      );
-
-      // Get total count
-      let countQuery = 'SELECT COUNT(DISTINCT b.id) as total FROM books b LEFT JOIN categories c ON b.category_id = c.id WHERE 1=1';
+      // Count query
+      let countQuery = `SELECT COUNT(DISTINCT b.id) as total FROM books b LEFT JOIN categories c ON b.category_id = c.id WHERE 1=1`;
       const countParams: unknown[] = [];
 
       if (category) {
@@ -68,32 +72,31 @@ export class BooksController {
         countParams.push(searchTerm, searchTerm, searchTerm);
       }
 
-      if (featured === 'true') {
-        countQuery += ' AND b.is_featured = true';
+      if (featured !== undefined) {
+        countQuery += ' AND b.is_featured = ?';
+        countParams.push(featured === 'true' ? 1 : 0);
       }
 
       if (published !== undefined) {
-        countQuery += published === 'true' ? ' AND b.is_published = true' : ' AND b.is_published = false';
-      } else {
-        if (!req.user || req.user.role !== 'admin') {
-          countQuery += ' AND b.is_published = true';
-        }
+        countQuery += ' AND b.is_published = ?';
+        countParams.push(published === 'true' ? 1 : 0);
       }
 
-      const [countResult] = await pool.execute<Array<{ total: number }>>(countQuery, countParams);
+      const offset = (Number(page) - 1) * Number(limit);
+      query += ` LIMIT ? OFFSET ?`;
+      params.push(Number(limit), offset);
+
+      const [books] = await pool.execute<BookWithCategoryRow[]>(query, params);
+      const [countResult] = await pool.execute<CountRow[]>(countQuery, countParams);
       const total = countResult[0]?.total || 0;
 
       res.status(200).json(
-        successResponse(
-          paginatedResponse(books, Number(page), Number(limit), total),
-          undefined,
-          {
-            page: Number(page),
-            limit: Number(limit),
-            total,
-            totalPages: Math.ceil(total / Number(limit)),
-          }
-        )
+        paginatedResponse(books, {
+          page: Number(page),
+          limit: Number(limit),
+          total,
+          totalPages: Math.ceil(total / Number(limit)),
+        })
       );
     } catch (error) {
       res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to fetch books'));
@@ -105,11 +108,8 @@ export class BooksController {
       const { id } = req.params;
       const pool = getPool();
 
-      const [books] = await pool.execute<Array<Book>>(
-        `SELECT b.*, c.name as category_name, c.slug as category_slug
-         FROM books b
-         LEFT JOIN categories c ON b.category_id = c.id
-         WHERE b.id = ?`,
+      const [books] = await pool.execute<BookRow[]>(
+        'SELECT * FROM books WHERE id = ?',
         [id]
       );
 
@@ -118,165 +118,29 @@ export class BooksController {
         return;
       }
 
-      const book = books[0];
-
-      // Check if user can view unpublished books
-      if (!book.is_published && (!req.user || req.user.role !== 'admin')) {
-        res.status(404).json(errorResponse('NOT_FOUND', 'Book not found'));
-        return;
-      }
-
-      res.status(200).json(successResponse(book));
+      res.status(200).json(successResponse(books[0]));
     } catch (error) {
       res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to fetch book'));
     }
   }
 
-  static async getChapters(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const pool = getPool();
-
-      const [chapters] = await pool.execute(
-        'SELECT * FROM chapters WHERE book_id = ? ORDER BY order_number ASC',
-        [id]
-      );
-
-      res.status(200).json(successResponse(chapters));
-    } catch (error) {
-      res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to fetch chapters'));
-    }
-  }
-
-  static async getFeatured(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      const pool = getPool();
-
-      const [books] = await pool.execute<Array<Book>>(
-        `SELECT b.*, c.name as category_name, c.slug as category_slug
-         FROM books b
-         LEFT JOIN categories c ON b.category_id = c.id
-         WHERE b.is_featured = true AND b.is_published = true
-         ORDER BY b.rating DESC, b.total_listens DESC
-         LIMIT 10`
-      );
-
-      res.status(200).json(successResponse(books));
-    } catch (error) {
-      res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to fetch featured books'));
-    }
-  }
-
-  static async getPopular(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      const pool = getPool();
-
-      const [books] = await pool.execute<Array<Book>>(
-        `SELECT b.*, c.name as category_name, c.slug as category_slug
-         FROM books b
-         LEFT JOIN categories c ON b.category_id = c.id
-         WHERE b.is_published = true
-         ORDER BY b.total_listens DESC, b.rating DESC
-         LIMIT 20`
-      );
-
-      res.status(200).json(successResponse(books));
-    } catch (error) {
-      res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to fetch popular books'));
-    }
-  }
-
-  static async search(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      const { q } = req.query;
-      const pool = getPool();
-
-      if (!q || typeof q !== 'string') {
-        res.status(400).json(errorResponse('VALIDATION_ERROR', 'Search query is required'));
-        return;
-      }
-
-      const searchTerm = `%${q}%`;
-      const [books] = await pool.execute<Array<Book>>(
-        `SELECT b.*, c.name as category_name, c.slug as category_slug
-         FROM books b
-         LEFT JOIN categories c ON b.category_id = c.id
-         WHERE b.is_published = true
-         AND (b.title LIKE ? OR b.author LIKE ? OR b.description LIKE ?)
-         ORDER BY b.rating DESC
-         LIMIT 50`,
-        [searchTerm, searchTerm, searchTerm]
-      );
-
-      res.status(200).json(successResponse(books));
-    } catch (error) {
-      res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to search books'));
-    }
-  }
-
-  static async getByCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      const { slug } = req.params;
-      const pool = getPool();
-
-      const [books] = await pool.execute<Array<Book>>(
-        `SELECT b.*, c.name as category_name, c.slug as category_slug
-         FROM books b
-         LEFT JOIN categories c ON b.category_id = c.id
-         WHERE c.slug = ? AND b.is_published = true
-         ORDER BY b.created_at DESC`,
-        [slug]
-      );
-
-      res.status(200).json(successResponse(books));
-    } catch (error) {
-      res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to fetch books by category'));
-    }
-  }
-
   static async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'admin') {
-        res.status(403).json(errorResponse('FORBIDDEN', 'Admin access required'));
-        return;
-      }
+      const { title, author, description, cover_url, category_id, is_published, is_featured } =
+        req.body;
 
       const pool = getPool();
-      const {
-        title,
-        author,
-        narrator,
-        description,
-        cover_image_url,
-        category_id,
-        duration_seconds = 0,
-        is_featured = false,
-        is_published = false,
-      } = req.body;
-
       const [result] = await pool.execute(
-        `INSERT INTO books (title, author, narrator, description, cover_image_url, category_id, 
-         duration_seconds, is_featured, is_published, created_by, published_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          title,
-          author,
-          narrator || null,
-          description || null,
-          cover_image_url || null,
-          category_id,
-          duration_seconds,
-          is_featured,
-          is_published,
-          req.user.id,
-          is_published ? new Date() : null,
-        ]
+        `INSERT INTO books (title, author, description, cover_url, category_id, is_published, is_featured)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [title, author, description, cover_url, category_id, is_published || false, is_featured || false]
       );
 
-      const insertResult = result as { insertId: number };
-      const [books] = await pool.execute<Array<Book>>('SELECT * FROM books WHERE id = ?', [
-        insertResult.insertId,
-      ]);
+      const insertId = (result as any).insertId;
+      const [books] = await pool.execute<BookRow[]>(
+        'SELECT * FROM books WHERE id = ?',
+        [insertId]
+      );
 
       res.status(201).json(successResponse(books[0], 'Book created successfully'));
     } catch (error) {
@@ -286,16 +150,10 @@ export class BooksController {
 
   static async update(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'admin') {
-        res.status(403).json(errorResponse('FORBIDDEN', 'Admin access required'));
-        return;
-      }
-
       const { id } = req.params;
       const pool = getPool();
 
-      // Check if book exists
-      const [existing] = await pool.execute<Array<Book>>('SELECT * FROM books WHERE id = ?', [id]);
+      const [existing] = await pool.execute<BookRow[]>('SELECT * FROM books WHERE id = ?', [id]);
       if (existing.length === 0) {
         res.status(404).json(errorResponse('NOT_FOUND', 'Book not found'));
         return;
@@ -304,32 +162,12 @@ export class BooksController {
       const updates: string[] = [];
       const values: unknown[] = [];
 
-      const allowedFields = [
-        'title',
-        'author',
-        'narrator',
-        'description',
-        'cover_image_url',
-        'category_id',
-        'duration_seconds',
-        'is_featured',
-        'is_published',
-      ];
+      const allowedFields = ['title', 'author', 'description', 'cover_url', 'category_id', 'is_published', 'is_featured'];
 
       for (const field of allowedFields) {
         if (req.body[field] !== undefined) {
           updates.push(`${field} = ?`);
           values.push(req.body[field]);
-        }
-      }
-
-      // Handle published_at
-      if (req.body.is_published !== undefined) {
-        if (req.body.is_published && !existing[0].published_at) {
-          updates.push('published_at = ?');
-          values.push(new Date());
-        } else if (!req.body.is_published) {
-          updates.push('published_at = NULL');
         }
       }
 
@@ -339,9 +177,9 @@ export class BooksController {
       }
 
       values.push(id);
-      await pool.execute(`UPDATE books SET ${updates.join(', ')} WHERE id = ?`, values);
+      await pool.execute(`UPDATE books SET ${updates.join(', ')}, updated_at = NOW() WHERE id = ?`, values);
 
-      const [books] = await pool.execute<Array<Book>>('SELECT * FROM books WHERE id = ?', [id]);
+      const [books] = await pool.execute<BookRow[]>('SELECT * FROM books WHERE id = ?', [id]);
       res.status(200).json(successResponse(books[0], 'Book updated successfully'));
     } catch (error) {
       res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to update book'));
@@ -350,15 +188,10 @@ export class BooksController {
 
   static async delete(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'admin') {
-        res.status(403).json(errorResponse('FORBIDDEN', 'Admin access required'));
-        return;
-      }
-
       const { id } = req.params;
       const pool = getPool();
 
-      const [existing] = await pool.execute<Array<Book>>('SELECT * FROM books WHERE id = ?', [id]);
+      const [existing] = await pool.execute<BookRow[]>('SELECT * FROM books WHERE id = ?', [id]);
       if (existing.length === 0) {
         res.status(404).json(errorResponse('NOT_FOUND', 'Book not found'));
         return;
@@ -370,5 +203,48 @@ export class BooksController {
       res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to delete book'));
     }
   }
-}
 
+  static async getFeatured(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const pool = getPool();
+      const [books] = await pool.execute<BookRow[]>(
+        'SELECT * FROM books WHERE is_featured = true AND is_published = true ORDER BY created_at DESC LIMIT 10'
+      );
+
+      res.status(200).json(successResponse(books));
+    } catch (error) {
+      res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to fetch featured books'));
+    }
+  }
+
+  static async getRecommended(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const pool = getPool();
+      const [books] = await pool.execute<BookRow[]>(
+        `SELECT b.* FROM books b
+         LEFT JOIN book_ratings br ON b.id = br.book_id
+         WHERE b.is_published = true
+         GROUP BY b.id
+         ORDER BY AVG(br.rating) DESC, b.view_count DESC
+         LIMIT 10`
+      );
+
+      res.status(200).json(successResponse(books));
+    } catch (error) {
+      res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to fetch recommended books'));
+    }
+  }
+
+  static async incrementViewCount(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const pool = getPool();
+
+      await pool.execute('UPDATE books SET view_count = view_count + 1 WHERE id = ?', [id]);
+
+      res.status(200).json(successResponse(null, 'View count incremented'));
+    } catch (error) {
+      res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to increment view count'));
+    }
+  }
+}
