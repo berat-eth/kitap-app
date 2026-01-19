@@ -22,9 +22,6 @@
     "production": {
       "android": {
         "buildType": "apk"
-      },
-      "ios": {
-        "bundleIdentifier": "com.beratsimsek.audiobook"
       }
     }
   },
@@ -32,4 +29,3 @@
     "production": {}
   }
 }
-
