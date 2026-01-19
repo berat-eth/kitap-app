@@ -15,7 +15,6 @@ router.post(
   adminAuth,
   requireRole('admin'),
   uploadCover,
-  handleUploadError,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.file) {
@@ -48,7 +47,6 @@ router.post(
   adminAuth,
   requireRole('admin'),
   uploadAudio,
-  handleUploadError,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.file) {
@@ -79,7 +77,6 @@ router.post(
 router.post(
   '/avatar',
   uploadAvatar,
-  handleUploadError,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.file) {
