@@ -5,6 +5,13 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a2e"
+    },
+    "userInterfaceStyle": "automatic",
     "splash": {
       "backgroundColor": "#137fec"
     },
@@ -22,6 +29,11 @@
       "package": "com.seslikitap.app"
     },
     "web": {},
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-will-be-generated"
+      }
+    },
     "plugins": [
       [
         "expo-av",
