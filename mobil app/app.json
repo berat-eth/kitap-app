@@ -2,6 +2,7 @@
   "expo": {
     "name": "Sesli Kitap",
     "slug": "sesli-kitap",
+    "owner": "berat_3322",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
@@ -22,6 +23,11 @@
       "package": "com.seslikitap.app",
       "versionCode": 1
     },
-    "web": {}
+    "web": {},
+    "extra": {
+      "eas": {
+        "projectId": "341c6cd9-1256-41c2-a1d6-70ce0eb6161a"
+      }
+    }
   }
 }
