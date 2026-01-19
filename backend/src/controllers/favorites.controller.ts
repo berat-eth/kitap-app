@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest, UserFavorite, Book } from '../types';
 import { getPool } from '../config/database';
 import { successResponse, errorResponse } from '../utils/helpers';
@@ -13,7 +14,7 @@ export class FavoritesController {
 
       const pool = getPool();
 
-      const [favorites] = await pool.execute<Array<Book & { favorited_at: Date }>>(
+      const [favorites] = await pool.execute<(Book & { favorited_at: Date } & RowDataPacket)[]>(
         `SELECT b.*, uf.created_at as favorited_at
          FROM user_favorites uf
          LEFT JOIN books b ON uf.book_id = b.id
@@ -44,14 +45,14 @@ export class FavoritesController {
       }
 
       // Check if book exists
-      const [books] = await pool.execute('SELECT id FROM books WHERE id = ?', [bookId]);
-      if (books.length === 0) {
+      const [books] = await pool.execute<RowDataPacket[]>('SELECT id FROM books WHERE id = ?', [bookId]);
+      if (Array.isArray(books) && books.length === 0) {
         res.status(404).json(errorResponse('NOT_FOUND', 'Book not found'));
         return;
       }
 
       // Check if already favorited
-      const [existing] = await pool.execute<Array<UserFavorite>>(
+      const [existing] = await pool.execute<(UserFavorite & RowDataPacket)[]>(
         'SELECT * FROM user_favorites WHERE user_id = ? AND book_id = ?',
         [req.user.id, bookId]
       );
@@ -67,7 +68,7 @@ export class FavoritesController {
       );
 
       const insertResult = result as { insertId: number };
-      const [favorites] = await pool.execute<Array<UserFavorite>>(
+      const [favorites] = await pool.execute<(UserFavorite & RowDataPacket)[]>(
         'SELECT * FROM user_favorites WHERE id = ?',
         [insertResult.insertId]
       );
@@ -88,7 +89,7 @@ export class FavoritesController {
       const { bookId } = req.params;
       const pool = getPool();
 
-      const [existing] = await pool.execute<Array<UserFavorite>>(
+      const [existing] = await pool.execute<(UserFavorite & RowDataPacket)[]>(
         'SELECT * FROM user_favorites WHERE user_id = ? AND book_id = ?',
         [req.user.id, bookId]
       );

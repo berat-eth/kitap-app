@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { RowDataPacket } from 'mysql2';
 import jwt from 'jsonwebtoken';
 import { AuthenticatedRequest } from '../types';
 import { config } from '../config/env';
@@ -34,7 +35,7 @@ export const adminAuth = async (
 
       // Verify user exists and is admin
       const pool = getPool();
-      const [users] = await pool.execute<Array<{ id: number; role: string; is_active: boolean; [key: string]: unknown }>>(
+      const [users] = await pool.execute<({ id: number; role: string; is_active: boolean; [key: string]: unknown } & RowDataPacket)[]>(
         'SELECT * FROM users WHERE id = ? AND email = ?',
         [decoded.userId, decoded.email]
       );
@@ -62,7 +63,7 @@ export const adminAuth = async (
         return;
       }
 
-      req.user = user as AuthenticatedRequest['user'];
+      req.user = user as unknown as AuthenticatedRequest['user'];
       next();
     } catch (error) {
       if (error instanceof jwt.JsonWebTokenError) {

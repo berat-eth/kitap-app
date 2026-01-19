@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest, UserProgress } from '../types';
 import { getPool } from '../config/database';
 import { successResponse, errorResponse } from '../utils/helpers';
@@ -13,7 +14,7 @@ export class ProgressController {
 
       const pool = getPool();
 
-      const [progress] = await pool.execute<Array<UserProgress>>(
+      const [progress] = await pool.execute<(UserProgress & RowDataPacket)[]>(
         `SELECT up.*, b.title as book_title, ch.title as chapter_title
          FROM user_progress up
          LEFT JOIN books b ON up.book_id = b.id
@@ -39,7 +40,7 @@ export class ProgressController {
       const { bookId } = req.params;
       const pool = getPool();
 
-      const [progress] = await pool.execute<Array<UserProgress>>(
+      const [progress] = await pool.execute<(UserProgress & RowDataPacket)[]>(
         `SELECT up.*, ch.title as chapter_title, ch.order_number
          FROM user_progress up
          LEFT JOIN chapters ch ON up.chapter_id = ch.id
@@ -65,7 +66,7 @@ export class ProgressController {
       const { book_id, chapter_id, current_position_seconds = 0, is_completed = false } = req.body;
 
       // Check if progress already exists
-      const [existing] = await pool.execute<Array<UserProgress>>(
+      const [existing] = await pool.execute<(UserProgress & RowDataPacket)[]>(
         'SELECT * FROM user_progress WHERE user_id = ? AND book_id = ? AND chapter_id = ?',
         [req.user.id, book_id, chapter_id]
       );
@@ -79,7 +80,7 @@ export class ProgressController {
           [current_position_seconds, is_completed, existing[0].id]
         );
 
-        const [updated] = await pool.execute<Array<UserProgress>>(
+        const [updated] = await pool.execute<(UserProgress & RowDataPacket)[]>(
           'SELECT * FROM user_progress WHERE id = ?',
           [existing[0].id]
         );
@@ -95,7 +96,7 @@ export class ProgressController {
       );
 
       const insertResult = result as { insertId: number };
-      const [progress] = await pool.execute<Array<UserProgress>>(
+      const [progress] = await pool.execute<(UserProgress & RowDataPacket)[]>(
         'SELECT * FROM user_progress WHERE id = ?',
         [insertResult.insertId]
       );
@@ -123,7 +124,7 @@ export class ProgressController {
       }
 
       // Find existing progress
-      const [existing] = await pool.execute<Array<UserProgress>>(
+      const [existing] = await pool.execute<(UserProgress & RowDataPacket)[]>(
         'SELECT * FROM user_progress WHERE user_id = ? AND book_id = ? AND chapter_id = ?',
         [req.user.id, bookId, chapter_id]
       );
@@ -159,7 +160,7 @@ export class ProgressController {
         values
       );
 
-      const [updated] = await pool.execute<Array<UserProgress>>(
+      const [updated] = await pool.execute<(UserProgress & RowDataPacket)[]>(
         'SELECT * FROM user_progress WHERE id = ?',
         [existing[0].id]
       );

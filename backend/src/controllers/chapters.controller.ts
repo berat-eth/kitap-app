@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest, Chapter } from '../types';
 import { getPool } from '../config/database';
 import { successResponse, errorResponse } from '../utils/helpers';
@@ -9,7 +10,7 @@ export class ChaptersController {
       const { id } = req.params;
       const pool = getPool();
 
-      const [chapters] = await pool.execute<Array<Chapter>>(
+      const [chapters] = await pool.execute<(Chapter & RowDataPacket)[]>(
         'SELECT * FROM chapters WHERE id = ?',
         [id]
       );
@@ -30,7 +31,7 @@ export class ChaptersController {
       const { id } = req.params;
       const pool = getPool();
 
-      const [chapters] = await pool.execute<Array<Chapter>>(
+      const [chapters] = await pool.execute<(Chapter & RowDataPacket)[]>(
         'SELECT audio_file_url FROM chapters WHERE id = ?',
         [id]
       );
@@ -68,8 +69,8 @@ export class ChaptersController {
       } = req.body;
 
       // Verify book exists
-      const [books] = await pool.execute('SELECT id FROM books WHERE id = ?', [book_id]);
-      if (books.length === 0) {
+      const [books] = await pool.execute<RowDataPacket[]>('SELECT id FROM books WHERE id = ?', [book_id]);
+      if (Array.isArray(books) && books.length === 0) {
         res.status(404).json(errorResponse('NOT_FOUND', 'Book not found'));
         return;
       }
@@ -81,7 +82,7 @@ export class ChaptersController {
       );
 
       const insertResult = result as { insertId: number };
-      const [chapters] = await pool.execute<Array<Chapter>>('SELECT * FROM chapters WHERE id = ?', [
+      const [chapters] = await pool.execute<(Chapter & RowDataPacket)[]>('SELECT * FROM chapters WHERE id = ?', [
         insertResult.insertId,
       ]);
 
@@ -101,7 +102,7 @@ export class ChaptersController {
       const { id } = req.params;
       const pool = getPool();
 
-      const [existing] = await pool.execute<Array<Chapter>>(
+      const [existing] = await pool.execute<(Chapter & RowDataPacket)[]>(
         'SELECT * FROM chapters WHERE id = ?',
         [id]
       );
@@ -130,7 +131,7 @@ export class ChaptersController {
       values.push(id);
       await pool.execute(`UPDATE chapters SET ${updates.join(', ')} WHERE id = ?`, values);
 
-      const [chapters] = await pool.execute<Array<Chapter>>('SELECT * FROM chapters WHERE id = ?', [
+      const [chapters] = await pool.execute<(Chapter & RowDataPacket)[]>('SELECT * FROM chapters WHERE id = ?', [
         id,
       ]);
       res.status(200).json(successResponse(chapters[0], 'Chapter updated successfully'));
@@ -149,7 +150,7 @@ export class ChaptersController {
       const { id } = req.params;
       const pool = getPool();
 
-      const [existing] = await pool.execute<Array<Chapter>>(
+      const [existing] = await pool.execute<(Chapter & RowDataPacket)[]>(
         'SELECT * FROM chapters WHERE id = ?',
         [id]
       );

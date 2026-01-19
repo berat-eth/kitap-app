@@ -91,7 +91,7 @@ export class BooksController {
       const total = countResult[0]?.total || 0;
 
       res.status(200).json(
-        paginatedResponse(books, {
+        successResponse(books, undefined, {
           page: Number(page),
           limit: Number(limit),
           total,
