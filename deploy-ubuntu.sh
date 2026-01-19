@@ -30,7 +30,7 @@ NC='\033[0m' # No Color
 
 # Değişkenler
 DOMAIN="kitap.beratsimsek.com.tr"
-API_DOMAIN="api.kitap.beratsimsek.com.tr"
+API_DOMAIN="api.beratsimsek.com.tr"
 EMAIL="admin@beratsimsek.com.tr"  # SSL sertifikası için email
 APP_USER="audiobook"
 APP_DIR="/var/www/audiobook"
