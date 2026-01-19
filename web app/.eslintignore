@@ -1,0 +1,17 @@
+# Dependencies
+node_modules
+.next
+out
+build
+dist
+
+# Backend (ayrı bir proje)
+backend
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+

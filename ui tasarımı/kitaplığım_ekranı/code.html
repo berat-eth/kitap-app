@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kitaplığım Ekranı</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "surface-dark": "#1c242e",
+              "surface-light": "#ffffff",
+            },
+            fontFamily: {
+              "display": ["Lexend", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white font-display antialiased min-h-screen pb-24">
+<header class="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+<div class="flex items-center justify-between px-4 py-3 relative">
+<button class="text-primary font-medium text-base hover:text-primary/80 transition-colors z-10">
+            Düzenle
+        </button>
+<h1 class="text-xl font-bold tracking-tight absolute left-1/2 -translate-x-1/2">Kitaplığım</h1>
+<button aria-label="Ara" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors z-10">
+<span class="material-symbols-outlined text-gray-600 dark:text-gray-300">search</span>
+</button>
+</div>
+<div class="px-4 pb-3">
+<div class="flex p-1 bg-gray-200 dark:bg-surface-dark rounded-xl">
+<button class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-primary text-primary dark:text-white shadow-sm transition-all">
+                Tüm Kitaplar
+            </button>
+<button class="flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all">
+                İndirilenler
+            </button>
+</div>
+</div>
+</header>
+<main class="flex flex-col gap-6 pt-4">
+<section>
+<div class="px-4 mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">history</span>
+<h2 class="text-xl font-bold">Son Dinlenenler</h2>
+</div>
+<div class="px-4">
+<div class="flex flex-col sm:flex-row items-stretch gap-4 p-4 rounded-2xl bg-surface-light dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800">
+<div class="relative w-full sm:w-32 aspect-[2/3] sm:aspect-square flex-shrink-0 rounded-xl overflow-hidden shadow-md">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Vintage book cover with classic typography" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDSwM8ajsIqHErqwMRntJ300X6jyGbYLi6JeeVKqVuFruqeJJ4Mkiny3j6h3sgMh6vuRblO7Iqzb-KgKo1g489uV-ZUAYvgK89SkVEpI3Vqc0NvazaGEJGjRpwSNvwNwhx7pbMaUcuuwrGfRLCnV5NizHxHr9NO7pxxZt_XnKvOHZ4KiRn88wdMgV3jeDsnC28b9jWue1hTgtIGxFJlVQXbeXL3DuvlU_upHRVykduo0VWqWsfefTh2uv3f9dsFxo80PbxDCbFOAtQ');"></div>
+<div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-4xl drop-shadow-lg">play_circle</span>
+</div>
+</div>
+<div class="flex flex-col justify-between flex-1 py-1">
+<div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-lg font-bold leading-tight mb-1">Suç ve Ceza</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Fyodor Dostoyevski</p>
+</div>
+<span class="material-symbols-outlined text-primary text-[22px]" title="İndirildi">download_done</span>
+</div>
+<div class="mt-4 mb-2">
+<div class="flex justify-between text-xs text-gray-400 mb-1 font-medium">
+<span>04:15:30</span>
+<span>12:45:00</span>
+</div>
+<div class="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%] rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="flex gap-3 mt-3">
+<button class="flex-1 bg-primary hover:bg-primary/90 text-white h-10 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+                            Devam Et
+                        </button>
+<button aria-label="Seçenekler" class="h-10 w-10 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-400">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col">
+<div class="flex items-center justify-between px-4 mb-2">
+<h2 class="text-xl font-bold">Kitap Listesi</h2>
+<div class="flex bg-gray-200 dark:bg-surface-dark p-1 rounded-lg">
+<button aria-label="Liste Görünümü" class="p-1.5 rounded-md bg-white dark:bg-gray-700 shadow-sm text-primary dark:text-white">
+<span class="material-symbols-outlined text-[20px]">view_list</span>
+</button>
+<button aria-label="Izgara Görünümü" class="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-3 px-4">
+<div class="group flex items-center gap-4 p-3 rounded-xl bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-[#232c36] transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+<div class="w-16 h-20 rounded-lg bg-cover bg-center shadow-sm flex-shrink-0" data-alt="Abstract colorful book cover art" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAbfdsYWbdbBkWlL85Hq6Np1hdMRTXYVa7MqSnS_kc5VuBSwLfxZw3UNvbcItUM9VWKBqfwjtTS0wq4B-sSpjj8EnIg-tpyTWDs0jfJh186oOWxs2MWq7knG6aechbhoD31rvem9YuoJLDWbqKkDdvBXLAbQ3tn83lPOgN-k7DwQlXSnxaGa4lwjWdTFkGY7RFcEi07-qsSAmXWlIasFHIJ4rghRXDEiJmu5aBI0p3-UjRML_bhOsZvmW4VI6gJQ6SDUTt2E4vsr2E');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h3 class="text-base font-bold truncate text-gray-900 dark:text-white">Simyacı</h3>
+<span class="material-symbols-outlined text-gray-400 text-[18px]" title="İndirildi">download_done</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 truncate">Paulo Coelho</p>
+<div class="flex items-center gap-2 mt-1.5">
+<span class="material-symbols-outlined text-green-500 text-[16px]">check_circle</span>
+<span class="text-xs font-medium text-green-500">Tamamlandı</span>
+</div>
+</div>
+<button aria-label="Kitap seçenekleri" class="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-400 dark:text-gray-500 transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="group flex items-center gap-4 p-3 rounded-xl bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-[#232c36] transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+<div class="w-16 h-20 rounded-lg bg-cover bg-center shadow-sm flex-shrink-0" data-alt="Minimalist dark book cover design" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDtPOg1unB_RWmbXTSGWsamuiCeGC2HM-8N50zOjExSyB8ImkfayNyj6b48Csaf8AbIrtLK5WzcLvgi95s8B6WG1eAOJuxKgXuN9WzMaHLpiXBusTjLDaPOJP_GKBC0gXYGYP3e11gZfmrUqBpujD9hxsaXVdxMD04QERp3-3ZvRJ84d65N6tvpLcHgmqSE1JGiIoRUyv8Nghf3djcBAvFdz0oHec4daYwNH3cEmmxIYEEApX-iRaSQBk5OAm1yh8w6E3f8NTvBm3E');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h3 class="text-base font-bold truncate text-gray-900 dark:text-white">1984</h3>
+<span class="material-symbols-outlined text-gray-300 text-[18px]" title="İndir">cloud_download</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 truncate">George Orwell</p>
+<div class="flex items-center gap-2 mt-1.5">
+<div class="h-1.5 w-16 bg-gray-200 dark:bg-gray-700 rounded-full">
+<div class="h-full bg-primary w-[15%] rounded-full"></div>
+</div>
+<span class="text-xs text-gray-400 font-medium">%15</span>
+</div>
+</div>
+<button aria-label="Kitap seçenekleri" class="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-400 dark:text-gray-500 transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="group flex items-center gap-4 p-3 rounded-xl bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-[#232c36] transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+<div class="w-16 h-20 rounded-lg bg-cover bg-center shadow-sm flex-shrink-0 grayscale opacity-80" data-alt="White book on blue background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDsgClnpj6nrhP6SYWcKs0WBIw_6mxX1TzFoTIAprYq0N57tewBgJdAxQ5x00faCX8NMTZeBrt6F5cd3bQg6KTAGtXGR-rMV6cufsbVKB_qcnsgKQ1DAatCh_7PHM5gCbnp-VS44OrJuOOQSHlG07AlReTkiT0T-v2bBlqMsCdqcPxo8sGzbG5G2-FwJdO_Z_qwHpWxzXT-SWPy7fvDbu1_PZZrA2Q2DETFvdAeOH4mkkWkcwtb1rskG5AvaI2rrAV2pSzxkg-2B9g');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h3 class="text-base font-bold truncate text-gray-900 dark:text-white">Sapiens</h3>
+<span class="material-symbols-outlined text-gray-400 text-[18px]" title="İndirildi">download_done</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 truncate">Yuval Noah Harari</p>
+<div class="flex items-center gap-2 mt-1.5">
+<span class="text-xs font-medium text-gray-400">Henüz Başlanmadı</span>
+</div>
+</div>
+<button aria-label="Kitap seçenekleri" class="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-400 dark:text-gray-500 transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="group flex items-center gap-4 p-3 rounded-xl bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-[#232c36] transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+<div class="w-16 h-20 rounded-lg bg-cover bg-center shadow-sm flex-shrink-0" data-alt="Stack of old books texture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBRQ5GfPihLn9j6xRadOIlWyDTcXDNJBiEm4To-GD9TbvTMPVdqaSjxM3J0iHjjDjJ-mxHeJvfvXx5mVNSfHAXshrk_2qwHMV3X0k617EFZY0yYBEY3n8U6khjnAR7E96luu1KC-2L5T4D4NmctlCEnPc2aKy6n-MjyCUqjafp8pySkkjKshhkPtshv5QiZJpnKN7hka8sHdJkdUwfRoBNzR-iOj_aCh1usr6oV1ZyIx3yvAdbwh6uQiOboMDGHiEXiglsOm9kU3mM');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h3 class="text-base font-bold truncate text-gray-900 dark:text-white">Harry Potter</h3>
+<span class="material-symbols-outlined text-gray-400 text-[18px]" title="İndirildi">download_done</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 truncate">J.K. Rowling</p>
+<div class="flex items-center gap-2 mt-1.5">
+<div class="h-1.5 w-16 bg-gray-200 dark:bg-gray-700 rounded-full">
+<div class="h-full bg-primary w-[78%] rounded-full"></div>
+</div>
+<span class="text-xs text-gray-400 font-medium">%78</span>
+</div>
+</div>
+<button aria-label="Kitap seçenekleri" class="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-400 dark:text-gray-500 transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 pb-safe pt-2 z-50">
+<div class="flex justify-around items-center px-2 h-16">
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 dark:text-gray-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="text-[10px] font-medium">Anasayfa</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 dark:text-gray-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">search</span>
+<span class="text-[10px] font-medium">Ara</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-2xl fill-1">library_books</span>
+<span class="text-[10px] font-bold">Kitaplığım</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 dark:text-gray-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">person</span>
+<span class="text-[10px] font-medium">Profil</span>
+</a>
+</div>
+</nav>
+<div class="h-6"></div>
+</body></html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ayarlar Ekranı</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "surface-dark": "#1c2630",
+                        "surface-light": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom range slider styling for better accessibility visibility */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 4px solid #137fec;
+            cursor: pointer;
+            margin-top: -10px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        /* Focus styles for accessibility */
+        *:focus-visible {
+            outline: 3px solid #137fec;
+            outline-offset: 2px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display antialiased selection:bg-primary selection:text-white">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden pb-12">
+<!-- Header -->
+<header class="sticky top-0 z-50 flex items-center bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md p-4 border-b border-slate-200 dark:border-slate-800">
+<button aria-label="Geri" class="flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-[28px] text-slate-900 dark:text-white">arrow_back</span>
+</button>
+<h1 class="text-slate-900 dark:text-white text-xl font-bold leading-tight flex-1 text-center pr-12">Ayarlar</h1>
+</header>
+<!-- Audio Settings Section -->
+<section class="mt-4">
+<h2 class="text-slate-900 dark:text-white tracking-tight text-2xl font-bold leading-tight px-6 pb-4 pt-2">Ses Ayarları</h2>
+<!-- Reading Speed Slider -->
+<div class="px-6 mb-6">
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="flex justify-between items-center mb-4">
+<label class="text-slate-900 dark:text-white text-lg font-semibold" for="speed-slider">Okuma Hızı</label>
+<span class="text-primary font-bold text-lg">1.2x</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 text-2xl">tornado</span>
+<div class="relative w-full h-10 flex items-center">
+<input class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer" id="speed-slider" max="3.0" min="0.5" step="0.1" type="range" value="1.2"/>
+</div>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 text-2xl">timer</span>
+</div>
+<div class="flex justify-between px-1 mt-1">
+<span class="text-sm font-medium text-slate-500">Yavaş</span>
+<span class="text-sm font-medium text-slate-500">Hızlı</span>
+</div>
+</div>
+</div>
+<!-- Voice Tone Selection -->
+<div class="px-6">
+<p class="text-slate-900 dark:text-white text-lg font-semibold mb-3 px-1">Ses Tonu</p>
+<div class="grid grid-cols-1 @[480px]:grid-cols-3 gap-3">
+<label class="group relative cursor-pointer">
+<input class="peer sr-only" name="voice_tone" type="radio"/>
+<div class="flex items-center justify-between p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-[#232e3a] peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 peer-checked:bg-primary peer-checked:text-white transition-colors">
+<span class="material-symbols-outlined">graphic_eq</span>
+</div>
+<span class="text-base font-semibold text-slate-900 dark:text-white">Derin</span>
+</div>
+<div class="size-5 rounded-full border-2 border-slate-300 dark:border-slate-600 peer-checked:border-primary peer-checked:bg-primary"></div>
+</div>
+</label>
+<label class="group relative cursor-pointer">
+<input checked="" class="peer sr-only" name="voice_tone" type="radio"/>
+<div class="flex items-center justify-between p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-[#232e3a] peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 peer-checked:bg-primary peer-checked:text-white transition-colors">
+<span class="material-symbols-outlined">record_voice_over</span>
+</div>
+<span class="text-base font-semibold text-slate-900 dark:text-white">Net</span>
+</div>
+<div class="size-5 rounded-full border-2 border-slate-300 dark:border-slate-600 peer-checked:border-primary peer-checked:bg-primary"></div>
+</div>
+</label>
+<label class="group relative cursor-pointer">
+<input class="peer sr-only" name="voice_tone" type="radio"/>
+<div class="flex items-center justify-between p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-[#232e3a] peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 peer-checked:bg-primary peer-checked:text-white transition-colors">
+<span class="material-symbols-outlined">air</span>
+</div>
+<span class="text-base font-semibold text-slate-900 dark:text-white">Yumuşak</span>
+</div>
+<div class="size-5 rounded-full border-2 border-slate-300 dark:border-slate-600 peer-checked:border-primary peer-checked:bg-primary"></div>
+</div>
+</label>
+</div>
+</div>
+</section>
+<div class="h-px bg-slate-200 dark:bg-slate-800 mx-6 my-6"></div>
+<!-- Appearance Section -->
+<section>
+<h2 class="text-slate-900 dark:text-white tracking-tight text-2xl font-bold leading-tight px-6 pb-4">Görünüm</h2>
+<div class="px-6 flex flex-col gap-3">
+<!-- High Contrast Toggle -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined">contrast</span>
+</div>
+<div class="flex flex-col">
+<span class="text-lg font-semibold text-slate-900 dark:text-white">Yüksek Kontrast</span>
+<span class="text-sm text-slate-500 dark:text-slate-400">Daha belirgin metin ve kenarlıklar</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-14 h-8 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Dark Mode Toggle -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+<span class="material-symbols-outlined">dark_mode</span>
+</div>
+<div class="flex flex-col">
+<span class="text-lg font-semibold text-slate-900 dark:text-white">Karanlık Mod</span>
+<span class="text-sm text-slate-500 dark:text-slate-400">Göz yorgunluğunu azaltır</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-14 h-8 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<div class="h-px bg-slate-200 dark:bg-slate-800 mx-6 my-6"></div>
+<!-- General Section -->
+<section>
+<h2 class="text-slate-900 dark:text-white tracking-tight text-2xl font-bold leading-tight px-6 pb-4">Genel</h2>
+<div class="px-6 flex flex-col gap-2">
+<!-- Notifications -->
+<button class="w-full group">
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-[#232e3a] transition-colors">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined">notifications</span>
+</div>
+<span class="text-lg font-semibold text-slate-900 dark:text-white">Bildirimler</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+</div>
+</button>
+<!-- Account -->
+<button class="w-full group">
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-[#232e3a] transition-colors">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined">person</span>
+</div>
+<span class="text-lg font-semibold text-slate-900 dark:text-white">Hesap Bilgileri</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+</div>
+</button>
+<!-- Help -->
+<button class="w-full group">
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-[#232e3a] transition-colors">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined">help</span>
+</div>
+<span class="text-lg font-semibold text-slate-900 dark:text-white">Yardım ve Geri Bildirim</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+</div>
+</button>
+</div>
+</section>
+<!-- Footer / Logout -->
+<div class="mt-8 px-6 pb-8">
+<button class="w-full flex items-center justify-center gap-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 h-14 border border-red-500/20 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-lg font-bold">Çıkış Yap</span>
+</button>
+<p class="text-center text-sm text-slate-400 dark:text-slate-600 mt-6 font-medium">Versiyon 2.4.0</p>
+</div>
+</div>
+</body></html>

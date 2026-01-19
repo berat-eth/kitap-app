@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sesli Kitap Oynatıcı</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "surface-dark": "#182430",
+              "surface-light": "#ffffff",
+            },
+            fontFamily: {
+              "display": ["Lexend", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="relative flex h-full min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden font-display transition-colors duration-200">
+<!-- Top App Bar -->
+<div class="flex items-center p-4 justify-between bg-background-light dark:bg-background-dark sticky top-0 z-10">
+<button aria-label="Geri Dön" class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-surface-dark transition-colors">
+<span class="material-symbols-outlined" style="font-size: 28px;">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center truncate px-2">
+            Sırça Köşk
+        </h2>
+<div class="flex w-12 items-center justify-end">
+<button aria-label="Yer İşareti Ekle" class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-surface-dark transition-colors">
+<span class="material-symbols-outlined" style="font-size: 28px;">bookmark_border</span>
+</button>
+</div>
+</div>
+<!-- Main Content Container -->
+<div class="flex flex-col flex-1 px-6 pb-8 pt-2 max-w-lg mx-auto w-full justify-between h-full">
+<!-- Cover Art -->
+<div class="w-full aspect-square relative rounded-xl shadow-xl overflow-hidden bg-surface-light dark:bg-surface-dark mb-6">
+<div class="w-full h-full bg-center bg-cover bg-no-repeat transform hover:scale-105 transition-transform duration-700" data-alt="Vintage style book cover illustration of Sırça Köşk by Sabahattin Ali" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCaAvcGd1QXba8uGOa1In_PPZY8HRid4KrhE3IdWDwEv99SCdaISTVVSk42yWkrlRdH4u8ZW3J45p1lkF9IlGr0Zn72dU6lYXKfARdsdbfbuunJMCLuJs3tf8JHe-yl3wv0Gx-sYv0TLf_21mEchzyTY43ipwqcrv-T-A9K2-0eFx5HqLco-7I1dDrsI-9xMxS6PpwXBLz9zoI-ha8dmtkeNJp5Tf_J2iD3ZTYRde7fNuKD61wS1oVQd40Uc8RZvLef93tONOdWobE");'>
+</div>
+<!-- Gradient overlay for better depth -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+</div>
+<!-- Book Info -->
+<div class="flex flex-col items-center gap-2 mb-8">
+<h1 class="text-slate-900 dark:text-white tracking-tight text-[28px] font-bold leading-tight text-center">
+                Bölüm 4: Sırça Köşk
+            </h1>
+<p class="text-slate-500 dark:text-slate-400 text-lg font-normal leading-normal text-center">
+                Sabahattin Ali
+            </p>
+</div>
+<!-- Progress Section -->
+<div class="flex flex-col gap-3 mb-8 w-full group/slider">
+<!-- Progress Bar -->
+<div class="relative w-full h-4 bg-slate-200 dark:bg-slate-700 rounded-full cursor-pointer touch-none">
+<!-- Track -->
+<div class="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-100" style="width: 58%;"></div>
+<!-- Thumb (Large for accessibility) -->
+<div class="absolute top-1/2 -translate-y-1/2 w-7 h-7 bg-white dark:bg-slate-100 rounded-full shadow-md border-2 border-primary cursor-pointer hover:scale-110 transition-transform" style="left: 58%; margin-left: -14px;"></div>
+</div>
+<!-- Time Labels -->
+<div class="flex justify-between items-center px-1">
+<p class="text-slate-900 dark:text-white text-sm font-medium leading-normal tabular-nums">12:04</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal tabular-nums">-08:45</p>
+</div>
+</div>
+<!-- Primary Controls -->
+<div class="flex items-center justify-between gap-4 mb-8">
+<!-- Rewind Button -->
+<button aria-label="15 saniye geri sar" class="group flex flex-col items-center justify-center w-16 h-16 rounded-full text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-surface-dark transition-colors active:scale-95">
+<span class="material-symbols-outlined group-hover:-translate-x-0.5 transition-transform" style="font-size: 36px;">replay_10</span>
+<span class="text-[10px] font-bold mt-[-2px]">15s</span>
+</button>
+<!-- Play/Pause Button (Main Action) -->
+<button aria-label="Oynat" class="flex items-center justify-center w-24 h-24 bg-primary text-white rounded-full shadow-lg shadow-primary/30 hover:bg-blue-600 transition-all active:scale-95 focus:outline-none focus:ring-4 focus:ring-primary/40">
+<span class="material-symbols-outlined fill-current ml-1" style="font-size: 56px;">play_arrow</span>
+</button>
+<!-- Forward Button -->
+<button aria-label="30 saniye ileri sar" class="group flex flex-col items-center justify-center w-16 h-16 rounded-full text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-surface-dark transition-colors active:scale-95">
+<span class="material-symbols-outlined group-hover:translate-x-0.5 transition-transform" style="font-size: 36px;">forward_30</span>
+<span class="text-[10px] font-bold mt-[-2px]">30s</span>
+</button>
+</div>
+<!-- Secondary Controls & Chapter Nav -->
+<div class="flex flex-col gap-6">
+<!-- Chapter Navigation -->
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-white text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors active:scale-95 border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-lg">skip_previous</span>
+<span>Önceki</span>
+</button>
+<button class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-white text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors active:scale-95 border border-slate-200 dark:border-slate-700">
+<span>Sonraki</span>
+<span class="material-symbols-outlined text-lg">skip_next</span>
+</button>
+</div>
+<!-- Bottom Row: Speed & Volume -->
+<div class="flex items-center justify-between gap-6 px-1">
+<!-- Speed Selector -->
+<button class="flex items-center justify-center h-10 px-3 rounded-lg text-slate-600 dark:text-slate-300 font-bold text-sm bg-transparent hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors">
+                    1.0x Hız
+                </button>
+<!-- Volume Slider Area -->
+<div class="flex-1 flex items-center gap-3 bg-slate-100 dark:bg-surface-dark p-2 rounded-lg border border-slate-200 dark:border-slate-800">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 20px;">volume_mute</span>
+</button>
+<div class="flex-1 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full relative cursor-pointer">
+<div class="absolute h-full bg-slate-600 dark:bg-slate-400 rounded-full" style="width: 70%;"></div>
+<div class="absolute h-3 w-3 bg-white dark:bg-slate-200 rounded-full shadow top-1/2 -translate-y-1/2" style="left: 70%;"></div>
+</div>
+<button class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 20px;">volume_up</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

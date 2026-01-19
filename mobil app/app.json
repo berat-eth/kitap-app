@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Sesli Kitap",
+    "slug": "sesli-kitap",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#137fec"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.seslikitap.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#137fec"
+      },
+      "package": "com.seslikitap.app"
+    },
+    "web": {},
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow Sesli Kitap to access your microphone for voice search."
+        }
+      ]
+    ]
+  }
+}
+
