@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Çevrimdışı Dinleme</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "surface-dark": "#1b2733",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display antialiased overflow-x-hidden">
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-white/10">
+<div class="flex items-center justify-between px-4 py-4">
+<button aria-label="Geri Dön" class="flex items-center justify-center size-12 rounded-full hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all text-gray-900 dark:text-white">
+<span class="material-symbols-outlined" style="font-size: 28px;">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold text-gray-900 dark:text-white tracking-tight flex-1 text-center pr-12">İndirilenler</h1>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col pb-32">
+<!-- Storage Indicator Section -->
+<section class="p-5">
+<div class="flex flex-col gap-3 rounded-xl bg-white dark:bg-surface-dark p-5 shadow-sm border border-gray-200 dark:border-white/5">
+<div class="flex items-end justify-between">
+<div class="flex flex-col gap-1">
+<h2 class="text-base font-semibold text-gray-900 dark:text-white">Cihaz Depolama Alanı</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400">Toplam 128 GB</p>
+</div>
+<span class="text-primary font-bold text-lg">%65</span>
+</div>
+<div class="relative w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-500 ease-out" style="width: 65%;"></div>
+</div>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Çevrimdışı dinleme için yaklaşık <span class="text-gray-900 dark:text-white font-medium">14 saat</span> daha yeriniz var.
+                </p>
+</div>
+</section>
+<!-- Books List -->
+<section aria-label="İndirilen Kitaplar Listesi" class="flex flex-col px-4 gap-4">
+<!-- List Item 1 -->
+<article class="group relative flex items-center gap-4 bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-200 dark:border-white/5 active:bg-gray-50 dark:active:bg-white/5 transition-colors">
+<div class="relative shrink-0">
+<div class="size-20 bg-center bg-cover rounded-lg shadow-inner" data-alt="Abstract desert landscape with warm orange and yellow gradients representing The Alchemist book cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAwttJ79Zj2B0I1XTufiRqv0vsTn0vJdlzB0POweCripYZOj5qPBjCPnQp0BLZw_UaR6QOobqJExGv-sQFJSIy6IPQJ4OIJIQd0LROgeC8sZK9wracUgtY16BrRAMmiWxZF8j0RPIatQueLHOjCCeVElklWysp658wtO0VQfNNKEwaTa2fCuwaoSwd9eKeAA-T2zCKoTJyQEHXuHSnveH833rY_zBsgjNacwpvdJ56IC9wZzS9zh2fbiNROMBSGfZQKAAySNcxXC40");'>
+</div>
+<div aria-label="İndirildi" class="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1 border-2 border-white dark:border-surface-dark flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-size: 14px;">download_done</span>
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0 justify-center h-full gap-1">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">Simyacı</h3>
+<p class="text-base text-gray-500 dark:text-gray-400 line-clamp-1">Paulo Coelho</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300">4s 12dk</span>
+<span class="text-xs text-gray-400 dark:text-gray-500">• Roman</span>
+</div>
+</div>
+<button aria-label="Seçenekler: Simyacı" class="shrink-0 size-12 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 active:bg-gray-200 dark:active:bg-white/20 transition-colors">
+<span class="material-symbols-outlined text-[28px]">more_vert</span>
+</button>
+</article>
+<!-- List Item 2 -->
+<article class="group relative flex items-center gap-4 bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-200 dark:border-white/5 active:bg-gray-50 dark:active:bg-white/5 transition-colors">
+<div class="relative shrink-0">
+<div class="size-20 bg-center bg-cover rounded-lg shadow-inner" data-alt="Starry night sky illustration with a small planet representing The Little Prince book cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCrSVvTK_sNk0yYSzcpq_pU2cnMfHMVIExvjFWmzovpg9pACLySOvM6o8bjOa9sY_GchqBOWl0ftlbIGVLCBOeuepzdYlWuQjqZB5brnQDS4eVCWTNcyYv0SbLWS-j3Nwlvdj-tCwf5OfNHFjFi0Y6xlID-VZ8R9maNxgYel6pqOOD7RiGRwBm3vr059ES1ICg2U-9c2Qn7Sp7gl_wrnOppuas-bQROHzRvaFn0yamgW77M7TuuDpt6TRj4PA-giiUJAA0kt4ZwGWA");'>
+</div>
+<div aria-label="İndirildi" class="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1 border-2 border-white dark:border-surface-dark flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-size: 14px;">download_done</span>
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0 justify-center h-full gap-1">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">Küçük Prens</h3>
+<p class="text-base text-gray-500 dark:text-gray-400 line-clamp-1">Antoine de Saint-Exupéry</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300">1s 54dk</span>
+<span class="text-xs text-gray-400 dark:text-gray-500">• Çocuk Klasikleri</span>
+</div>
+</div>
+<button aria-label="Seçenekler: Küçük Prens" class="shrink-0 size-12 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 active:bg-gray-200 dark:active:bg-white/20 transition-colors">
+<span class="material-symbols-outlined text-[28px]">more_vert</span>
+</button>
+</article>
+<!-- List Item 3 -->
+<article class="group relative flex items-center gap-4 bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-200 dark:border-white/5 active:bg-gray-50 dark:active:bg-white/5 transition-colors">
+<div class="relative shrink-0">
+<div class="size-20 bg-center bg-cover rounded-lg shadow-inner" data-alt="Dark abstract geometric eye pattern representing 1984 book cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCVs9YkjOjjhYQj5wcsWUKwgbgu_HgKQ7UH7eRCH2hI8Pkv-LBzWFeKjC_VgHS1OwGBUcB3mHHiq0n9fvjEEQUwOR3RCUJ9ke9zW9c83mMKeGJKXhD8jSDnMeO7HZ5sJz2Tql0_jJqIaBuySgKwq6XzD1RC7vtguw6O0UWwTpdYUggto2m6kDs7WlYCSipjhDvTiVKjBAEjm3RezCCcACbf9V5KiG9S4uhnpHK0Fh3pAqIR0IyeuNJG8ZMt8lyPLE7Qp1dYq7o7uEs");'>
+</div>
+<div aria-label="İndirildi" class="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1 border-2 border-white dark:border-surface-dark flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-size: 14px;">download_done</span>
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0 justify-center h-full gap-1">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">1984</h3>
+<p class="text-base text-gray-500 dark:text-gray-400 line-clamp-1">George Orwell</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300">11s 22dk</span>
+<span class="text-xs text-gray-400 dark:text-gray-500">• Bilim Kurgu</span>
+</div>
+</div>
+<button aria-label="Seçenekler: 1984" class="shrink-0 size-12 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 active:bg-gray-200 dark:active:bg-white/20 transition-colors">
+<span class="material-symbols-outlined text-[28px]">more_vert</span>
+</button>
+</article>
+<!-- List Item 4 -->
+<article class="group relative flex items-center gap-4 bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-200 dark:border-white/5 active:bg-gray-50 dark:active:bg-white/5 transition-colors">
+<div class="relative shrink-0">
+<div class="size-20 bg-center bg-cover rounded-lg shadow-inner" data-alt="Minimalist lightning bolt scar symbol on dark purple background representing Harry Potter book cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBGV2M4JWbeLfanBOXfKU2Rh8ireWPAzNNhXe7lh6Kq5pwt9b3HzpvMMWGa14gmuPMSfNJRI8hL8RdyGjNYTG9WPwo2D7gDX8FK-inj1lpJ1HoUFW-oGqLc89mVqp-KKQS0y9r30DbDiRCeR1esrm6HTzm28LyePyXCqJYPFKbUtWghVeg9jF_MVzqsUkXFFSdhAqY1PlHKrd0zOT4pB062hkuzGvsKaAVpfykbyA1m_Y3bY2GTmn_DvYg9XhHASg5OPd8ZwcEGN8Y");'>
+</div>
+<div aria-label="İndirildi" class="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1 border-2 border-white dark:border-surface-dark flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-size: 14px;">download_done</span>
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0 justify-center h-full gap-1">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">Harry Potter ve Felsefe Taşı</h3>
+<p class="text-base text-gray-500 dark:text-gray-400 line-clamp-1">J.K. Rowling</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300">9s 33dk</span>
+<span class="text-xs text-gray-400 dark:text-gray-500">• Fantastik</span>
+</div>
+</div>
+<button aria-label="Seçenekler: Harry Potter" class="shrink-0 size-12 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 active:bg-gray-200 dark:active:bg-white/20 transition-colors">
+<span class="material-symbols-outlined text-[28px]">more_vert</span>
+</button>
+</article>
+</section>
+</main>
+<!-- Mini Player Sticky Footer -->
+<div class="fixed bottom-0 left-0 w-full z-40 px-4 pb-6 pt-2 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark dark:to-transparent">
+<div class="bg-gray-900 dark:bg-primary rounded-2xl p-4 shadow-xl flex items-center gap-4 border border-white/10 dark:border-none ring-1 ring-black/5">
+<div class="size-12 bg-center bg-cover rounded-lg shrink-0" data-alt="Abstract desert landscape thumbnail for currently playing book" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBfcEVV28ye56ZRLTNaH3tZWJRWioA5eUTY7ONFOWyruiD0r1hLu3fOhd2rtmpJwB35fD6YPDZZuMDXBnrxLNViSWePumx6VSSGl_RJXm-6NpUG_c-q72OAXxAZJFvezfRnHKzs6jxkUVKpco6ux8i8qga1vnXWqgU0U3g6X-T4AMh5jqiZT7vaNmZkE4TTyWdkTXLJyOz9VRfGDkYKFyNpGQYXy6LO_4M_-iMcKhS0buH13kLktH-MewgqPZituN_WFrcqlSZ9oKM");'>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<p class="text-white text-base font-bold line-clamp-1">Simyacı</p>
+<p class="text-white/70 text-sm line-clamp-1">Bölüm 4 • Kaldığınız yerden devam</p>
+</div>
+<button aria-label="Oynat" class="size-10 bg-white text-primary rounded-full flex items-center justify-center shrink-0 hover:scale-105 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-size: 28px;">play_arrow</span>
+</button>
+</div>
+</div>
+</body></html>

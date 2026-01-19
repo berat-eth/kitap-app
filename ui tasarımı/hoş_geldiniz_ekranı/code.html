@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SesliKitap - Hoş Geldiniz</title>
+<!-- Google Fonts: Lexend -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding for cleaner mobile look if needed */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased">
+<!-- Main Container -->
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden justify-between">
+<!-- Header / Top Bar -->
+<div class="flex items-center justify-between p-4 pb-2 pt-6 sticky top-0 z-10 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-sm">
+<!-- Hidden placeholder for balance -->
+<div class="w-12"></div>
+<!-- App Title -->
+<h2 aria-label="Sesli Kitap Uygulaması" class="text-[#111418] dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
+                SesliKitap
+            </h2>
+<!-- Accessibility Icon -->
+<div class="flex w-12 items-center justify-end">
+<button aria-label="Erişilebilirlik Ayarları" class="flex items-center justify-center rounded-full h-12 w-12 bg-transparent text-[#111418] dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[28px]">accessibility_new</span>
+</button>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col items-center justify-center px-6 py-4 w-full max-w-md mx-auto">
+<!-- Hero Image / Visual -->
+<div class="w-full aspect-[4/3] relative mb-8 rounded-2xl overflow-hidden shadow-2xl shadow-primary/10">
+<div class="w-full h-full bg-center bg-cover" data-alt="Abstract blue sound waves visualization" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBw4Rwrla_c0XleL6vcBXgTkq-9wocd06XKMins2Y1Uk73Z4S7YGORUJBq6GcRaKtMggOtK0qSf1I4o8pqmrCilIpEayMBgyOAzoIsOeOziCMG7P5Nb9Tgl4fNRvox5RfFef796kNyQeQEf5o7JkUL7bfFiOOeczlfPfkB3UZMifPZTXr3jdgkavRD2MWHM5yvHp19I1KBct7Bp5K3LTBmKqY5xAZcrxQqfTCzUZ8TIfsO-ov7WQIpvSM87ZtcK1Hg4HvGgJLX_HK0");'>
+<div class="absolute inset-0 bg-gradient-to-t from-background-light/80 to-transparent dark:from-background-dark/90 dark:to-transparent"></div>
+</div>
+<!-- Floating Icon Overlay for extra context -->
+<div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-background-dark dark:bg-white p-4 rounded-full shadow-lg">
+<span class="material-symbols-outlined text-white dark:text-primary text-[40px]">headphones</span>
+</div>
+</div>
+<!-- Text Content -->
+<div class="flex flex-col gap-4 text-center w-full mb-6">
+<h1 class="text-[#111418] dark:text-white tracking-tight text-[36px] font-bold leading-[1.15]">
+                    Sesin Gücüyle<br/><span class="text-primary">Okuyun</span>
+</h1>
+<p class="text-[#637588] dark:text-gray-300 text-lg font-normal leading-relaxed">
+                    Binlerce kitaba anında sesli erişim sağlayın. Görme engelli bireyler için özel olarak tasarlandı.
+                </p>
+</div>
+</div>
+<!-- Actions / Bottom Buttons -->
+<div class="w-full bg-background-light dark:bg-background-dark p-6 pb-10 flex flex-col gap-4 sticky bottom-0 z-10 max-w-md mx-auto">
+<!-- Primary Action: Login -->
+<button aria-label="Giriş Yap" class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-[60px] px-5 bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all text-white text-lg font-bold leading-normal tracking-[0.015em] shadow-lg shadow-primary/25">
+<span class="truncate">Giriş Yap</span>
+<span class="material-symbols-outlined ml-2 text-[24px]">login</span>
+</button>
+<!-- Secondary Action: Sign Up -->
+<button aria-label="Hesap Oluştur" class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-[60px] px-5 bg-transparent border-2 border-[#111418]/10 dark:border-white/20 text-[#111418] dark:text-white hover:bg-[#111418]/5 dark:hover:bg-white/5 active:scale-[0.98] transition-all text-lg font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Hesap Oluştur</span>
+</button>
+<!-- Helper link -->
+<div class="mt-2 text-center">
+<a aria-label="Yardım ve Destek" class="text-sm font-medium text-[#637588] dark:text-gray-400 hover:text-primary dark:hover:text-primary underline decoration-2 underline-offset-4" href="#">Yardım mı lazım?</a>
+</div>
+</div>
+</div>
+</body></html>
