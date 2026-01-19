@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest, UserDownload, Book } from '../types';
 import { getPool } from '../config/database';
 import { successResponse, errorResponse } from '../utils/helpers';
@@ -13,7 +14,7 @@ export class DownloadsController {
 
       const pool = getPool();
 
-      const [downloads] = await pool.execute<Array<Book & { download_progress: number; is_completed: boolean; downloaded_at: Date }>>(
+      const [downloads] = await pool.execute<(Book & { download_progress: number; is_completed: boolean; downloaded_at: Date } & RowDataPacket)[]>(
         `SELECT b.*, ud.download_progress, ud.is_completed, ud.downloaded_at
          FROM user_downloads ud
          LEFT JOIN books b ON ud.book_id = b.id
@@ -39,14 +40,14 @@ export class DownloadsController {
       const pool = getPool();
 
       // Check if book exists
-      const [books] = await pool.execute('SELECT id FROM books WHERE id = ?', [bookId]);
-      if (books.length === 0) {
+      const [books] = await pool.execute<RowDataPacket[]>('SELECT id FROM books WHERE id = ?', [bookId]);
+      if (Array.isArray(books) && books.length === 0) {
         res.status(404).json(errorResponse('NOT_FOUND', 'Book not found'));
         return;
       }
 
       // Check if already downloading
-      const [existing] = await pool.execute<Array<UserDownload>>(
+      const [existing] = await pool.execute<(UserDownload & RowDataPacket)[]>(
         'SELECT * FROM user_downloads WHERE user_id = ? AND book_id = ?',
         [req.user.id, bookId]
       );
@@ -62,7 +63,7 @@ export class DownloadsController {
       );
 
       const insertResult = result as { insertId: number };
-      const [downloads] = await pool.execute<Array<UserDownload>>(
+      const [downloads] = await pool.execute<(UserDownload & RowDataPacket)[]>(
         'SELECT * FROM user_downloads WHERE id = ?',
         [insertResult.insertId]
       );
@@ -83,7 +84,7 @@ export class DownloadsController {
       const { bookId } = req.params;
       const pool = getPool();
 
-      const [existing] = await pool.execute<Array<UserDownload>>(
+      const [existing] = await pool.execute<(UserDownload & RowDataPacket)[]>(
         'SELECT * FROM user_downloads WHERE user_id = ? AND book_id = ?',
         [req.user.id, bookId]
       );
@@ -114,7 +115,7 @@ export class DownloadsController {
       const { bookId } = req.params;
       const pool = getPool();
 
-      const [downloads] = await pool.execute<Array<UserDownload>>(
+      const [downloads] = await pool.execute<(UserDownload & RowDataPacket)[]>(
         'SELECT * FROM user_downloads WHERE user_id = ? AND book_id = ?',
         [req.user.id, bookId]
       );

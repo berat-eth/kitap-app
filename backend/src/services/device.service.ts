@@ -1,5 +1,6 @@
+import { RowDataPacket } from 'mysql2';
 import { getPool } from '../config/database';
-import { User, UserCreateInput, UserUpdateInput } from '../types';
+import { User, UserUpdateInput } from '../types';
 import logger from '../utils/logger';
 
 export class DeviceService {
@@ -7,7 +8,8 @@ export class DeviceService {
     const pool = getPool();
 
     // Find existing user
-    const [users] = await pool.execute<Array<User>>(
+    interface UserRow extends User, RowDataPacket {}
+    const [users] = await pool.execute<UserRow[]>(
       'SELECT * FROM users WHERE device_id = ?',
       [deviceId]
     );
@@ -26,7 +28,8 @@ export class DeviceService {
     );
 
     const insertResult = result as { insertId: number };
-    const [newUsers] = await pool.execute<Array<User>>(
+    interface UserRow extends User, RowDataPacket {}
+    const [newUsers] = await pool.execute<UserRow[]>(
       'SELECT * FROM users WHERE id = ?',
       [insertResult.insertId]
     );
@@ -37,7 +40,8 @@ export class DeviceService {
 
   static async getUserByDeviceId(deviceId: string): Promise<User | null> {
     const pool = getPool();
-    const [users] = await pool.execute<Array<User>>(
+    interface UserRow extends User, RowDataPacket {}
+    const [users] = await pool.execute<UserRow[]>(
       'SELECT * FROM users WHERE device_id = ?',
       [deviceId]
     );
@@ -65,16 +69,18 @@ export class DeviceService {
       values.push(data.last_active_at);
     }
 
+    interface UserRow extends User, RowDataPacket {}
+    
     if (updates.length === 0) {
       // Return existing user if no updates
-      const [users] = await pool.execute<Array<User>>('SELECT * FROM users WHERE id = ?', [userId]);
+      const [users] = await pool.execute<UserRow[]>('SELECT * FROM users WHERE id = ?', [userId]);
       return users[0];
     }
 
     values.push(userId);
     await pool.execute(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, values);
 
-    const [users] = await pool.execute<Array<User>>('SELECT * FROM users WHERE id = ?', [userId]);
+    const [users] = await pool.execute<UserRow[]>('SELECT * FROM users WHERE id = ?', [userId]);
     return users[0];
   }
 }

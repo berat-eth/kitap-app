@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest } from '../types';
 import { config } from '../config/env';
 import { getPool } from '../config/database';
@@ -32,7 +33,7 @@ export const deviceAuth = async (
     const pool = getPool();
 
     // Find or create user by device_id
-    let [users] = await pool.execute<Array<{ id: number; [key: string]: unknown }>>(
+    let [users] = await pool.execute<({ id: number; [key: string]: unknown } & RowDataPacket)[]>(
       'SELECT * FROM users WHERE device_id = ?',
       [deviceId]
     );
@@ -46,7 +47,7 @@ export const deviceAuth = async (
       );
 
       const insertResult = result as { insertId: number };
-      [users] = await pool.execute<Array<{ id: number; [key: string]: unknown }>>(
+      [users] = await pool.execute<({ id: number; [key: string]: unknown } & RowDataPacket)[]>(
         'SELECT * FROM users WHERE id = ?',
         [insertResult.insertId]
       );

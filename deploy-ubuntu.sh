@@ -30,7 +30,7 @@ NC='\033[0m' # No Color
 
 # Değişkenler
 DOMAIN="kitap.beratsimsek.com.tr"
-API_DOMAIN="api.beratsimsek.com.tr"
+API_DOMAIN="api.kitap.beratsimsek.com.tr"
 EMAIL="admin@beratsimsek.com.tr"  # SSL sertifikası için email
 APP_USER="audiobook"
 APP_DIR="/var/www/audiobook"
@@ -209,13 +209,18 @@ log "Frontend .env dosyası oluşturuldu"
 # 10. Backend bağımlılıklarını kur
 log "Backend bağımlılıkları kuruluyor..."
 cd $BACKEND_DIR
-npm install --production
+npm install  # Tüm bağımlılıkları kur (build için gerekli)
 log "Backend bağımlılıkları kuruldu"
 
 # 11. Backend build
 log "Backend build ediliyor..."
 npm run build
 log "Backend build tamamlandı"
+
+# 11.5. Production dependencies için temizlik (opsiyonel)
+log "DevDependencies temizleniyor..."
+npm prune --production || warning "DevDependencies temizlenemedi"
+log "DevDependencies temizlendi"
 
 # 12. Database migration
 log "Database migration çalıştırılıyor..."
@@ -543,8 +548,9 @@ echo "Audiobook güncelleniyor..."
 # Backend güncelle
 cd $BACKEND_DIR
 git pull
-npm install --production
+npm install  # Tüm bağımlılıkları kur (build için gerekli)
 npm run build
+npm prune --production  # Build sonrası devDependencies'i temizle
 pm2 restart audiobook-backend
 
 # Frontend güncelle

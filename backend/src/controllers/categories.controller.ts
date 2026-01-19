@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest, Category } from '../types';
 import { getPool } from '../config/database';
 import { successResponse, errorResponse } from '../utils/helpers';
@@ -8,7 +9,7 @@ export class CategoriesController {
     try {
       const pool = getPool();
 
-      const [categories] = await pool.execute<Array<Category>>(
+      const [categories] = await pool.execute<(Category & RowDataPacket)[]>(
         'SELECT * FROM categories WHERE is_active = true ORDER BY name ASC'
       );
 
@@ -23,7 +24,7 @@ export class CategoriesController {
       const { id } = req.params;
       const pool = getPool();
 
-      const [categories] = await pool.execute<Array<Category>>(
+      const [categories] = await pool.execute<(Category & RowDataPacket)[]>(
         'SELECT * FROM categories WHERE id = ?',
         [id]
       );
@@ -55,7 +56,7 @@ export class CategoriesController {
       );
 
       const insertResult = result as { insertId: number };
-      const [categories] = await pool.execute<Array<Category>>(
+      const [categories] = await pool.execute<(Category & RowDataPacket)[]>(
         'SELECT * FROM categories WHERE id = ?',
         [insertResult.insertId]
       );
@@ -76,7 +77,7 @@ export class CategoriesController {
       const { id } = req.params;
       const pool = getPool();
 
-      const [existing] = await pool.execute<Array<Category>>(
+      const [existing] = await pool.execute<(Category & RowDataPacket)[]>(
         'SELECT * FROM categories WHERE id = ?',
         [id]
       );
@@ -105,7 +106,7 @@ export class CategoriesController {
       values.push(id);
       await pool.execute(`UPDATE categories SET ${updates.join(', ')} WHERE id = ?`, values);
 
-      const [categories] = await pool.execute<Array<Category>>(
+      const [categories] = await pool.execute<(Category & RowDataPacket)[]>(
         'SELECT * FROM categories WHERE id = ?',
         [id]
       );
@@ -125,7 +126,7 @@ export class CategoriesController {
       const { id } = req.params;
       const pool = getPool();
 
-      const [existing] = await pool.execute<Array<Category>>(
+      const [existing] = await pool.execute<(Category & RowDataPacket)[]>(
         'SELECT * FROM categories WHERE id = ?',
         [id]
       );

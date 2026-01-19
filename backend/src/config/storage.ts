@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { config } from './env';
 
 // Fix: config.upload is not defined, use direct access
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';

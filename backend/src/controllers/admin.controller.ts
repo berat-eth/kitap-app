@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest, User } from '../types';
 import { getPool } from '../config/database';
 import { successResponse, errorResponse } from '../utils/helpers';
@@ -14,21 +15,39 @@ export class AdminController {
       const pool = getPool();
 
       // Get stats
-      const [userStats] = await pool.execute<Array<{ total: number; active: number }>>(
+      interface UserStats extends RowDataPacket {
+        total: number;
+        active: number;
+      }
+
+      interface BookStats extends RowDataPacket {
+        total: number;
+        published: number;
+      }
+
+      interface ListeningStats extends RowDataPacket {
+        total_hours: number;
+      }
+
+      interface RevenueStats extends RowDataPacket {
+        total: number;
+      }
+
+      const [userStats] = await pool.execute<UserStats[]>(
         `SELECT 
           COUNT(*) as total,
           SUM(CASE WHEN last_active_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 ELSE 0 END) as active
          FROM users WHERE role = 'user'`
       );
 
-      const [bookStats] = await pool.execute<Array<{ total: number; published: number }>>(
+      const [bookStats] = await pool.execute<BookStats[]>(
         `SELECT 
           COUNT(*) as total,
           SUM(CASE WHEN is_published = true THEN 1 ELSE 0 END) as published
          FROM books`
       );
 
-      const [listeningStats] = await pool.execute<Array<{ total_hours: number }>>(
+      const [listeningStats] = await pool.execute<ListeningStats[]>(
         `SELECT 
           COALESCE(SUM(duration_seconds), 0) / 3600 as total_hours
          FROM user_progress up
@@ -36,7 +55,7 @@ export class AdminController {
          WHERE up.is_completed = true`
       );
 
-      const [revenueStats] = await pool.execute<Array<{ total: number }>>(
+      const [revenueStats] = await pool.execute<RevenueStats[]>(
         `SELECT COALESCE(SUM(amount), 0) as total
          FROM donations
          WHERE payment_status = 'completed'
@@ -77,7 +96,12 @@ export class AdminController {
       const { page = 1, limit = 20 } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
 
-      const [users] = await pool.execute<Array<User>>(
+      interface UserRow extends User, RowDataPacket {}
+      interface CountRow extends RowDataPacket {
+        total: number;
+      }
+
+      const [users] = await pool.execute<UserRow[]>(
         `SELECT id, device_id, email, name, avatar_url, role, is_active, created_at, last_active_at
          FROM users
          WHERE role = 'user'
@@ -86,7 +110,7 @@ export class AdminController {
         [Number(limit), offset]
       );
 
-      const [countResult] = await pool.execute<Array<{ total: number }>>(
+      const [countResult] = await pool.execute<CountRow[]>(
         'SELECT COUNT(*) as total FROM users WHERE role = ?',
         ['user']
       );
@@ -115,7 +139,9 @@ export class AdminController {
       const { id } = req.params;
       const pool = getPool();
 
-      const [users] = await pool.execute<Array<User>>(
+      interface UserRow extends User, RowDataPacket {}
+
+      const [users] = await pool.execute<UserRow[]>(
         'SELECT * FROM users WHERE id = ?',
         [id]
       );
@@ -161,7 +187,9 @@ export class AdminController {
       values.push(id);
       await pool.execute(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, values);
 
-      const [users] = await pool.execute<Array<User>>('SELECT * FROM users WHERE id = ?', [id]);
+      interface UserRow extends User, RowDataPacket {}
+
+      const [users] = await pool.execute<UserRow[]>('SELECT * FROM users WHERE id = ?', [id]);
       res.status(200).json(successResponse(users[0], 'User updated successfully'));
     } catch (error) {
       res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to update user'));
@@ -179,7 +207,9 @@ export class AdminController {
       const pool = getPool();
 
       // Don't allow deleting admin users
-      const [existing] = await pool.execute<Array<User>>('SELECT role FROM users WHERE id = ?', [
+      interface UserRow extends User, RowDataPacket {}
+
+      const [existing] = await pool.execute<UserRow[]>('SELECT role FROM users WHERE id = ?', [
         id,
       ]);
       if (existing.length === 0) {

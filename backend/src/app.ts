@@ -6,7 +6,6 @@ import rateLimit from 'express-rate-limit';
 import { config } from './config/env';
 import { ensureUploadDirectories, uploadConfig } from './config/storage';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
-import logger from './utils/logger';
 
 // Routes
 import deviceRoutes from './routes/device.routes';
@@ -60,7 +59,7 @@ export const createApp = (): Express => {
   ensureUploadDirectories();
 
   // Health check
-  app.get('/health', (req, res) => {
+  app.get('/health', (_req, res) => {
     res.status(200).json({
       status: 'ok',
       timestamp: new Date().toISOString(),

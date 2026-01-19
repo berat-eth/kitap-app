@@ -203,6 +203,13 @@ export interface AdminLog {
   created_at: Date;
 }
 
+// JWT Payload
+export interface AdminJwtPayload {
+  userId: number;
+  email: string;
+  role: string;
+}
+
 // Request extensions
 export interface AuthenticatedRequest extends Request {
   user?: User;

@@ -8,7 +8,7 @@ export const createConnection = async (): Promise<mysql.Pool> => {
     return pool;
   }
 
-  pool = mysql.createPool({
+  const poolConfig: mysql.PoolOptions = {
     host: config.database.host,
     port: config.database.port,
     user: config.database.user,
@@ -21,13 +21,16 @@ export const createConnection = async (): Promise<mysql.Pool> => {
     keepAliveInitialDelay: 0,
     // Uzak sunucu için timeout ayarları
     connectTimeout: 60000, // 60 saniye
-    acquireTimeout: 60000,
-    timeout: 60000,
-    // SSL bağlantısı (eğer gerekiyorsa)
-    ssl: config.database.ssl ? {
+  };
+
+  // SSL bağlantısı (eğer gerekiyorsa)
+  if (config.database.ssl) {
+    poolConfig.ssl = {
       rejectUnauthorized: config.database.sslRejectUnauthorized !== false,
-    } : false,
-  });
+    };
+  }
+
+  pool = mysql.createPool(poolConfig);
 
   // Test connection
   try {

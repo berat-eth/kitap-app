@@ -76,25 +76,25 @@ export const uploadAvatar = upload.single('avatar');
 // Error handler for multer
 export const handleUploadError = (
   err: Error,
-  req: Request,
+  _req: Request,
   res: Response,
   next: (err?: Error) => void
 ): void => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      res.status(400).json(
+      (res as any).status(400).json(
         errorResponse('FILE_TOO_LARGE', 'File size exceeds maximum allowed size')
       );
       return;
     }
-    res.status(400).json(
+    (res as any).status(400).json(
       errorResponse('UPLOAD_ERROR', err.message)
     );
     return;
   }
 
   if (err.message.includes('Invalid file type')) {
-    res.status(400).json(
+    (res as any).status(400).json(
       errorResponse('INVALID_FILE_TYPE', err.message)
     );
     return;

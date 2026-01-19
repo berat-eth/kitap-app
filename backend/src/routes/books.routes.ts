@@ -10,14 +10,12 @@ const router = Router();
 
 // Public routes (no auth required)
 router.get('/featured', BooksController.getFeatured);
-router.get('/popular', BooksController.getPopular);
-router.get('/search', BooksController.search);
-router.get('/category/:slug', BooksController.getByCategory);
+router.get('/recommended', BooksController.getRecommended);
 
 // Device auth routes
 router.get('/', deviceAuth, BooksController.getAll);
 router.get('/:id', deviceAuth, BooksController.getById);
-router.get('/:id/chapters', deviceAuth, BooksController.getChapters);
+router.post('/:id/view', deviceAuth, BooksController.incrementViewCount);
 
 // Admin routes
 router.post('/', adminAuth, requireRole('admin'), validate(bookCreateSchema), BooksController.create);
