@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { RowDataPacket } from 'mysql2';
 import { getPool } from '../config/database';
 import { config } from '../config/env';
 import { User, AdminJwtPayload } from '../types';
@@ -10,7 +11,8 @@ export class AdminAuthService {
     const pool = getPool();
 
     // Find user by email
-    const [users] = await pool.execute<Array<User>>(
+    interface UserRow extends User, RowDataPacket {}
+    const [users] = await pool.execute<UserRow[]>(
       'SELECT * FROM users WHERE email = ? AND role = ?',
       [email, 'admin']
     );
@@ -44,11 +46,11 @@ export class AdminAuthService {
 
     const accessToken = jwt.sign(payload, config.adminJwt.secret, {
       expiresIn: config.adminJwt.expiresIn,
-    });
+    } as jwt.SignOptions);
 
     const refreshToken = jwt.sign(payload, config.adminJwt.refreshSecret, {
       expiresIn: config.adminJwt.refreshExpiresIn,
-    });
+    } as jwt.SignOptions);
 
     // Update last_active_at
     await pool.execute('UPDATE users SET last_active_at = NOW() WHERE id = ?', [user.id]);
@@ -85,7 +87,8 @@ export class AdminAuthService {
 
       // Verify user still exists and is admin
       const pool = getPool();
-      const [users] = await pool.execute<Array<User>>(
+      interface UserRow extends User, RowDataPacket {}
+      const [users] = await pool.execute<UserRow[]>(
         'SELECT * FROM users WHERE id = ? AND email = ? AND role = ? AND is_active = ?',
         [decoded.userId, decoded.email, 'admin', true]
       );
@@ -102,7 +105,7 @@ export class AdminAuthService {
 
       const accessToken = jwt.sign(payload, config.adminJwt.secret, {
         expiresIn: config.adminJwt.expiresIn,
-      });
+      } as jwt.SignOptions);
 
       return { accessToken };
     } catch (error) {

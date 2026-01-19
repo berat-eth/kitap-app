@@ -83,7 +83,7 @@ export class AdminAuthController {
     }
   }
 
-  static async logout(req: AuthenticatedRequest, res: Response): Promise<void> {
+  static async logout(_req: AuthenticatedRequest, res: Response): Promise<void> {
     // In JWT-based auth, logout is handled client-side by removing the token
     // But we can log the action for audit purposes
     res.status(200).json(

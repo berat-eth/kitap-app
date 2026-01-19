@@ -76,7 +76,7 @@ export const uploadAvatar = upload.single('avatar');
 // Error handler for multer
 export const handleUploadError = (
   err: Error,
-  req: Request,
+  _req: Request,
   res: Response,
   next: (err?: Error) => void
 ): void => {
