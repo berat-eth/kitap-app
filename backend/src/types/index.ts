@@ -103,6 +103,8 @@ export interface Chapter {
   order_number: number;
   audio_file_url: string;
   audio_file_size: number | null;
+  transcript_file_url: string | null;
+  transcript_file_size: number | null;
   duration_seconds: number;
   created_at: Date;
   updated_at: Date;
@@ -114,6 +116,8 @@ export interface ChapterCreateInput {
   order_number: number;
   audio_file_url: string;
   audio_file_size?: number;
+  transcript_file_url?: string;
+  transcript_file_size?: number;
   duration_seconds?: number;
 }
 
@@ -122,6 +126,8 @@ export interface ChapterUpdateInput {
   order_number?: number;
   audio_file_url?: string;
   audio_file_size?: number;
+  transcript_file_url?: string;
+  transcript_file_size?: number;
   duration_seconds?: number;
 }
 

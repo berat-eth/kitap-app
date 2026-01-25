@@ -1,8 +1,11 @@
 import { Response } from 'express';
 import { RowDataPacket } from 'mysql2';
+import path from 'path';
 import { AuthenticatedRequest, Chapter } from '../types';
 import { getPool } from '../config/database';
 import { successResponse, errorResponse } from '../utils/helpers';
+import { StorageService } from '../services/storage.service';
+import { config } from '../config/env';
 
 export class ChaptersController {
   static async getById(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -51,6 +54,36 @@ export class ChaptersController {
     }
   }
 
+  static async getTranscriptUrl(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const pool = getPool();
+
+      const [chapters] = await pool.execute<(Chapter & RowDataPacket)[]>(
+        'SELECT transcript_file_url FROM chapters WHERE id = ?',
+        [id]
+      );
+
+      if (chapters.length === 0) {
+        res.status(404).json(errorResponse('NOT_FOUND', 'Chapter not found'));
+        return;
+      }
+
+      if (!chapters[0].transcript_file_url) {
+        res.status(404).json(errorResponse('NOT_FOUND', 'Transcript not found for this chapter'));
+        return;
+      }
+
+      res.status(200).json(
+        successResponse({
+          transcriptUrl: chapters[0].transcript_file_url,
+        })
+      );
+    } catch (error) {
+      res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to fetch transcript URL'));
+    }
+  }
+
   static async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       if (!req.user || req.user.role !== 'admin') {
@@ -65,6 +98,8 @@ export class ChaptersController {
         order_number,
         audio_file_url,
         audio_file_size = null,
+        transcript_file_url = null,
+        transcript_file_size = null,
         duration_seconds = 0,
       } = req.body;
 
@@ -76,9 +111,9 @@ export class ChaptersController {
       }
 
       const [result] = await pool.execute(
-        `INSERT INTO chapters (book_id, title, order_number, audio_file_url, audio_file_size, duration_seconds)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [book_id, title, order_number, audio_file_url, audio_file_size, duration_seconds]
+        `INSERT INTO chapters (book_id, title, order_number, audio_file_url, audio_file_size, transcript_file_url, transcript_file_size, duration_seconds)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [book_id, title, order_number, audio_file_url, audio_file_size, transcript_file_url, transcript_file_size, duration_seconds]
       );
 
       const insertResult = result as { insertId: number };
@@ -114,7 +149,15 @@ export class ChaptersController {
       const updates: string[] = [];
       const values: unknown[] = [];
 
-      const allowedFields = ['title', 'order_number', 'audio_file_url', 'audio_file_size', 'duration_seconds'];
+      const allowedFields = [
+        'title',
+        'order_number',
+        'audio_file_url',
+        'audio_file_size',
+        'transcript_file_url',
+        'transcript_file_size',
+        'duration_seconds',
+      ];
 
       for (const field of allowedFields) {
         if (req.body[field] !== undefined) {
@@ -157,6 +200,21 @@ export class ChaptersController {
       if (existing.length === 0) {
         res.status(404).json(errorResponse('NOT_FOUND', 'Chapter not found'));
         return;
+      }
+
+      const chapter = existing[0];
+
+      // Delete transcript file if exists
+      if (chapter.transcript_file_url) {
+        try {
+          // Extract file path from URL
+          const urlPath = chapter.transcript_file_url.replace('/data', '').replace(/^\//, '');
+          const filePath = path.join(config.data.dir, urlPath);
+          await StorageService.deleteFile(filePath);
+        } catch (error) {
+          // Log error but don't fail the deletion
+          console.error('Error deleting transcript file:', error);
+        }
       }
 
       await pool.execute('DELETE FROM chapters WHERE id = ?', [id]);

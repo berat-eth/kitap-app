@@ -33,6 +33,11 @@ export const config = {
     headerName: process.env.DEVICE_ID_HEADER || 'X-Device-ID',
   },
 
+  // Data Directory
+  data: {
+    dir: process.env.DATA_DIR || '/root/data',
+  },
+
   // File Upload (moved to storage.ts)
 
   // Redis

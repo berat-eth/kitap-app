@@ -11,6 +11,7 @@ const router = Router();
 // Device auth routes
 router.get('/:id', deviceAuth, ChaptersController.getById);
 router.get('/:id/audio', deviceAuth, ChaptersController.getAudioUrl);
+router.get('/:id/transcript', deviceAuth, ChaptersController.getTranscriptUrl);
 
 // Admin routes
 router.post('/', adminAuth, requireRole('admin'), validate(chapterCreateSchema), ChaptersController.create);

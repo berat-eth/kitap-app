@@ -80,8 +80,11 @@ export const createApp = (): Express => {
   app.use('/api/public', publicRoutes);
   app.use('/api/upload', uploadRoutes);
 
-  // Serve uploaded files
+  // Serve uploaded files (backward compatibility)
   app.use('/uploads', express.static(uploadConfig.uploadDir));
+
+  // Serve data files (audio and transcripts)
+  app.use('/data', express.static(config.data.dir));
 
   // Error handling
   app.use(notFoundHandler);

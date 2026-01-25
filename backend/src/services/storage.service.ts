@@ -5,7 +5,7 @@ import logger from '../utils/logger';
 
 export class StorageService {
   static async saveFile(
-    type: 'cover' | 'audio' | 'avatar',
+    type: 'cover' | 'audio' | 'avatar' | 'transcript',
     file: Express.Multer.File
   ): Promise<{ filePath: string; publicUrl: string }> {
     const filename = file.filename;

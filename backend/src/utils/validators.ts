@@ -31,6 +31,8 @@ export const chapterCreateSchema = z.object({
   order_number: z.number().int().positive(),
   audio_file_url: z.string().url(),
   audio_file_size: z.number().int().min(0).optional(),
+  transcript_file_url: z.string().url().optional().nullable(),
+  transcript_file_size: z.number().int().min(0).optional().nullable(),
   duration_seconds: z.number().int().min(0).optional(),
 });
 

@@ -126,6 +126,10 @@ mkdir -p $BACKEND_DIR
 mkdir -p $FRONTEND_DIR
 mkdir -p $BACKEND_DIR/uploads
 mkdir -p $BACKEND_DIR/logs
+# /root/data klasörü (ses dosyaları ve transkriptler için)
+mkdir -p /root/data/audio
+mkdir -p /root/data/transcripts
+log "Data klasörleri oluşturuldu: /root/data"
 
 # 7. Kaynak kodları kopyala (bu script'in çalıştırıldığı dizinden)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -270,7 +274,12 @@ module.exports = {
 };
 EOL
 
+# Eski instance'ları temizle (tüm instance'ları durdur ve sil)
+pm2 stop audiobook-backend 2>/dev/null || true
 pm2 delete audiobook-backend 2>/dev/null || true
+# PM2 process listesini temizle
+pm2 flush 2>/dev/null || true
+# Yeni instance'ları başlat
 pm2 start ecosystem.config.js
 pm2 save
 log "Backend başlatıldı ve PM2'ye kaydedildi"
@@ -304,7 +313,10 @@ module.exports = {
 EOL
 
 mkdir -p logs
+# Eski instance'ları temizle
+pm2 stop audiobook-frontend 2>/dev/null || true
 pm2 delete audiobook-frontend 2>/dev/null || true
+# Yeni instance'ları başlat
 pm2 start ecosystem.config.js
 pm2 save
 log "Frontend başlatıldı ve PM2'ye kaydedildi"
@@ -312,14 +324,31 @@ log "Frontend başlatıldı ve PM2'ye kaydedildi"
 # 17. Nginx yapılandırması
 log "Nginx yapılandırılıyor..."
 
+# Nginx.conf'a limit_req_zone ekle (http bloğuna - ayrı dosya ile)
+mkdir -p /etc/nginx/conf.d
+if [ ! -f /etc/nginx/conf.d/rate-limit.conf ]; then
+    log "Rate limit config dosyası oluşturuluyor..."
+    cat > /etc/nginx/conf.d/rate-limit.conf << 'RATELIMIT'
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
+RATELIMIT
+    log "Rate limit config dosyası oluşturuldu"
+fi
+
+# nginx.conf'a include ekle (eğer yoksa)
+if ! grep -q "include.*conf.d/rate-limit.conf" /etc/nginx/nginx.conf; then
+    log "nginx.conf'a rate-limit include ekleniyor..."
+    # http bloğunun içine include ekle
+    sed -i '/^http {/a\    include /etc/nginx/conf.d/rate-limit.conf;' /etc/nginx/nginx.conf
+    log "Rate limit include eklendi"
+fi
+
 # Backend için Nginx config
 cat > /etc/nginx/sites-available/audiobook-api << EOL
 server {
     listen 80;
     server_name $API_DOMAIN;
 
-    # Rate limiting
-    limit_req_zone \$binary_remote_addr zone=api_limit:10m rate=10r/s;
+    # Rate limiting (zone nginx.conf'ta tanımlı)
     limit_req zone=api_limit burst=20 nodelay;
 
     # Security headers
@@ -347,9 +376,17 @@ server {
         proxy_read_timeout 60s;
     }
 
-    # Uploads - statik dosya sunumu
+    # Uploads - statik dosya sunumu (geriye dönük uyumluluk)
     location /uploads/ {
         alias $BACKEND_DIR/uploads/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # Data - ses dosyaları ve transkriptler
+    location /data/ {
+        alias /root/data/;
         expires 30d;
         add_header Cache-Control "public, immutable";
         access_log off;

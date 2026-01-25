@@ -16,7 +16,12 @@ const storage = multer.diskStorage({
       const now = new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, '0');
-      uploadPath = path.join(uploadConfig.uploadDir, 'audio', 'chapters', String(year), month);
+      uploadPath = path.join(uploadConfig.dataDir, 'audio', String(year), month);
+    } else if (file.fieldname === 'transcript') {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      uploadPath = path.join(uploadConfig.dataDir, 'transcripts', String(year), month);
     } else if (file.fieldname === 'avatar') {
       uploadPath = path.join(uploadConfig.uploadDir, 'avatars');
     } else {
@@ -43,10 +48,21 @@ const fileFilter = (
   const allowedMimes: Record<string, string[]> = {
     cover: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
     audio: ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a'],
+    transcript: ['text/plain', 'text/srt', 'text/vtt', 'application/x-subrip'],
     avatar: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
   };
 
   const fieldMimes = allowedMimes[file.fieldname] || [];
+
+  // Also check file extension for transcript files
+  if (file.fieldname === 'transcript') {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedExts = ['.txt', '.srt', '.vtt'];
+    if (allowedExts.includes(ext) || fieldMimes.includes(file.mimetype)) {
+      cb(null, true);
+      return;
+    }
+  }
 
   if (fieldMimes.includes(file.mimetype)) {
     cb(null, true);
@@ -55,7 +71,7 @@ const fileFilter = (
   }
 };
 
-// Multer instance
+// Multer instance for audio and large files
 export const upload = multer({
   storage,
   fileFilter,
@@ -64,11 +80,23 @@ export const upload = multer({
   },
 });
 
+// Multer instance for transcript files (smaller size limit)
+export const uploadTranscript = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: uploadConfig.maxTranscriptSize,
+  },
+});
+
 // Middleware for cover upload
 export const uploadCover = upload.single('cover');
 
 // Middleware for audio upload
 export const uploadAudio = upload.single('audio');
+
+// Middleware for transcript upload
+export const uploadTranscriptFile = uploadTranscript.single('transcript');
 
 // Middleware for avatar upload
 export const uploadAvatar = upload.single('avatar');
