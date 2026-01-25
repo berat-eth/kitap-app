@@ -23,22 +23,42 @@ const dataSourceOptions: DataSourceOptions = {
   logging: config.isDevelopment ? ['error', 'warn'] : ['error'],
   charset: 'utf8mb4',
   timezone: '+03:00', // Türkiye saati
+  connectTimeout: 60000, // 60 saniye bağlantı timeout
   extra: {
     connectionLimit: 10,
+    waitForConnections: true,
+    queueLimit: 0,
+    connectTimeout: 60000,
+    acquireTimeout: 60000,
+    timeout: 60000,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000,
   },
+  poolSize: 10,
+  maxQueryExecutionTime: 30000, // 30 saniye sorgu timeout
 };
 
 export const AppDataSource = new DataSource(dataSourceOptions);
 
-export const initializeDatabase = async (): Promise<void> => {
-  try {
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
-      console.log('✅ Veritabanı bağlantısı başarılı');
+export const initializeDatabase = async (retries = 5, delay = 5000): Promise<void> => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      if (!AppDataSource.isInitialized) {
+        await AppDataSource.initialize();
+        console.log('✅ Veritabanı bağlantısı başarılı');
+        return;
+      }
+      return;
+    } catch (error) {
+      console.error(`❌ Veritabanı bağlantı hatası (deneme ${attempt}/${retries}):`, error);
+      
+      if (attempt === retries) {
+        throw error;
+      }
+      
+      console.log(`⏳ ${delay / 1000} saniye sonra tekrar denenecek...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
-  } catch (error) {
-    console.error('❌ Veritabanı bağlantı hatası:', error);
-    throw error;
   }
 };
 
