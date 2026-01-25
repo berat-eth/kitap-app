@@ -61,9 +61,10 @@ export default function KesfetPage() {
         if (sortBy === 'title') {
           return a.title.localeCompare(b.title);
         } else if (sortBy === 'popular') {
-          return a.id.localeCompare(b.id);
+          return Number(a.id) - Number(b.id);
         } else {
-          return b.id.localeCompare(a.id);
+          // newest - yeni eklenenler (büyük id önce)
+          return Number(b.id) - Number(a.id);
         }
       });
 
