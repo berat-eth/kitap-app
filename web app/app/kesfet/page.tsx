@@ -3,7 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Book } from '@/lib/types';
-import { getBooks, searchBooks, getBooksByCategory, getCategories } from '@/lib/api';
+import { getBooks, searchBooks, getBooksByCategory, getCategoriesWithDetails } from '@/lib/api';
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  bookCount: number;
+}
 import Image from 'next/image';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -12,8 +21,8 @@ export default function KesfetPage() {
   const router = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'title'>('newest');
@@ -31,7 +40,7 @@ export default function KesfetPage() {
       setIsLoading(true);
       const [booksData, categoriesData] = await Promise.all([
         getBooks(),
-        getCategories(),
+        getCategoriesWithDetails(),
       ]);
       setBooks(booksData);
       setCategories(categoriesData);
@@ -50,7 +59,7 @@ export default function KesfetPage() {
         const searchResults = await searchBooks(searchQuery);
         filtered = searchResults;
       } else if (selectedCategory) {
-        const categoryResults = await getBooksByCategory(selectedCategory);
+        const categoryResults = await getBooksByCategory(selectedCategory.slug);
         filtered = categoryResults;
       } else {
         filtered = [...books];
@@ -167,15 +176,15 @@ export default function KesfetPage() {
                 </button>
                 {categories.map((category) => (
                   <button
-                    key={category}
+                    key={category.id}
                     onClick={() => setSelectedCategory(category)}
                     className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                      selectedCategory === category
+                      selectedCategory?.id === category.id
                         ? 'neu-glass-button bg-primary/20 text-primary border-primary/30'
                         : 'neu-glass-button text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
-                    {category}
+                    {category.name}
                   </button>
                 ))}
               </div>

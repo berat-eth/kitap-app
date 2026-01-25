@@ -3,7 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Book } from '@/lib/types';
-import { getBooks, searchBooks, getBooksByCategory, getCategories } from '@/lib/api';
+import { getBooks, searchBooks, getBooksByCategory, getCategoriesWithDetails } from '@/lib/api';
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  bookCount: number;
+}
 import Image from 'next/image';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -19,7 +26,7 @@ export default function HomePage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);
   const [popularBooks, setPopularBooks] = useState<Book[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -98,7 +105,7 @@ export default function HomePage() {
       setIsLoading(true);
       const [booksData, categoriesData] = await Promise.all([
         getBooks(),
-        getCategories(),
+        getCategoriesWithDetails(),
       ]);
       setBooks(booksData);
       setCategories(categoriesData);
