@@ -841,7 +841,7 @@ build_backend() {
     fi
     
     log_info "npm paketleri yükleniyor..."
-    npm ci
+    npm install
     
     log_info "TypeScript build yapılıyor..."
     npm run build
@@ -866,7 +866,7 @@ build_webapp() {
     fi
     
     log_info "npm paketleri yükleniyor..."
-    npm ci
+    npm install
     
     log_info "Next.js build yapılıyor..."
     npm run build
