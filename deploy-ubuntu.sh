@@ -275,10 +275,13 @@ module.exports = {
 EOL
 
 # Eski instance'ları temizle (tüm instance'ları durdur ve sil)
+log "Eski backend instance'ları temizleniyor..."
 pm2 stop audiobook-backend 2>/dev/null || true
 pm2 delete audiobook-backend 2>/dev/null || true
 # PM2 process listesini temizle
-pm2 flush 2>/dev/null || true
+pm2 flush audiobook-backend 2>/dev/null || true
+# Kısa bir bekleme (process'lerin tamamen kapanması için)
+sleep 2
 # Yeni instance'ları başlat
 pm2 start ecosystem.config.js
 pm2 save
@@ -314,8 +317,13 @@ EOL
 
 mkdir -p logs
 # Eski instance'ları temizle
+log "Eski frontend instance'ları temizleniyor..."
 pm2 stop audiobook-frontend 2>/dev/null || true
 pm2 delete audiobook-frontend 2>/dev/null || true
+# PM2 process listesini temizle
+pm2 flush audiobook-frontend 2>/dev/null || true
+# Kısa bir bekleme (process'lerin tamamen kapanması için)
+sleep 2
 # Yeni instance'ları başlat
 pm2 start ecosystem.config.js
 pm2 save
@@ -326,18 +334,23 @@ log "Nginx yapılandırılıyor..."
 
 # Nginx.conf'a limit_req_zone ekle (http bloğuna - ayrı dosya ile)
 mkdir -p /etc/nginx/conf.d
-if [ ! -f /etc/nginx/conf.d/rate-limit.conf ]; then
-    log "Rate limit config dosyası oluşturuluyor..."
-    cat > /etc/nginx/conf.d/rate-limit.conf << 'RATELIMIT'
+
+# Önce mevcut tüm rate-limit config dosyalarını temizle (duplicate'leri önlemek için)
+rm -f /etc/nginx/conf.d/rate-limit*.conf
+# nginx.conf'dan eski include'ları kaldır
+sed -i '/include.*conf.d\/rate-limit/d' /etc/nginx/nginx.conf
+
+# Yeni rate limit config dosyası oluştur
+log "Rate limit config dosyası oluşturuluyor..."
+cat > /etc/nginx/conf.d/rate-limit.conf << 'RATELIMIT'
 limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
 RATELIMIT
-    log "Rate limit config dosyası oluşturuldu"
-fi
+log "Rate limit config dosyası oluşturuldu"
 
 # nginx.conf'a include ekle (eğer yoksa)
 if ! grep -q "include.*conf.d/rate-limit.conf" /etc/nginx/nginx.conf; then
     log "nginx.conf'a rate-limit include ekleniyor..."
-    # http bloğunun içine include ekle
+    # http bloğunun içine include ekle (http { satırından sonra, ilk satıra)
     sed -i '/^http {/a\    include /etc/nginx/conf.d/rate-limit.conf;' /etc/nginx/nginx.conf
     log "Rate limit include eklendi"
 fi
