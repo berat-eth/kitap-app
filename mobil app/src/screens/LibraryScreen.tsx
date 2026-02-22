@@ -47,7 +47,7 @@ const LibraryScreen = () => {
             <Text style={[styles.editButton, { color: theme.colors.primary }]}>Düzenle</Text>
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Kitaplığım</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Search')}>
+          <TouchableOpacity onPress={() => navigation.navigate('MainTabs', { screen: 'Search' })}>
             <Ionicons name="search" size={24} color={theme.colors.text} />
           </TouchableOpacity>
         </View>

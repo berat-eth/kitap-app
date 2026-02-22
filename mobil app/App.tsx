@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { AudioPlayerProvider } from './src/context/AudioPlayerContext';
+import { VoiceChatProvider } from './src/context/VoiceChatContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -28,10 +29,12 @@ export default function App() {
     <SafeAreaProvider>
       <ThemeProvider>
         <AudioPlayerProvider>
-          <NavigationContainer>
-            <AppNavigator />
-            <StatusBar style="auto" />
-          </NavigationContainer>
+          <VoiceChatProvider>
+            <NavigationContainer>
+              <AppNavigator />
+              <StatusBar style="auto" />
+            </NavigationContainer>
+          </VoiceChatProvider>
         </AudioPlayerProvider>
       </ThemeProvider>
     </SafeAreaProvider>

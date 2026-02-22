@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, borderRadius } from '../theme/spacing';
-import { RootStackParamList } from '../navigation/types';
+import { MainTabParamList } from '../navigation/types';
 import { useAudioPlayer } from '../context/AudioPlayerContext';
 
-type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
+type SettingsScreenNavigationProp = BottomTabNavigationProp<MainTabParamList, 'Settings'>;
 
 const SettingsScreen = () => {
   const { theme, toggleTheme, themeMode, highContrast, toggleHighContrast } = useTheme();

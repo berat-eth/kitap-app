@@ -51,7 +51,7 @@ const HomeScreen = () => {
       >
         <SearchBar
           placeholder="Kitap veya yazar ara..."
-          onVoiceSearch={() => navigation.navigate('Search')}
+          onVoiceSearch={() => navigation.navigate('MainTabs', { screen: 'Search' })}
         />
 
         <CategoryFilter

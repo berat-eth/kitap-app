@@ -116,3 +116,125 @@ export interface AdminStats {
     listenerCount: number;
   }>;
 }
+
+// ==========================================
+// Voice Chat Room Types
+// ==========================================
+
+export interface RoomParticipant {
+  deviceId: string;
+  deviceName: string;
+  isMuted: boolean;
+  joinedAt: Date;
+  socketId: string;
+}
+
+export interface VoiceRoom {
+  id: string;
+  name: string;
+  topic?: string;
+  hostDeviceId: string;
+  participants: Map<string, RoomParticipant>;
+  maxParticipants: number;
+  createdAt: Date;
+  isLive: boolean;
+}
+
+export interface VoiceRoomPublic {
+  id: string;
+  name: string;
+  topic?: string;
+  hostDeviceId: string;
+  participantCount: number;
+  maxParticipants: number;
+  createdAt: Date;
+  isLive: boolean;
+  participants: Array<Omit<RoomParticipant, 'socketId'>>;
+}
+
+export interface CreateRoomDTO {
+  name: string;
+  topic?: string;
+  maxParticipants?: number;
+}
+
+export interface JoinRoomDTO {
+  roomId: string;
+}
+
+export interface LeaveRoomDTO {
+  roomId: string;
+}
+
+export interface MuteDTO {
+  roomId: string;
+  isMuted: boolean;
+}
+
+// WebRTC Signaling Types
+export interface WebRTCOffer {
+  roomId: string;
+  targetDeviceId: string;
+  offer: RTCSessionDescriptionInit;
+}
+
+export interface WebRTCAnswer {
+  roomId: string;
+  targetDeviceId: string;
+  answer: RTCSessionDescriptionInit;
+}
+
+export interface ICECandidate {
+  roomId: string;
+  targetDeviceId: string;
+  candidate: RTCIceCandidateInit;
+}
+
+export interface RTCSessionDescriptionInit {
+  type: 'offer' | 'answer';
+  sdp?: string;
+}
+
+export interface RTCIceCandidateInit {
+  candidate?: string;
+  sdpMid?: string | null;
+  sdpMLineIndex?: number | null;
+  usernameFragment?: string | null;
+}
+
+// Socket Event Payloads
+export interface SocketErrorPayload {
+  message: string;
+  code: string;
+}
+
+export interface ParticipantJoinedPayload {
+  roomId: string;
+  participant: Omit<RoomParticipant, 'socketId'>;
+}
+
+export interface ParticipantLeftPayload {
+  roomId: string;
+  deviceId: string;
+}
+
+export interface ParticipantMutedPayload {
+  roomId: string;
+  deviceId: string;
+  isMuted: boolean;
+}
+
+export interface WebRTCOfferPayload {
+  fromDeviceId: string;
+  offer: RTCSessionDescriptionInit;
+}
+
+export interface WebRTCAnswerPayload {
+  fromDeviceId: string;
+  answer: RTCSessionDescriptionInit;
+}
+
+export interface ICECandidatePayload {
+  fromDeviceId: string;
+  candidate: RTCIceCandidateInit;
+}

@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import express, { Express } from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
@@ -9,6 +10,7 @@ import path from 'path';
 import { config, validateConfig } from './config';
 import { initializeDatabase, closeDatabase } from './config/database';
 import { initializeRedis, closeRedis } from './config/redis';
+import { initializeSocket, closeSocket, roomManager } from './socket';
 import routes from './routes';
 import { errorHandler, notFoundHandler, apiLimiter } from './middleware';
 import { logger } from './utils';
@@ -87,10 +89,16 @@ if (config.swaggerEnabled) {
 
 // Health check
 app.get('/health', (req, res) => {
+  const socketStats = roomManager.getStats();
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+    voiceChat: {
+      totalRooms: socketStats.totalRooms,
+      activeRooms: socketStats.activeRooms,
+      totalParticipants: socketStats.totalParticipants,
+    },
   });
 });
 
@@ -115,14 +123,21 @@ const startServer = async (): Promise<void> => {
     // Redis bağlantısı (opsiyonel)
     await initializeRedis();
 
+    // HTTP server oluştur (Socket.io için gerekli)
+    const httpServer = createServer(app);
+
+    // Socket.io başlat
+    initializeSocket(httpServer);
+
     // Sunucuyu başlat
-    const server = app.listen(config.port, () => {
+    httpServer.listen(config.port, () => {
       console.log('');
       console.log('🚀 ======================================');
       console.log(`🎧 Sesli Kitap API Sunucusu`);
       console.log('======================================');
       console.log(`📍 URL: http://localhost:${config.port}`);
       console.log(`📚 API: http://localhost:${config.port}${config.apiPrefix}`);
+      console.log(`🎙️ Socket.io: ws://localhost:${config.port}`);
       if (config.swaggerEnabled) {
         console.log(`📖 Docs: http://localhost:${config.port}/api-docs`);
       }
@@ -131,6 +146,8 @@ const startServer = async (): Promise<void> => {
       console.log('');
     });
 
+    const server = httpServer;
+
     // Graceful shutdown
     const shutdown = async (signal: string): Promise<void> => {
       console.log(`\n${signal} alındı. Sunucu kapatılıyor...`);
@@ -138,6 +155,7 @@ const startServer = async (): Promise<void> => {
       server.close(async () => {
         console.log('HTTP sunucusu kapatıldı');
 
+        await closeSocket();
         await closeDatabase();
         await closeRedis();
 

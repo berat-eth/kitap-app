@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: typography.fontSize.sm,
-    whiteSpace: 'nowrap',
   },
 });
 

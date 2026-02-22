@@ -14,6 +14,7 @@ import BookDetailScreen from '../screens/BookDetailScreen';
 import AudioPlayerScreen from '../screens/AudioPlayerScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import OfflineScreen from '../screens/OfflineScreen';
+import VoiceChatRoomScreen from '../screens/VoiceChatRoomScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -58,6 +59,16 @@ const MainTabs = () => {
           tabBarLabel: 'Keşfet',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="search" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="VoiceChat"
+        component={VoiceChatRoomScreen}
+        options={{
+          tabBarLabel: 'Sesli Sohbet',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="mic" size={size} color={color} />
           ),
         }}
       />
