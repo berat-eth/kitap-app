@@ -39,11 +39,27 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-### 3. HTTPS (Let's Encrypt)
+### 3. SSL Kurulumu (Let's Encrypt)
 
+**Otomatik (önerilen):**
 ```bash
-sudo certbot --nginx -d kitap1.beratsimsek.com.tr -d api1.beratsimsek.com.tr
+chmod +x deploy/ssl-setup.sh
+sudo ./deploy/ssl-setup.sh
 ```
+
+**Manuel:**
+```bash
+# Certbot kur (Ubuntu/Debian)
+sudo apt update && sudo apt install -y certbot python3-certbot-nginx
+
+# SSL sertifikası al (Nginx config otomatik güncellenir)
+sudo certbot --nginx -d kitap1.beratsimsek.com.tr -d api1.beratsimsek.com.tr --redirect
+
+# E-posta ile (yenileme bildirimi)
+sudo certbot --nginx -d kitap1.beratsimsek.com.tr -d api1.beratsimsek.com.tr -m email@example.com --agree-tos --redirect
+```
+
+**Ön koşullar:** DNS kayıtları sunucuya yönlendirilmiş olmalı, port 80 dışarıdan erişilebilir olmalı.
 
 ### 4. DNS
 
