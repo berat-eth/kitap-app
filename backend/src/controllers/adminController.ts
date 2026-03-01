@@ -4,6 +4,7 @@ import * as chapterService from '../services/chapterService';
 import * as categoryService from '../services/categoryService';
 import * as deviceService from '../services/deviceService';
 import * as submissionService from '../services/submissionService';
+import { getRoomList } from '../socket/voiceChat';
 import { AppError } from '../middleware/errorHandler';
 import { Book } from '../types';
 
@@ -123,6 +124,15 @@ export async function listSubmissions(req: Request, res: Response, next: NextFun
     const { status } = req.query as { status?: 'pending' | 'approved' | 'rejected' };
     const submissions = await submissionService.getAllSubmissions(status);
     res.json({ success: true, data: submissions });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listVoiceRooms(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const rooms = getRoomList();
+    res.json({ success: true, data: rooms });
   } catch (err) {
     next(err);
   }

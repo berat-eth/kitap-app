@@ -22,4 +22,6 @@ router.get('/submissions', adminController.listSubmissions);
 router.put('/submissions/:id/approve', adminController.approveSubmission);
 router.put('/submissions/:id/reject', adminController.rejectSubmission);
 
+router.get('/rooms', adminController.listVoiceRooms);
+
 export default router;

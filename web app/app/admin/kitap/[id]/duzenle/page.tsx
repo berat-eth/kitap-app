@@ -145,6 +145,20 @@ export default function EditBookPage() {
               <span className="text-sm">Kitaplar</span>
             </Link>
             <Link
+              href="/admin/kitap-istekleri"
+              className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group font-medium"
+            >
+              <span className="material-symbols-outlined group-hover:text-primary transition-colors text-[22px]">upload_file</span>
+              <span className="text-sm">Kitap İstekleri</span>
+            </Link>
+            <Link
+              href="/admin/sesli-sohbet"
+              className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group font-medium"
+            >
+              <span className="material-symbols-outlined group-hover:text-primary transition-colors text-[22px]">groups</span>
+              <span className="text-sm">Sesli Sohbet</span>
+            </Link>
+            <Link
               href="/admin/kullanicilar"
               className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group font-medium"
             >

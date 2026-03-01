@@ -183,7 +183,7 @@ export function registerVoiceChatHandlers(io: SocketIOServer): void {
   });
 }
 
-function getRoomList() {
+export function getRoomList() {
   return Array.from(rooms.values())
     .filter((r) => r.isLive)
     .map(serializeRoom);
