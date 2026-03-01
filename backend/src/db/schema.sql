@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS books (
   description  TEXT,
   cover_image  VARCHAR(500),
   category_id  VARCHAR(36),
-  duration     INT           NOT NULL DEFAULT 0 COMMENT 'Total duration in seconds',
+  duration     INT           NOT NULL DEFAULT 0,
   rating       DECIMAL(3,2)  NOT NULL DEFAULT 0.00,
   is_featured  TINYINT(1)    NOT NULL DEFAULT 0,
   is_popular   TINYINT(1)    NOT NULL DEFAULT 0,
@@ -39,8 +39,7 @@ CREATE TABLE IF NOT EXISTS books (
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
   INDEX idx_books_category (category_id),
   INDEX idx_books_featured (is_featured),
-  INDEX idx_books_popular (is_popular),
-  FULLTEXT INDEX idx_books_search (title, author, description)
+  INDEX idx_books_popular (is_popular)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================
@@ -52,7 +51,7 @@ CREATE TABLE IF NOT EXISTS chapters (
   title      VARCHAR(255) NOT NULL,
   order_num  INT          NOT NULL DEFAULT 1,
   audio_url  VARCHAR(500) NOT NULL,
-  duration   INT          NOT NULL DEFAULT 0 COMMENT 'Duration in seconds',
+  duration   INT          NOT NULL DEFAULT 0,
   created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
@@ -66,7 +65,7 @@ CREATE TABLE IF NOT EXISTS chapters (
 CREATE TABLE IF NOT EXISTS devices (
   id            VARCHAR(36)  NOT NULL,
   device_name   VARCHAR(255),
-  platform      VARCHAR(50)  COMMENT 'ios | android | web',
+  platform      VARCHAR(50),
   registered_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_seen     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
@@ -79,7 +78,7 @@ CREATE TABLE IF NOT EXISTS progress (
   device_id    VARCHAR(36)   NOT NULL,
   book_id      VARCHAR(36)   NOT NULL,
   chapter_id   VARCHAR(36),
-  current_time DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT 'Current playback position in seconds',
+  current_time DECIMAL(10,2) NOT NULL DEFAULT 0,
   is_completed TINYINT(1)    NOT NULL DEFAULT 0,
   updated_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (device_id, book_id),
@@ -127,9 +126,9 @@ CREATE TABLE IF NOT EXISTS book_submissions (
   narrator     VARCHAR(255)  NOT NULL,
   description  TEXT,
   category     VARCHAR(100)  NOT NULL,
-  cover_image  VARCHAR(500)  COMMENT 'URL veya dosya yolu',
+  cover_image  VARCHAR(500),
   status       ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
-  admin_note   TEXT          COMMENT 'Red/onay notu',
+  admin_note   TEXT,
   created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -146,7 +145,7 @@ CREATE TABLE IF NOT EXISTS book_submission_chapters (
   submission_id VARCHAR(36) NOT NULL,
   title       VARCHAR(255) NOT NULL,
   order_num   INT           NOT NULL DEFAULT 1,
-  audio_url   VARCHAR(500)  NOT NULL COMMENT 'URL veya dosya yolu',
+  audio_url   VARCHAR(500)  NOT NULL,
   duration    INT           NOT NULL DEFAULT 0,
   created_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
