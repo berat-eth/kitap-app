@@ -7,15 +7,14 @@ import adminRouter from './admin';
 
 const router = Router();
 
-// Public routes
+router.get('/health', (req, res) => {
+  res.json({ success: true, message: 'API is running', timestamp: new Date().toISOString() });
+});
+
 router.use('/books', booksRouter);
 router.use('/chapters', chaptersRouter);
 router.use('/categories', categoriesRouter);
-
-// Device routes (X-Device-ID gerekli)
 router.use('/device', deviceRouter);
-
-// Admin routes (X-Admin-Key gerekli)
 router.use('/admin', adminRouter);
 
 export default router;

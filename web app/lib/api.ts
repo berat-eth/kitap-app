@@ -2,6 +2,7 @@ import { Book, Chapter } from './types';
 
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
 
 // Device ID yönetimi (localStorage)
 const DEVICE_ID_KEY = 'sesli_kitap_device_id';
@@ -36,14 +37,15 @@ const apiFetch = async <T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> => {
   const deviceId = getDeviceId();
-  
-  const headers: HeadersInit = {
+
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers || {}),
+    'X-API-Key': API_KEY,
+    ...(options.headers as Record<string, string> || {}),
   };
-  
+
   if (deviceId) {
-    (headers as Record<string, string>)['X-Device-ID'] = deviceId;
+    headers['X-Device-ID'] = deviceId;
   }
   
   try {

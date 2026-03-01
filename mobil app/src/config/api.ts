@@ -2,12 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // API Configuration - Tüm ayarlar burada
 export const API_CONFIG = {
-  // Production API (değiştirilebilir)
-  baseURL: __DEV__ 
-    ? 'http://10.0.2.2:3001/api' // Android Emulator için localhost
-    : 'https://api.kitap.beratsimsek.com.tr/api', // Production
-  
-  timeout: 30000, // 30 seconds
+  baseURL: __DEV__
+    ? (process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:3001/api')
+    : (process.env.EXPO_PUBLIC_API_URL_PROD ?? 'https://api.kitap.beratsimsek.com.tr/api'),
+
+  apiKey: process.env.EXPO_PUBLIC_API_KEY ?? '',
+
+  timeout: 30000,
 };
 
 // Device ID Storage Key
@@ -68,21 +69,21 @@ export const API_ENDPOINTS = {
   DEVICE_REVIEW_ADD: (bookId: string | number) => `/device/reviews/${bookId}`,
 };
 
-// Fetch wrapper with device ID header
+// Fetch wrapper with API key + device ID headers
 export const apiFetch = async (
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> => {
   const deviceId = await getDeviceId();
-  
-  const headers: HeadersInit = {
+
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers || {}),
+    'X-API-Key': API_CONFIG.apiKey,
+    ...(options.headers as Record<string, string> || {}),
   };
-  
-  // Device ID header ekle (varsa)
+
   if (deviceId) {
-    (headers as Record<string, string>)['X-Device-ID'] = deviceId;
+    headers['X-Device-ID'] = deviceId;
   }
   
   const url = `${API_CONFIG.baseURL}${endpoint}`;
@@ -119,7 +120,10 @@ export const registerDevice = async (
     
     const response = await fetch(`${API_CONFIG.baseURL}${API_ENDPOINTS.DEVICE_REGISTER}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': API_CONFIG.apiKey,
+      },
       body: JSON.stringify({ deviceName, platform }),
     });
     
