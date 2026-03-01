@@ -8,7 +8,7 @@
 -- categories
 -- ============================================================
 CREATE TABLE IF NOT EXISTS categories (
-  id          VARCHAR(36)  NOT NULL DEFAULT (UUID()),
+  id          VARCHAR(36)  NOT NULL,
   name        VARCHAR(100) NOT NULL,
   slug        VARCHAR(100) NOT NULL UNIQUE,
   description TEXT,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS categories (
 -- books
 -- ============================================================
 CREATE TABLE IF NOT EXISTS books (
-  id           VARCHAR(36)   NOT NULL DEFAULT (UUID()),
+  id           VARCHAR(36)   NOT NULL,
   title        VARCHAR(255)  NOT NULL,
   author       VARCHAR(255)  NOT NULL,
   narrator     VARCHAR(255),
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS books (
 -- chapters
 -- ============================================================
 CREATE TABLE IF NOT EXISTS chapters (
-  id         VARCHAR(36)  NOT NULL DEFAULT (UUID()),
+  id         VARCHAR(36)  NOT NULL,
   book_id    VARCHAR(36)  NOT NULL,
   title      VARCHAR(255) NOT NULL,
   order_num  INT          NOT NULL DEFAULT 1,
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS favorites (
 -- voice_rooms
 -- ============================================================
 CREATE TABLE IF NOT EXISTS voice_rooms (
-  id               VARCHAR(36)  NOT NULL DEFAULT (UUID()),
+  id               VARCHAR(36)  NOT NULL,
   name             VARCHAR(255) NOT NULL,
   topic            VARCHAR(500),
   host_device_id   VARCHAR(36)  NOT NULL,
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS voice_rooms (
 -- book_submissions (Kullanıcı kitap gönderimleri)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS book_submissions (
-  id           VARCHAR(36)   NOT NULL DEFAULT (UUID()),
+  id           VARCHAR(36)   NOT NULL,
   device_id    VARCHAR(36)   NOT NULL,
   title        VARCHAR(255)  NOT NULL,
   author       VARCHAR(255)  NOT NULL,
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS book_submissions (
 -- book_submission_chapters
 -- ============================================================
 CREATE TABLE IF NOT EXISTS book_submission_chapters (
-  id          VARCHAR(36)  NOT NULL DEFAULT (UUID()),
+  id          VARCHAR(36)  NOT NULL,
   submission_id VARCHAR(36) NOT NULL,
   title       VARCHAR(255) NOT NULL,
   order_num   INT           NOT NULL DEFAULT 1,
