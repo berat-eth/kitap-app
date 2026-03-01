@@ -11,7 +11,13 @@ async function migrate(): Promise<void> {
   const statements = sql
     .split(';')
     .map((s) => s.trim())
-    .filter((s) => s.length > 0 && !s.startsWith('--'));
+    .filter((s) => {
+      if (!s || s.startsWith('--')) return false;
+      const upper = s.toUpperCase();
+      // Veritabanı bağlantısı pool tarafından yönetilir, bu komutları atla
+      if (upper.startsWith('CREATE DATABASE') || upper.startsWith('USE ')) return false;
+      return true;
+    });
 
   for (const statement of statements) {
     await pool.execute(statement);

@@ -1,10 +1,8 @@
 -- ============================================================
 -- Sesli Kitap - MySQL Schema
--- Run this script once on your remote MySQL server
+-- Veritabanı bağlantısı .env DB_NAME üzerinden sağlanır.
+-- Bu script sadece tabloları oluşturur.
 -- ============================================================
-
-CREATE DATABASE IF NOT EXISTS sesli_kitap CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE sesli_kitap;
 
 -- ============================================================
 -- categories
