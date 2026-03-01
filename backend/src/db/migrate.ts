@@ -9,7 +9,7 @@ async function migrate(): Promise<void> {
   // Veritabanını açıkça seç (shared hosting uyumluluğu)
   const dbEscaped = '`' + env.DB_NAME.replace(/`/g, '``') + '`';
   await pool.execute(`USE ${dbEscaped}`);
-  const [rows] = await pool.execute<[{ database: string }[]]>('SELECT DATABASE() as database');
+  const [rows] = await pool.execute('SELECT DATABASE() as `database`');
   const dbName = (rows as any)[0]?.database;
   console.log('Using database:', dbName);
 
