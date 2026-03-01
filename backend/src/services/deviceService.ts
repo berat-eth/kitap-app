@@ -60,11 +60,11 @@ export async function saveProgress(data: {
   isCompleted?: boolean;
 }): Promise<Progress> {
   await pool.execute(
-    `INSERT INTO progress (device_id, book_id, chapter_id, current_time, is_completed)
+    `INSERT INTO progress (device_id, book_id, chapter_id, \`current_time\`, is_completed)
      VALUES (?, ?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE
-       chapter_id   = VALUES(chapter_id),
-       current_time = VALUES(current_time),
+       chapter_id    = VALUES(chapter_id),
+       \`current_time\` = VALUES(\`current_time\`),
        is_completed = VALUES(is_completed),
        updated_at   = CURRENT_TIMESTAMP`,
     [

@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS progress (
   device_id    VARCHAR(36)   NOT NULL,
   book_id      VARCHAR(36)   NOT NULL,
   chapter_id   VARCHAR(36),
-  current_time DECIMAL(10,2) NOT NULL DEFAULT 0,
+  `current_time` DECIMAL(10,2) NOT NULL DEFAULT 0,
   is_completed TINYINT(1)    NOT NULL DEFAULT 0,
   updated_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (device_id, book_id),
