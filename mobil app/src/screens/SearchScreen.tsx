@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { typography } from '../theme/typography';
 import { spacing, borderRadius } from '../theme/spacing';
 import { RootStackParamList } from '../navigation/types';
@@ -12,17 +13,20 @@ import SearchBar from '../components/SearchBar';
 import CategoryFilter from '../components/CategoryFilter';
 import BookCard from '../components/BookCard';
 import { mockBooks, mockCategories } from '../utils/mockData';
-import { useAudioPlayer } from '../context/AudioPlayerContext';
+
+const MINI_PLAYER_HEIGHT = 60;
 
 type SearchScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const SearchScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation<SearchScreenNavigationProp>();
-  const { play } = useAudioPlayer();
+  const { play, playerState } = useAudioPlayer();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('1');
   const [recentSearches] = useState(['Suç ve Ceza', 'Stefan Zweig', 'Harry Potter Sesli Betimleme']);
+  
+  const hasActivePlayer = playerState.currentBook && playerState.currentChapter;
 
   const filteredBooks = mockBooks.filter((book) => {
     if (searchQuery) {
@@ -55,7 +59,10 @@ const SearchScreen = () => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          hasActivePlayer && { paddingBottom: spacing['4xl'] + MINI_PLAYER_HEIGHT }
+        ]}
       >
         <View style={styles.searchSection}>
           <SearchBar
@@ -118,7 +125,11 @@ const SearchScreen = () => {
       </ScrollView>
 
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        style={[
+          styles.fab, 
+          { backgroundColor: theme.colors.primary },
+          hasActivePlayer && { bottom: spacing['2xl'] + MINI_PLAYER_HEIGHT }
+        ]}
         onPress={() => {
           // Voice search functionality
         }}

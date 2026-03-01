@@ -115,3 +115,41 @@ CREATE TABLE IF NOT EXISTS voice_rooms (
   PRIMARY KEY (id),
   INDEX idx_voice_rooms_live (is_live)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
+-- book_submissions (Kullanıcı kitap gönderimleri)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS book_submissions (
+  id           VARCHAR(36)   NOT NULL DEFAULT (UUID()),
+  device_id    VARCHAR(36)   NOT NULL,
+  title        VARCHAR(255)  NOT NULL,
+  author       VARCHAR(255)  NOT NULL,
+  narrator     VARCHAR(255)  NOT NULL,
+  description  TEXT,
+  category     VARCHAR(100)  NOT NULL,
+  cover_image  VARCHAR(500)  COMMENT 'URL veya dosya yolu',
+  status       ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  admin_note   TEXT          COMMENT 'Red/onay notu',
+  created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  INDEX idx_submissions_status (status),
+  INDEX idx_submissions_device (device_id),
+  INDEX idx_submissions_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
+-- book_submission_chapters
+-- ============================================================
+CREATE TABLE IF NOT EXISTS book_submission_chapters (
+  id          VARCHAR(36)  NOT NULL DEFAULT (UUID()),
+  submission_id VARCHAR(36) NOT NULL,
+  title       VARCHAR(255) NOT NULL,
+  order_num   INT           NOT NULL DEFAULT 1,
+  audio_url   VARCHAR(500)  NOT NULL COMMENT 'URL veya dosya yolu',
+  duration    INT           NOT NULL DEFAULT 0,
+  created_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (submission_id) REFERENCES book_submissions(id) ON DELETE CASCADE,
+  INDEX idx_sub_chapters_submission (submission_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

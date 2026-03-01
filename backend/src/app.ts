@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './config/env';
@@ -8,6 +9,9 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import apiRouter from './routes/index';
 
 const app = express();
+
+// Static files (uploads) - before API routes so /uploads is served
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.set('trust proxy', 1);
 

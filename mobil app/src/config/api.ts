@@ -67,6 +67,11 @@ export const API_ENDPOINTS = {
   
   // Reviews (Device Auth Required)
   DEVICE_REVIEW_ADD: (bookId: string | number) => `/device/reviews/${bookId}`,
+  
+  // Submit Book
+  SUBMIT_BOOK: '/submit-book',
+  SUBMIT_BOOK_MY: '/submit-book/my',
+  UPLOAD: '/upload',
 };
 
 // Fetch wrapper with API key + device ID headers
@@ -144,5 +149,55 @@ export const registerDevice = async (
 // Helper function to get full URL
 export const getFullUrl = (endpoint: string): string => {
   return `${API_CONFIG.baseURL}${endpoint}`;
+};
+
+// Dosya yükle (cover veya ses)
+export const uploadFile = async (uri: string, type: string, name: string): Promise<string> => {
+  const deviceId = await getDeviceId();
+  const formData = new FormData();
+  formData.append('file', {
+    uri,
+    type,
+    name: name || 'file',
+  } as any);
+
+  const headers: Record<string, string> = {
+    'X-API-Key': API_CONFIG.apiKey,
+  };
+  if (deviceId) headers['X-Device-ID'] = deviceId;
+
+  const response = await fetch(`${API_CONFIG.baseURL}${API_ENDPOINTS.UPLOAD}`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  const data = await response.json();
+  if (!data.success || !data.data?.url) {
+    throw new Error(data.message || 'Dosya yüklenemedi');
+  }
+  return data.data.url;
+};
+
+// Kitap gönder
+export const submitBook = async (payload: {
+  title: string;
+  author: string;
+  narrator: string;
+  description?: string;
+  category: string;
+  cover_image?: string;
+  chapters: { title: string; order_num?: number; audio_url: string }[];
+}): Promise<{ id: string; status: string }> => {
+  const response = await apiFetch(API_ENDPOINTS.SUBMIT_BOOK, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.message || 'Kitap gönderilemedi');
+  }
+  return data.data;
 };
 

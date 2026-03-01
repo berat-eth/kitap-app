@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { typography } from '../theme/typography';
 import { spacing } from '../theme/spacing';
 import { RootStackParamList } from '../navigation/types';
@@ -13,15 +14,18 @@ import SearchBar from '../components/SearchBar';
 import CategoryFilter from '../components/CategoryFilter';
 import BookCard from '../components/BookCard';
 import { mockBooks, mockCategories, featuredBook, popularBooks } from '../utils/mockData';
-import { useAudioPlayer } from '../context/AudioPlayerContext';
+
+const MINI_PLAYER_HEIGHT = 60;
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const HomeScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const { play } = useAudioPlayer();
+  const { play, playerState } = useAudioPlayer();
   const [selectedCategory, setSelectedCategory] = useState('1');
+  
+  const hasActivePlayer = playerState.currentBook && playerState.currentChapter;
 
   const handleBookPress = (bookId: string) => {
     navigation.navigate('BookDetail', { bookId });
@@ -47,7 +51,10 @@ const HomeScreen = () => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          hasActivePlayer && { paddingBottom: spacing['4xl'] + MINI_PLAYER_HEIGHT }
+        ]}
       >
         <SearchBar
           placeholder="Kitap veya yazar ara..."

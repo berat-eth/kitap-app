@@ -5,22 +5,26 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { typography } from '../theme/typography';
 import { spacing, borderRadius } from '../theme/spacing';
 import { RootStackParamList } from '../navigation/types';
 import BookCard from '../components/BookCard';
 import ProgressBar from '../components/ProgressBar';
 import { mockBooks } from '../utils/mockData';
-import { useAudioPlayer } from '../context/AudioPlayerContext';
+
+const MINI_PLAYER_HEIGHT = 60;
 
 type LibraryScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const LibraryScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation<LibraryScreenNavigationProp>();
-  const { play } = useAudioPlayer();
+  const { play, playerState } = useAudioPlayer();
   const [activeTab, setActiveTab] = useState<'all' | 'downloaded'>('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  
+  const hasActivePlayer = playerState.currentBook && playerState.currentChapter;
 
   const myBooks = mockBooks.filter((b) => b.isDownloaded || b.progress !== undefined);
   const downloadedBooks = mockBooks.filter((b) => b.isDownloaded);
@@ -102,7 +106,10 @@ const LibraryScreen = () => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          hasActivePlayer && { paddingBottom: spacing['4xl'] + MINI_PLAYER_HEIGHT }
+        ]}
       >
         {recentlyPlayed && (
           <View style={styles.section}>

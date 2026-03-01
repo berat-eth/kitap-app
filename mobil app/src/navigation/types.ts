@@ -6,6 +6,7 @@ export type RootStackParamList = {
   BookDetail: { bookId: string };
   AudioPlayer: { bookId: string; chapterId?: string };
   Offline: undefined;
+  SubmitBook: undefined;
 };
 
 export type MainTabParamList = {

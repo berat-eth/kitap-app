@@ -18,4 +18,8 @@ router.delete('/chapters/:id', adminController.deleteChapter);
 
 router.post('/categories', adminController.createCategory);
 
+router.get('/submissions', adminController.listSubmissions);
+router.put('/submissions/:id/approve', adminController.approveSubmission);
+router.put('/submissions/:id/reject', adminController.rejectSubmission);
+
 export default router;

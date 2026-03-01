@@ -127,20 +127,21 @@ class VoiceChatService {
       this.callbacks.onError?.(error);
     });
 
-    this.socket.on('room:created', (data: { room: VoiceRoom }) => {
-      this.callbacks.onRoomCreated?.(data.room);
+    this.socket.on('room:created', (data: VoiceRoom) => {
+      this.callbacks.onRoomCreated?.(data);
     });
 
-    this.socket.on('room:joined', (data: { room: VoiceRoom; participants: RoomParticipant[] }) => {
-      this.callbacks.onRoomJoined?.(data);
+    this.socket.on('room:joined', (data: VoiceRoom) => {
+      this.callbacks.onRoomJoined?.({ room: data, participants: data.participants ?? [] });
     });
 
     this.socket.on('room:left', (data: { roomId: string }) => {
       this.callbacks.onRoomLeft?.(data.roomId);
     });
 
-    this.socket.on('room:list', (data: { rooms: VoiceRoom[] }) => {
-      this.callbacks.onRoomList?.(data.rooms);
+    this.socket.on('room:list', (data: VoiceRoom[] | { rooms: VoiceRoom[] }) => {
+      const rooms = Array.isArray(data) ? data : (data?.rooms ?? []);
+      this.callbacks.onRoomList?.(rooms);
     });
 
     this.socket.on('room:updated', (data: { room: VoiceRoom }) => {
@@ -188,7 +189,11 @@ class VoiceChatService {
       console.error('Socket bağlı değil');
       return;
     }
-    this.socket.emit('room:create', data);
+    this.socket.emit('room:create', {
+      ...data,
+      deviceId: this.deviceId,
+      deviceName: `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : 'Web'} Cihaz`,
+    });
   }
 
   joinRoom(roomId: string): void {
@@ -196,7 +201,11 @@ class VoiceChatService {
       console.error('Socket bağlı değil');
       return;
     }
-    this.socket.emit('room:join', { roomId });
+    this.socket.emit('room:join', {
+      roomId,
+      deviceId: this.deviceId,
+      deviceName: `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : 'Web'} Cihaz`,
+    });
   }
 
   leaveRoom(roomId: string): void {
@@ -204,7 +213,7 @@ class VoiceChatService {
       console.error('Socket bağlı değil');
       return;
     }
-    this.socket.emit('room:leave', { roomId });
+    this.socket.emit('room:leave');
   }
 
   listRooms(): void {
@@ -220,7 +229,7 @@ class VoiceChatService {
       console.error('Socket bağlı değil');
       return;
     }
-    this.socket.emit('room:close', { roomId });
+    this.socket.emit('room:close', { roomId, deviceId: this.deviceId });
   }
 
   setMuted(roomId: string, isMuted: boolean): void {
@@ -228,7 +237,7 @@ class VoiceChatService {
       console.error('Socket bağlı değil');
       return;
     }
-    this.socket.emit('participant:mute', { roomId, isMuted });
+    this.socket.emit('participant:mute', { deviceId: this.deviceId, isMuted });
   }
 }
 

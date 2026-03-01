@@ -4,6 +4,8 @@ import chaptersRouter from './chapters';
 import categoriesRouter from './categories';
 import deviceRouter from './device';
 import adminRouter from './admin';
+import submitBookRouter from './submitBook';
+import uploadRouter from './upload';
 
 const router = Router();
 
@@ -16,5 +18,7 @@ router.use('/chapters', chaptersRouter);
 router.use('/categories', categoriesRouter);
 router.use('/device', deviceRouter);
 router.use('/admin', adminRouter);
+router.use('/submit-book', submitBookRouter);
+router.use('/upload', uploadRouter);
 
 export default router;

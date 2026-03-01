@@ -3,6 +3,7 @@ import * as bookService from '../services/bookService';
 import * as chapterService from '../services/chapterService';
 import * as categoryService from '../services/categoryService';
 import * as deviceService from '../services/deviceService';
+import * as submissionService from '../services/submissionService';
 import { AppError } from '../middleware/errorHandler';
 import { Book } from '../types';
 
@@ -112,6 +113,40 @@ export async function listUsers(req: Request, res: Response, next: NextFunction)
         totalPages: Math.ceil(total / limitNum),
       },
     });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listSubmissions(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { status } = req.query as { status?: 'pending' | 'approved' | 'rejected' };
+    const submissions = await submissionService.getAllSubmissions(status);
+    res.json({ success: true, data: submissions });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function approveSubmission(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    const { note } = req.body as { note?: string };
+    const submission = await submissionService.updateSubmissionStatus(id, 'approved', note);
+    if (!submission) throw new AppError(404, 'Submission not found');
+    res.json({ success: true, data: submission, message: 'Kitap onaylandı' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function rejectSubmission(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    const { note } = req.body as { note?: string };
+    const submission = await submissionService.updateSubmissionStatus(id, 'rejected', note);
+    if (!submission) throw new AppError(404, 'Submission not found');
+    res.json({ success: true, data: submission, message: 'Kitap reddedildi' });
   } catch (err) {
     next(err);
   }

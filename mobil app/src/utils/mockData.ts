@@ -13,6 +13,20 @@ export const mockCategories: Category[] = [
   { id: '10', name: 'Kişisel Gelişim' },
 ];
 
+// Gerçek çalışan ses dosyaları (test amaçlı)
+const AUDIO_URLS = {
+  song1: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+  song2: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+  song3: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+  song4: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+  song5: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+  song6: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+  song7: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
+  song8: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+  song9: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3',
+  song10: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3',
+};
+
 export const mockBooks: Book[] = [
   {
     id: '1',
@@ -25,8 +39,9 @@ export const mockBooks: Book[] = [
     category: 'Çocuk Klasikleri',
     description: 'Küçük Prens, Antoine de Saint-Exupéry\'nin en ünlü eseridir. Bir çocuğun gözünden büyüklerin dünyasını anlatan bu masal, evrensel bir klasik haline gelmiştir.',
     chapters: [
-      { id: '1-1', title: 'Bölüm 1', duration: '15dk', audioUrl: 'https://example.com/audio1.mp3' },
-      { id: '1-2', title: 'Bölüm 2', duration: '18dk', audioUrl: 'https://example.com/audio2.mp3' },
+      { id: '1-1', title: 'Bölüm 1: Çölde Karşılaşma', duration: '12dk', audioUrl: AUDIO_URLS.song1 },
+      { id: '1-2', title: 'Bölüm 2: Küçük Gezegen', duration: '15dk', audioUrl: AUDIO_URLS.song2 },
+      { id: '1-3', title: 'Bölüm 3: Gül ve Tilki', duration: '18dk', audioUrl: AUDIO_URLS.song3 },
     ],
     isDownloaded: true,
     progress: 45,
@@ -43,7 +58,9 @@ export const mockBooks: Book[] = [
     category: 'Bilim Kurgu',
     description: 'George Orwell\'in distopya klasiklerinden biri olan 1984, totaliter bir toplumda yaşamanın korkunçluğunu anlatır.',
     chapters: [
-      { id: '2-1', title: 'Bölüm 1', duration: '25dk', audioUrl: 'https://example.com/audio3.mp3' },
+      { id: '2-1', title: 'Bölüm 1: Büyük Birader', duration: '25dk', audioUrl: AUDIO_URLS.song4 },
+      { id: '2-2', title: 'Bölüm 2: Hakikat Bakanlığı', duration: '28dk', audioUrl: AUDIO_URLS.song5 },
+      { id: '2-3', title: 'Bölüm 3: Winston\'ın Günlüğü', duration: '22dk', audioUrl: AUDIO_URLS.song6 },
     ],
     isDownloaded: false,
     downloadProgress: 15,
@@ -58,7 +75,8 @@ export const mockBooks: Book[] = [
     rating: 4.8,
     category: 'Bilim Kurgu',
     chapters: [
-      { id: '3-1', title: 'Bölüm 1', duration: '30dk', audioUrl: 'https://example.com/audio4.mp3' },
+      { id: '3-1', title: 'Bölüm 1: Arrakis', duration: '30dk', audioUrl: AUDIO_URLS.song7 },
+      { id: '3-2', title: 'Bölüm 2: Baharat', duration: '35dk', audioUrl: AUDIO_URLS.song8 },
     ],
   },
   {
@@ -71,7 +89,8 @@ export const mockBooks: Book[] = [
     rating: 4.9,
     category: 'Bilim',
     chapters: [
-      { id: '4-1', title: 'Bölüm 1', duration: '20dk', audioUrl: 'https://example.com/audio5.mp3' },
+      { id: '4-1', title: 'Bölüm 1: Bilişsel Devrim', duration: '20dk', audioUrl: AUDIO_URLS.song9 },
+      { id: '4-2', title: 'Bölüm 2: Tarım Devrimi', duration: '25dk', audioUrl: AUDIO_URLS.song10 },
     ],
   },
   {
@@ -83,22 +102,30 @@ export const mockBooks: Book[] = [
     duration: '24sa 45dk',
     rating: 4.7,
     category: 'Klasikler',
-    description: 'Fyodor Dostoyevsky\'nin başyapıtı Suç ve Ceza, yoksul bir öğrenci olan Raskolnikov\'un, olağanüstü insanların adi suçların ötesinde olduğuna dair teorisini test etmek amacıyla bir tefeciyi öldürmesini konu alır.',
+    description: 'Fyodor Dostoyevsky\'nin başyapıtı Suç ve Ceza, yoksul bir öğrenci olan Raskolnikov\'un hikayesini anlatır.',
     chapters: [
-      { id: '5-1', title: 'Bölüm 1', duration: '35dk', audioUrl: 'https://example.com/audio6.mp3' },
+      { id: '5-1', title: 'Bölüm 1: Fikir', duration: '35dk', audioUrl: AUDIO_URLS.song1 },
+      { id: '5-2', title: 'Bölüm 2: Cinayet', duration: '40dk', audioUrl: AUDIO_URLS.song2 },
+      { id: '5-3', title: 'Bölüm 3: Sonya', duration: '38dk', audioUrl: AUDIO_URLS.song3 },
     ],
     isDownloaded: true,
     progress: 78,
   },
   {
     id: '6',
-    title: 'Simyacı',
-    author: 'Paulo Coelho',
+    title: 'Dönüşüm',
+    author: 'Franz Kafka',
     narrator: 'Zeynep Özkan',
     coverImage: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400',
-    duration: '4sa 12dk',
+    duration: '2sa 12dk',
     rating: 4.8,
-    category: 'Roman',
+    category: 'Klasikler',
+    description: 'Gregor Samsa bir sabah uyandığında kendini dev bir böceğe dönüşmüş bulur.',
+    chapters: [
+      { id: '6-1', title: 'Bölüm 1: Dönüşüm', duration: '45dk', audioUrl: AUDIO_URLS.song4 },
+      { id: '6-2', title: 'Bölüm 2: Aile', duration: '40dk', audioUrl: AUDIO_URLS.song5 },
+      { id: '6-3', title: 'Bölüm 3: Son', duration: '35dk', audioUrl: AUDIO_URLS.song6 },
+    ],
     isDownloaded: true,
     isCompleted: true,
   },
@@ -112,10 +139,10 @@ export const mockBooks: Book[] = [
     rating: 4.9,
     category: 'Roman',
     chapters: [
-      { id: '7-1', title: 'Bölüm 1', duration: '20dk', audioUrl: 'https://example.com/audio7.mp3' },
-      { id: '7-2', title: 'Bölüm 2', duration: '22dk', audioUrl: 'https://example.com/audio8.mp3' },
-      { id: '7-3', title: 'Bölüm 3', duration: '25dk', audioUrl: 'https://example.com/audio9.mp3' },
-      { id: '7-4', title: 'Bölüm 4: Sırça Köşk', duration: '28dk', audioUrl: 'https://example.com/audio10.mp3' },
+      { id: '7-1', title: 'Bölüm 1', duration: '20dk', audioUrl: AUDIO_URLS.song7 },
+      { id: '7-2', title: 'Bölüm 2', duration: '22dk', audioUrl: AUDIO_URLS.song8 },
+      { id: '7-3', title: 'Bölüm 3', duration: '25dk', audioUrl: AUDIO_URLS.song9 },
+      { id: '7-4', title: 'Bölüm 4: Sırça Köşk', duration: '28dk', audioUrl: AUDIO_URLS.song10 },
     ],
     progress: 58,
   },
@@ -128,6 +155,10 @@ export const mockBooks: Book[] = [
     duration: '5sa 24dk',
     rating: 4.9,
     category: 'Roman',
+    chapters: [
+      { id: '8-1', title: 'Bölüm 1: Berlin', duration: '30dk', audioUrl: AUDIO_URLS.song1 },
+      { id: '8-2', title: 'Bölüm 2: Maria Puder', duration: '35dk', audioUrl: AUDIO_URLS.song2 },
+    ],
   },
   {
     id: '9',
@@ -138,6 +169,10 @@ export const mockBooks: Book[] = [
     duration: '34sa 12dk',
     rating: 5.0,
     category: 'Tarih',
+    chapters: [
+      { id: '9-1', title: 'Giriş', duration: '45dk', audioUrl: AUDIO_URLS.song3 },
+      { id: '9-2', title: 'Bölüm 1: Samsun\'a Çıkış', duration: '50dk', audioUrl: AUDIO_URLS.song4 },
+    ],
   },
   {
     id: '10',
@@ -148,17 +183,21 @@ export const mockBooks: Book[] = [
     duration: '9sa 33dk',
     rating: 4.9,
     category: 'Fantastik',
+    chapters: [
+      { id: '10-1', title: 'Bölüm 1: Hayatta Kalan Çocuk', duration: '25dk', audioUrl: AUDIO_URLS.song5 },
+      { id: '10-2', title: 'Bölüm 2: Kaybolan Cam', duration: '20dk', audioUrl: AUDIO_URLS.song6 },
+      { id: '10-3', title: 'Bölüm 3: Bilinmeyen Mektuplar', duration: '22dk', audioUrl: AUDIO_URLS.song7 },
+    ],
     isDownloaded: true,
     progress: 78,
   },
 ];
 
-export const featuredBook: Book = mockBooks[0]; // Küçük Prens
+export const featuredBook: Book = mockBooks[0];
 
 export const popularBooks: Book[] = [
-  mockBooks[1], // 1984
-  mockBooks[2], // Dune
-  mockBooks[3], // Sapiens
-  mockBooks[4], // Suç ve Ceza
+  mockBooks[1],
+  mockBooks[2],
+  mockBooks[3],
+  mockBooks[4],
 ];
-

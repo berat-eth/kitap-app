@@ -149,8 +149,9 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
 
       startPositionUpdates();
     } catch (error) {
-      console.error('Error playing audio:', error);
-      // Fallback to mock mode on error
+      // Fallback to mock mode on error (silently)
+      console.log('Audio playback failed, using mock mode');
+      isMockModeRef.current = true;
       const chapterToPlay = chapter || book.chapters?.[0];
       if (chapterToPlay) {
         setPlayerState(prev => ({

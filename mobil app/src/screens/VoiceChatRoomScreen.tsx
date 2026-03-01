@@ -14,12 +14,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { useVoiceChat } from '../context/VoiceChatContext';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { typography } from '../theme/typography';
 import { spacing, borderRadius } from '../theme/spacing';
 import Header from '../components/Header';
 
+const MINI_PLAYER_HEIGHT = 60;
+
 const VoiceChatRoomScreen = () => {
   const { theme } = useTheme();
+  const { playerState } = useAudioPlayer();
+  const hasActivePlayer = playerState.currentBook && playerState.currentChapter;
   const {
     isConnected,
     isConnecting,
@@ -138,7 +143,10 @@ const VoiceChatRoomScreen = () => {
       />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          hasActivePlayer && { paddingBottom: spacing['4xl'] + MINI_PLAYER_HEIGHT }
+        ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

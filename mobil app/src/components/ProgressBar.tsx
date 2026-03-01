@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, PanResponder, Animated } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { borderRadius } from '../theme/spacing';
 
 interface ProgressBarProps {
-  progress: number; // 0-100
+  progress: number;
   height?: number;
   showThumb?: boolean;
   onSeek?: (progress: number) => void;
@@ -13,81 +12,125 @@ interface ProgressBarProps {
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   progress,
-  height = 4,
+  height = 6,
   showThumb = false,
   onSeek,
   disabled = false,
 }) => {
   const { theme } = useTheme();
-  const clampedProgress = Math.max(0, Math.min(100, progress));
-  const [containerWidth, setContainerWidth] = useState(0);
+  const isDark = theme.mode === 'dark';
+  const accentColor = '#137fec';
 
-  const handleLayout = (event: any) => {
-    const { width } = event.nativeEvent.layout;
-    setContainerWidth(width);
+  const clamp = (v: number) => Math.max(0, Math.min(100, v));
+  const clamped = clamp(progress);
+
+  const [dragging, setDragging] = useState(false);
+  const [dragProgress, setDragProgress] = useState(clamped);
+  const barWidth = useRef(0);
+  const thumbScale = useRef(new Animated.Value(1)).current;
+
+  const displayed = dragging ? dragProgress : clamped;
+
+  const calcProgress = (x: number) => {
+    if (barWidth.current === 0) return displayed;
+    return clamp((x / barWidth.current) * 100);
   };
 
-  const handlePress = (event: any) => {
-    if (disabled || !onSeek || containerWidth === 0) return;
-    const { locationX } = event.nativeEvent;
-    const newProgress = (locationX / containerWidth) * 100;
-    onSeek(Math.max(0, Math.min(100, newProgress)));
-  };
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => !disabled && !!onSeek,
+      onMoveShouldSetPanResponder: () => !disabled && !!onSeek,
+      onPanResponderGrant: (e) => {
+        setDragging(true);
+        Animated.spring(thumbScale, { toValue: 1.3, useNativeDriver: true, friction: 6 }).start();
+        const p = calcProgress(e.nativeEvent.locationX);
+        setDragProgress(p);
+      },
+      onPanResponderMove: (e) => {
+        const p = calcProgress(e.nativeEvent.locationX);
+        setDragProgress(p);
+      },
+      onPanResponderRelease: (e) => {
+        const p = calcProgress(e.nativeEvent.locationX);
+        setDragging(false);
+        Animated.spring(thumbScale, { toValue: 1, useNativeDriver: true, friction: 6 }).start();
+        onSeek?.(p);
+      },
+      onPanResponderTerminate: () => {
+        setDragging(false);
+        Animated.spring(thumbScale, { toValue: 1, useNativeDriver: true, friction: 6 }).start();
+      },
+    }),
+  ).current;
+
+  const trackColor = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)';
+  const thumbSize = 22;
 
   return (
-    <TouchableOpacity
-      style={[styles.container, { height, backgroundColor: theme.colors.border }]}
-      onPress={handlePress}
-      onLayout={handleLayout}
-      disabled={disabled || !onSeek}
-      activeOpacity={1}
+    <View
+      style={[styles.hitArea, { paddingVertical: showThumb ? 14 : 6 }]}
+      onLayout={(e) => { barWidth.current = e.nativeEvent.layout.width; }}
+      {...panResponder.panHandlers}
     >
-      <View
-        style={[
-          styles.progress,
-          {
-            width: `${clampedProgress}%`,
-            backgroundColor: theme.colors.primary,
-            height,
-          },
-        ]}
-      />
-      {showThumb && (
+      <View style={[styles.track, { height, backgroundColor: trackColor, borderRadius: height }]}>
+        {/* Dolgu */}
         <View
           style={[
-            styles.thumb,
+            styles.fill,
             {
-              left: `${clampedProgress}%`,
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.primary,
+              width: `${displayed}%`,
+              height,
+              backgroundColor: accentColor,
+              borderRadius: height,
             },
           ]}
         />
-      )}
-    </TouchableOpacity>
+
+        {/* Thumb */}
+        {showThumb && (
+          <Animated.View
+            style={[
+              styles.thumb,
+              {
+                left: `${displayed}%`,
+                width: thumbSize,
+                height: thumbSize,
+                borderRadius: thumbSize / 2,
+                marginLeft: -(thumbSize / 2),
+                top: -(thumbSize / 2 - height / 2),
+                backgroundColor: '#fff',
+                borderColor: accentColor,
+                borderWidth: 3,
+                shadowColor: accentColor,
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: dragging ? 0.5 : 0.35,
+                shadowRadius: dragging ? 10 : 6,
+                elevation: dragging ? 10 : 6,
+                transform: [{ scale: thumbScale }],
+              },
+            ]}
+          />
+        )}
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  hitArea: {
     width: '100%',
-    borderRadius: borderRadius.full,
-    overflow: 'hidden',
+    justifyContent: 'center',
+  },
+  track: {
+    width: '100%',
+    overflow: 'visible',
     position: 'relative',
+    justifyContent: 'center',
   },
-  progress: {
-    borderRadius: borderRadius.full,
-  },
+  fill: {},
   thumb: {
     position: 'absolute',
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2,
-    top: -12,
-    marginLeft: -14,
   },
 });
 
 export default ProgressBar;
-

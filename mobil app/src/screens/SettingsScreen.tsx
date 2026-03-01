@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { typography } from '../theme/typography';
 import { spacing, borderRadius } from '../theme/spacing';
-import { MainTabParamList } from '../navigation/types';
-import { useAudioPlayer } from '../context/AudioPlayerContext';
+import { RootStackParamList } from '../navigation/types';
 
-type SettingsScreenNavigationProp = BottomTabNavigationProp<MainTabParamList, 'Settings'>;
+const MINI_PLAYER_HEIGHT = 60;
+
+type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const SettingsScreen = () => {
   const { theme, toggleTheme, themeMode, highContrast, toggleHighContrast } = useTheme();
@@ -18,6 +20,8 @@ const SettingsScreen = () => {
   const { playerState, setPlaybackRate } = useAudioPlayer();
   const [playbackSpeed, setPlaybackSpeed] = useState(playerState.playbackRate);
   const [voiceTone, setVoiceTone] = useState<'deep' | 'clear' | 'soft'>('clear');
+  
+  const hasActivePlayer = playerState.currentBook && playerState.currentChapter;
 
   const handleSpeedChange = (value: number) => {
     setPlaybackSpeed(value);
@@ -25,9 +29,12 @@ const SettingsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          hasActivePlayer && { paddingBottom: spacing['4xl'] + MINI_PLAYER_HEIGHT }
+        ]}
         showsVerticalScrollIndicator={false}
       >
       <View style={styles.section}>
@@ -181,6 +188,31 @@ const SettingsScreen = () => {
             />
           </View>
         </View>
+      </View>
+
+      <View style={styles.divider} />
+
+      {/* Submit Book Section */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>İçerik Oluşturucu</Text>
+        
+        <TouchableOpacity
+          style={[styles.submitBookCard, { backgroundColor: theme.colors.primary }]}
+          onPress={() => navigation.navigate('SubmitBook')}
+        >
+          <View style={styles.submitBookContent}>
+            <View style={styles.submitBookIcon}>
+              <Ionicons name="book-outline" size={32} color="#fff" />
+            </View>
+            <View style={styles.submitBookInfo}>
+              <Text style={styles.submitBookTitle}>Kitap Gönder</Text>
+              <Text style={styles.submitBookDescription}>
+                Kendi yazdığınız veya seslendirdiğiniz kitapları paylaşın
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#fff" />
+          </View>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.divider} />
@@ -363,6 +395,42 @@ const styles = StyleSheet.create({
     backgroundColor: '#e5e7eb',
     marginVertical: spacing.xl,
     marginHorizontal: spacing.xl,
+  },
+  submitBookCard: {
+    borderRadius: borderRadius.xl,
+    padding: spacing.base,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  submitBookContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  submitBookIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: borderRadius.xl,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  submitBookInfo: {
+    flex: 1,
+  },
+  submitBookTitle: {
+    fontSize: typography.fontSize.lg,
+    fontFamily: typography.fontFamily.bold,
+    color: '#fff',
+    marginBottom: spacing.xs,
+  },
+  submitBookDescription: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.regular,
+    color: 'rgba(255,255,255,0.85)',
   },
   logoutButton: {
     flexDirection: 'row',
