@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import multer from 'multer';
+import multer, { FileFilterCallback } from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,12 +10,20 @@ const router = Router();
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'submissions');
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
+  destination: (
+    _req: Request,
+    _file: Express.Multer.File,
+    cb: (error: Error | null, destination: string) => void
+  ) => {
     const dir = path.join(UPLOAD_DIR, uuidv4());
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
-  filename: (_req, file, cb) => {
+  filename: (
+    _req: Request,
+    file: Express.Multer.File,
+    cb: (error: Error | null, filename: string) => void
+  ) => {
     const ext = path.extname(file.originalname) || '.bin';
     cb(null, `${Date.now()}${ext}`);
   },
@@ -24,7 +32,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
-  fileFilter: (_req, file, cb) => {
+  fileFilter: (_req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
     const allowedImages = ['image/jpeg', 'image/png', 'image/webp'];
     const allowedAudio = ['audio/mpeg', 'audio/mp3', 'audio/m4a', 'audio/wav', 'audio/x-wav'];
     const type = file.mimetype;
