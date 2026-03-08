@@ -38,8 +38,9 @@ export async function getBooks(query: BooksQuery): Promise<{ books: Book[]; tota
   }
 
   if (query.search) {
-    conditions.push('MATCH(b.title, b.author, b.description) AGAINST(? IN BOOLEAN MODE)');
-    params.push(`${query.search}*`);
+    const searchTerm = `%${query.search}%`;
+    conditions.push('(b.title LIKE ? OR b.author LIKE ? OR (b.description IS NOT NULL AND b.description LIKE ?))');
+    params.push(searchTerm, searchTerm, searchTerm);
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -73,12 +74,13 @@ export async function getPopularBooks(): Promise<Book[]> {
 }
 
 export async function searchBooks(q: string): Promise<Book[]> {
+  const term = `%${q}%`;
   const [rows] = await pool.execute<RowDataPacket[]>(
     `${BOOK_SELECT}
-     WHERE MATCH(b.title, b.author, b.description) AGAINST(? IN BOOLEAN MODE)
+     WHERE b.title LIKE ? OR b.author LIKE ? OR (b.description IS NOT NULL AND b.description LIKE ?)
      ORDER BY b.play_count DESC
      LIMIT 30`,
-    [`${q}*`],
+    [term, term, term],
   );
   return rows.map(mapBook);
 }

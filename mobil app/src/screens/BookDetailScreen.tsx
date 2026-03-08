@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -8,7 +8,8 @@ import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, borderRadius } from '../theme/spacing';
 import { RootStackParamList } from '../navigation/types';
-import { mockBooks } from '../utils/mockData';
+import { getBookById } from '../services/bookService';
+import { Book } from '../types';
 import { useAudioPlayer } from '../context/AudioPlayerContext';
 
 type BookDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BookDetail'>;
@@ -19,7 +20,22 @@ const BookDetailScreen = () => {
   const navigation = useNavigation<BookDetailScreenNavigationProp>();
   const { play } = useAudioPlayer();
   const { bookId } = route.params as { bookId: string };
-  const book = mockBooks.find((b) => b.id === bookId);
+  const [book, setBook] = useState<Book | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getBookById(bookId).then(setBook).finally(() => setLoading(false));
+  }, [bookId]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!book) {
     return (
@@ -278,6 +294,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     fontFamily: typography.fontFamily.bold,
     color: '#fff',
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

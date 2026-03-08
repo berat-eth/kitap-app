@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -9,7 +9,8 @@ import { typography } from '../theme/typography';
 import { spacing, borderRadius } from '../theme/spacing';
 import { RootStackParamList } from '../navigation/types';
 import ProgressBar from '../components/ProgressBar';
-import { mockBooks } from '../utils/mockData';
+import { getFavoriteBooks } from '../services/bookService';
+import { Book } from '../types';
 import { useAudioPlayer } from '../context/AudioPlayerContext';
 
 type OfflineScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Offline'>;
@@ -18,7 +19,11 @@ const OfflineScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation<OfflineScreenNavigationProp>();
   const { play, playerState } = useAudioPlayer();
-  const downloadedBooks = mockBooks.filter((b) => b.isDownloaded);
+  const [downloadedBooks, setDownloadedBooks] = useState<Book[]>([]);
+
+  useEffect(() => {
+    getFavoriteBooks().then(setDownloadedBooks).catch(() => setDownloadedBooks([]));
+  }, []);
 
   const storageUsed = 65; // percentage
   const totalStorage = 128; // GB
@@ -28,7 +33,7 @@ const OfflineScreen = () => {
     navigation.navigate('BookDetail', { bookId });
   };
 
-  const handlePlay = (book: typeof mockBooks[0]) => {
+  const handlePlay = (book: Book) => {
     play(book);
     navigation.navigate('AudioPlayer', { bookId: book.id });
   };

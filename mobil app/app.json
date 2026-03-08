@@ -21,7 +21,8 @@
         "backgroundColor": "#137fec"
       },
       "package": "com.seslikitap.app",
-      "versionCode": 1
+      "versionCode": 1,
+      "usesCleartextTraffic": true
     },
     "web": {},
     "extra": {

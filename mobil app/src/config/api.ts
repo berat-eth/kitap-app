@@ -1,14 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { apiLogger } from '../utils/logger';
 
 // API Configuration - Tüm ayarlar burada
 export const API_CONFIG = {
-  baseURL: __DEV__
-    ? (process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:3001/api')
-    : (process.env.EXPO_PUBLIC_API_URL_PROD ?? 'https://api.kitap.beratsimsek.com.tr/api'),
+  baseURL: process.env.EXPO_PUBLIC_API_URL ?? process.env.EXPO_PUBLIC_API_URL_PROD ?? 'https://api.kitap.beratsimsek.com.tr/api',
 
   apiKey: process.env.EXPO_PUBLIC_API_KEY ?? '',
 
-  timeout: 30000,
+  timeout: 60000,
 };
 
 // Device ID Storage Key
@@ -92,58 +91,100 @@ export const apiFetch = async (
   }
   
   const url = `${API_CONFIG.baseURL}${endpoint}`;
-  
+  const method = (options.method || 'GET').toUpperCase();
+
+  const logHeaders = { ...headers };
+  if (logHeaders['X-API-Key']) logHeaders['X-API-Key'] = '***';
+
+  const logMeta: Record<string, unknown> = { headers: logHeaders };
+  if (options.body && method !== 'GET') {
+    logMeta.body = typeof options.body === 'string' ? options.body : '[FormData]';
+  }
+  apiLogger.request(method, endpoint, logMeta);
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
-  
+  const startTime = Date.now();
+
   try {
     const response = await fetch(url, {
       ...options,
       headers,
       signal: controller.signal,
     });
-    
+
     clearTimeout(timeoutId);
+    const durationMs = Date.now() - startTime;
+    apiLogger.response(method, endpoint, response.status, durationMs);
+
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
+    const durationMs = Date.now() - startTime;
+    apiLogger.response(method, endpoint, 0, durationMs, { error: String(error) });
+    apiLogger.error('apiFetch', endpoint, error);
     throw error;
   }
 };
+
+// registerDevice eşzamanlı çağrıları engelle
+let registerDevicePromise: Promise<string | null> | null = null;
 
 // Cihaz kaydı yap
 export const registerDevice = async (
   deviceName?: string,
   platform?: string
 ): Promise<string | null> => {
-  try {
-    // Zaten kayıtlı mı kontrol et
-    const existingId = await getDeviceId();
-    if (existingId) {
-      return existingId;
-    }
-    
-    const response = await fetch(`${API_CONFIG.baseURL}${API_ENDPOINTS.DEVICE_REGISTER}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': API_CONFIG.apiKey,
-      },
-      body: JSON.stringify({ deviceName, platform }),
-    });
-    
-    const data = await response.json();
-    
-    if (data.success && data.data?.deviceId) {
-      await setDeviceId(data.data.deviceId);
-      return data.data.deviceId;
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Cihaz kaydı hatası:', error);
-    return null;
+  const existingId = await getDeviceId();
+  if (existingId) {
+    apiLogger.request('POST', API_ENDPOINTS.DEVICE_REGISTER, { cached: true, headers: { 'X-API-Key': '***' } });
+    return existingId;
   }
+
+  if (registerDevicePromise) {
+    return registerDevicePromise;
+  }
+
+  registerDevicePromise = (async () => {
+    try {
+      apiLogger.request('POST', API_ENDPOINTS.DEVICE_REGISTER, {
+        body: { deviceName, platform },
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': '***' },
+      });
+      const startTime = Date.now();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+
+      const response = await fetch(`${API_CONFIG.baseURL}${API_ENDPOINTS.DEVICE_REGISTER}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': API_CONFIG.apiKey,
+        },
+        body: JSON.stringify({ deviceName, platform }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      const data = await response.json();
+      const durationMs = Date.now() - startTime;
+      apiLogger.response('POST', API_ENDPOINTS.DEVICE_REGISTER, response.status, durationMs);
+
+      if (data.success && data.data?.id) {
+        const deviceId = data.data.id;
+        await setDeviceId(deviceId);
+        return deviceId;
+      }
+      return null;
+    } catch (error) {
+      apiLogger.error('registerDevice', 'Cihaz kaydı hatası', error);
+      return null;
+    } finally {
+      registerDevicePromise = null;
+    }
+  })();
+
+  return registerDevicePromise;
 };
 
 // Helper function to get full URL
@@ -154,6 +195,11 @@ export const getFullUrl = (endpoint: string): string => {
 // Dosya yükle (cover veya ses)
 export const uploadFile = async (uri: string, type: string, name: string): Promise<string> => {
   const deviceId = await getDeviceId();
+  apiLogger.request('POST', API_ENDPOINTS.UPLOAD, {
+    body: { type, name },
+    headers: { 'X-API-Key': '***', 'X-Device-ID': deviceId ? '***' : undefined },
+  });
+
   const formData = new FormData();
   formData.append('file', {
     uri,
@@ -166,6 +212,7 @@ export const uploadFile = async (uri: string, type: string, name: string): Promi
   };
   if (deviceId) headers['X-Device-ID'] = deviceId;
 
+  const startTime = Date.now();
   const response = await fetch(`${API_CONFIG.baseURL}${API_ENDPOINTS.UPLOAD}`, {
     method: 'POST',
     headers,
@@ -173,7 +220,11 @@ export const uploadFile = async (uri: string, type: string, name: string): Promi
   });
 
   const data = await response.json();
+  const durationMs = Date.now() - startTime;
+  apiLogger.response('POST', API_ENDPOINTS.UPLOAD, response.status, durationMs);
+
   if (!data.success || !data.data?.url) {
+    apiLogger.error('uploadFile', data.message || 'Dosya yüklenemedi');
     throw new Error(data.message || 'Dosya yüklenemedi');
   }
   return data.data.url;
@@ -189,6 +240,11 @@ export const submitBook = async (payload: {
   cover_image?: string;
   chapters: { title: string; order_num?: number; audio_url: string }[];
 }): Promise<{ id: string; status: string }> => {
+  apiLogger.request('POST', API_ENDPOINTS.SUBMIT_BOOK, {
+    body: { title: payload.title, author: payload.author, chapterCount: payload.chapters?.length },
+    headers: { 'Content-Type': 'application/json', 'X-API-Key': '***' },
+  });
+
   const response = await apiFetch(API_ENDPOINTS.SUBMIT_BOOK, {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -196,6 +252,7 @@ export const submitBook = async (payload: {
 
   const data = await response.json();
   if (!data.success) {
+    apiLogger.error('submitBook', data.message || 'Kitap gönderilemedi');
     throw new Error(data.message || 'Kitap gönderilemedi');
   }
   return data.data;

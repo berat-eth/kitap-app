@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -11,7 +11,8 @@ import { spacing, borderRadius } from '../theme/spacing';
 import { RootStackParamList } from '../navigation/types';
 import BookCard from '../components/BookCard';
 import ProgressBar from '../components/ProgressBar';
-import { mockBooks } from '../utils/mockData';
+import { getFavoriteBooks } from '../services/bookService';
+import { Book } from '../types';
 
 const MINI_PLAYER_HEIGHT = 60;
 
@@ -23,22 +24,27 @@ const LibraryScreen = () => {
   const { play, playerState } = useAudioPlayer();
   const [activeTab, setActiveTab] = useState<'all' | 'downloaded'>('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  
+  const [myBooks, setMyBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const hasActivePlayer = playerState.currentBook && playerState.currentChapter;
 
-  const myBooks = mockBooks.filter((b) => b.isDownloaded || b.progress !== undefined);
-  const downloadedBooks = mockBooks.filter((b) => b.isDownloaded);
-  const displayedBooks = activeTab === 'all' ? myBooks : downloadedBooks;
+  useEffect(() => {
+    getFavoriteBooks()
+      .then(setMyBooks)
+      .catch(() => setMyBooks([]))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const recentlyPlayed = myBooks
-    .filter((b) => b.lastPlayedAt)
-    .sort((a, b) => (b.lastPlayedAt?.getTime() || 0) - (a.lastPlayedAt?.getTime() || 0))[0];
+  const downloadedBooks: Book[] = [];
+  const displayedBooks = activeTab === 'all' ? myBooks : downloadedBooks;
+  const recentlyPlayed = playerState.currentBook ?? myBooks[0];
 
   const handleBookPress = (bookId: string) => {
     navigation.navigate('BookDetail', { bookId });
   };
 
-  const handlePlay = (book: typeof mockBooks[0]) => {
+  const handlePlay = (book: Book) => {
     play(book);
     navigation.navigate('AudioPlayer', { bookId: book.id });
   };
@@ -111,7 +117,11 @@ const LibraryScreen = () => {
           hasActivePlayer && { paddingBottom: spacing['4xl'] + MINI_PLAYER_HEIGHT }
         ]}
       >
-        {recentlyPlayed && (
+        {loading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        ) : recentlyPlayed && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="time-outline" size={20} color={theme.colors.primary} />
@@ -135,11 +145,11 @@ const LibraryScreen = () => {
                         {recentlyPlayed.author}
                       </Text>
                     </View>
-                    {recentlyPlayed.isDownloaded && (
+                    {recentlyPlayed.isDownloaded === true && (
                       <Ionicons name="checkmark-circle" size={22} color={theme.colors.primary} />
                     )}
                   </View>
-                  {recentlyPlayed.progress !== undefined && (
+                  {recentlyPlayed.progress !== undefined && recentlyPlayed.progress > 0 && (
                     <View style={styles.recentProgress}>
                       <View style={styles.recentProgressLabels}>
                         <Text style={[styles.progressTime, { color: theme.colors.textSecondary }]}>
@@ -204,7 +214,11 @@ const LibraryScreen = () => {
               </TouchableOpacity>
             </View>
           </View>
-          {displayedBooks.map((book) => (
+          {displayedBooks.length === 0 ? (
+            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+              {activeTab === 'downloaded' ? 'İndirilen kitap yok' : 'Favori kitap ekleyin'}
+            </Text>
+          ) : displayedBooks.map((book) => (
             <BookCard
               key={book.id}
               book={book}
@@ -363,6 +377,15 @@ const styles = StyleSheet.create({
   viewModeButton: {
     padding: spacing.xs,
     borderRadius: borderRadius.base,
+  },
+  center: {
+    paddingVertical: spacing['4xl'],
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: typography.fontSize.base,
+    paddingVertical: spacing['4xl'],
+    textAlign: 'center',
   },
 });
 

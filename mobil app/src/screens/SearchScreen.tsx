@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -12,7 +12,8 @@ import { RootStackParamList } from '../navigation/types';
 import SearchBar from '../components/SearchBar';
 import CategoryFilter from '../components/CategoryFilter';
 import BookCard from '../components/BookCard';
-import { mockBooks, mockCategories } from '../utils/mockData';
+import { searchBooks, getCategories, getBooks } from '../services/bookService';
+import { Book, Category } from '../types';
 
 const MINI_PLAYER_HEIGHT = 60;
 
@@ -23,26 +24,48 @@ const SearchScreen = () => {
   const navigation = useNavigation<SearchScreenNavigationProp>();
   const { play, playerState } = useAudioPlayer();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('1');
-  const [recentSearches] = useState(['Suç ve Ceza', 'Stefan Zweig', 'Harry Potter Sesli Betimleme']);
-  
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [recentSearches] = useState<string[]>([]);
+
   const hasActivePlayer = playerState.currentBook && playerState.currentChapter;
 
-  const filteredBooks = mockBooks.filter((book) => {
-    if (searchQuery) {
-      return (
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  const loadBooks = useCallback(async () => {
+    setLoading(true);
+    try {
+      if (searchQuery.trim()) {
+        const results = await searchBooks(searchQuery.trim());
+        setBooks(results);
+      } else {
+        const { books: b } = await getBooks({
+          limit: 20,
+          category: selectedCategory === 'all' ? undefined : selectedCategory,
+        });
+        setBooks(b);
+      }
+    } catch {
+      setBooks([]);
+    } finally {
+      setLoading(false);
     }
-    return true;
-  });
+  }, [searchQuery, selectedCategory]);
+
+  useEffect(() => {
+    getCategories().then((c) => setCategories(c.slice(1)));
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(loadBooks, searchQuery ? 400 : 0);
+    return () => clearTimeout(t);
+  }, [loadBooks, searchQuery]);
 
   const handleBookPress = (bookId: string) => {
     navigation.navigate('BookDetail', { bookId });
   };
 
-  const handlePlay = (book: typeof mockBooks[0]) => {
+  const handlePlay = (book: Book) => {
     play(book);
     navigation.navigate('AudioPlayer', { bookId: book.id });
   };
@@ -77,13 +100,13 @@ const SearchScreen = () => {
             Popüler Kategoriler
           </Text>
           <CategoryFilter
-            categories={mockCategories.slice(1)}
+            categories={categories}
             selectedCategoryId={selectedCategory}
             onSelectCategory={setSelectedCategory}
           />
         </View>
 
-        {searchQuery === '' && (
+        {searchQuery === '' && recentSearches.length > 0 && (
           <View style={styles.recentSearchesSection}>
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Son Aramalar</Text>
@@ -112,15 +135,25 @@ const SearchScreen = () => {
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             {searchQuery ? 'Arama Sonuçları' : 'Önerilen Kitaplar'}
           </Text>
-          {filteredBooks.slice(0, 3).map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              variant="horizontal"
-              onPress={() => handleBookPress(book.id)}
-              onPlay={() => handlePlay(book)}
-            />
-          ))}
+          {loading ? (
+            <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginVertical: spacing.lg }} />
+          ) : books.length === 0 ? (
+            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+              {searchQuery ? 'Sonuç bulunamadı' : 'Henüz kitap yok'}
+            </Text>
+          ) : (
+            <>
+              {books.map((book) => (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  variant="horizontal"
+                  onPress={() => handleBookPress(book.id)}
+                  onPlay={() => handlePlay(book)}
+                />
+              ))}
+            </>
+          )}
         </View>
       </ScrollView>
 
@@ -215,6 +248,10 @@ const styles = StyleSheet.create({
   resultsSection: {
     marginTop: spacing.base,
     paddingHorizontal: spacing.base,
+  },
+  emptyText: {
+    fontSize: typography.fontSize.base,
+    paddingVertical: spacing.lg,
   },
   fab: {
     position: 'absolute',

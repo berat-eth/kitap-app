@@ -10,6 +10,7 @@ import {
   Dimensions,
   ScrollView,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -21,7 +22,8 @@ import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { typography } from '../theme/typography';
 import { spacing, borderRadius } from '../theme/spacing';
 import { RootStackParamList } from '../navigation/types';
-import { mockBooks } from '../utils/mockData';
+import { Book } from '../types';
+import { getBookById } from '../services/bookService';
 import SeekBar from '../components/ProgressBar';
 import AudioControls from '../components/AudioControls';
 
@@ -53,7 +55,13 @@ const AudioPlayerScreen = () => {
   } = useAudioPlayer();
 
   const { bookId } = route.params as { bookId: string };
-  const book = mockBooks.find((b) => b.id === bookId);
+  const [book, setBook] = useState<Book | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    getBookById(bookId).then((b) => { setBook(b); setLoading(false); });
+  }, [bookId]);
 
   const [activeTab, setActiveTab] = useState<Tab>('player');
   const [sleepModalVisible, setSleepModalVisible] = useState(false);
@@ -77,10 +85,16 @@ const AudioPlayerScreen = () => {
     }
   }, [playerState.isPlaying]);
 
-  if (!book) {
+  if (loading || !book) {
     return (
       <SafeAreaView style={[styles.root, { backgroundColor: theme.colors.background }]}>
-        <Text style={{ color: theme.colors.text, padding: spacing.xl }}>Kitap bulunamadı</Text>
+        {loading ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        ) : (
+          <Text style={{ color: theme.colors.text, padding: spacing.xl }}>Kitap bulunamadı</Text>
+        )}
       </SafeAreaView>
     );
   }

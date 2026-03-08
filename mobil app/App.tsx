@@ -1,5 +1,6 @@
 import 'react-native-reanimated';
 import React, { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -9,16 +10,19 @@ import { VoiceChatProvider } from './src/context/VoiceChatContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import { registerDevice } from './src/config/api';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  // Fonts will be loaded when available
-  // For now, app will use system fonts
   const [fontsLoaded] = useFonts({});
 
   useEffect(() => {
-    // Hide splash screen after a short delay
+    const platformName = Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : 'Web';
+    registerDevice(`Sesli Kitap ${platformName}`, platformName);
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       SplashScreen.hideAsync();
     }, 1000);
