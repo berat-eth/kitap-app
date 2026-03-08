@@ -4,6 +4,7 @@ import app from './app';
 import { env } from './config/env';
 import { testConnection } from './config/database';
 import { registerVoiceChatHandlers } from './socket/voiceChat';
+import { logger, LOG_CONTEXT } from './utils/logger';
 
 const server = http.createServer(app);
 
@@ -21,13 +22,19 @@ async function bootstrap(): Promise<void> {
   await testConnection();
 
   server.listen(env.PORT, () => {
-    console.log(`[Server] Running on port ${env.PORT} (${env.NODE_ENV})`);
-    console.log(`[Server] REST API: http://localhost:${env.PORT}/api`);
-    console.log(`[Server] Health:   http://localhost:${env.PORT}/api/health`);
+    logger.info(LOG_CONTEXT.SERVER, 'Server started', {
+      port: env.PORT,
+      nodeEnv: env.NODE_ENV,
+      logLevel: env.LOG_LEVEL,
+    });
+    logger.info(LOG_CONTEXT.SERVER, 'Endpoints', {
+      api: `http://localhost:${env.PORT}/api`,
+      health: `http://localhost:${env.PORT}/api/health`,
+    });
   });
 }
 
 bootstrap().catch((err) => {
-  console.error('[Server] Failed to start:', err);
+  logger.errorEx(LOG_CONTEXT.SERVER, 'Failed to start', err);
   process.exit(1);
 });

@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import * as submissionService from '../services/submissionService';
 import { AppError } from '../middleware/errorHandler';
+import { logger, LOG_CONTEXT } from '../utils/logger';
 
 export async function submitBook(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const deviceId = req.headers['x-device-id'] as string;
     if (!deviceId) {
+      logger.warn(LOG_CONTEXT.SUBMIT, 'Submit missing X-Device-ID');
       throw new AppError(400, 'X-Device-ID header is required');
     }
 
@@ -49,6 +51,13 @@ export async function submitBook(req: Request, res: Response, next: NextFunction
       chapters,
     });
 
+    logger.info(LOG_CONTEXT.SUBMIT, 'Book submission created', {
+      submissionId: submission.id,
+      deviceId,
+      title: body.title.trim(),
+      chapterCount: chapters.length,
+    });
+
     res.status(201).json({
       success: true,
       message: 'Kitap başarıyla gönderildi. İnceleme sürecinden sonra yayınlanacaktır.',
@@ -71,6 +80,7 @@ export async function getMySubmissions(req: Request, res: Response, next: NextFu
     }
 
     const submissions = await submissionService.getSubmissionsByDevice(deviceId);
+    logger.debug(LOG_CONTEXT.SUBMIT, 'getMySubmissions', { deviceId, count: submissions.length });
     res.json({ success: true, data: submissions });
   } catch (err) {
     next(err);

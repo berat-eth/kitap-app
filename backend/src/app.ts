@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { env } from './config/env';
 import { requireApiKey } from './middleware/apiKey';
 import { rateLimiter } from './middleware/rateLimiter';
+import { requestLogger } from './middleware/requestLogger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import apiRouter from './routes/index';
 
@@ -39,6 +40,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use(rateLimiter);
+app.use(requestLogger);
 app.use(requireApiKey);
 
 app.use('/api', apiRouter);

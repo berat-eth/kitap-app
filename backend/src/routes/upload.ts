@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler';
+import { logger, LOG_CONTEXT } from '../utils/logger';
 
 const router = Router();
 
@@ -56,6 +57,12 @@ router.post(
       const pathUrl = `/uploads/${relativePath.replace(/\\/g, '/')}`;
       const baseUrl = `${req.protocol}://${req.get('host')}`;
       const fullUrl = `${baseUrl}${pathUrl}`;
+      logger.info(LOG_CONTEXT.UPLOAD, 'File uploaded', {
+        originalName: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+        path: pathUrl,
+      });
       res.json({ success: true, data: { url: fullUrl, path: pathUrl } });
     } catch (err) {
       next(err);

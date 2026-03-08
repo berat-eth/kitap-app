@@ -1,5 +1,6 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
+import { logger, LOG_CONTEXT } from '../utils/logger';
 
 interface RoomParticipant {
   deviceId: string;
@@ -46,6 +47,8 @@ export function registerVoiceChatHandlers(io: SocketIOServer): void {
     let currentRoomId: string | null = null;
     let currentDeviceId: string | null = null;
 
+    logger.info(LOG_CONTEXT.VOICE, 'Socket connected', { socketId: socket.id });
+
     socket.on(
       'room:create',
       (data: { name: string; topic?: string; deviceId: string; deviceName?: string; maxParticipants?: number }) => {
@@ -77,6 +80,12 @@ export function registerVoiceChatHandlers(io: SocketIOServer): void {
         socket.join(room.id);
         socket.emit('room:created', serializeRoom(room));
         io.emit('room:list', getRoomList());
+        logger.info(LOG_CONTEXT.VOICE, 'Room created', {
+          roomId: room.id,
+          name: room.name,
+          hostDeviceId: data.deviceId,
+          socketId: socket.id,
+        });
       },
     );
 
@@ -113,6 +122,11 @@ export function registerVoiceChatHandlers(io: SocketIOServer): void {
           joinedAt: participant.joinedAt,
         });
         io.emit('room:list', getRoomList());
+        logger.info(LOG_CONTEXT.VOICE, 'Participant joined room', {
+          roomId: room.id,
+          deviceId: participant.deviceId,
+          participantCount: room.participants.size,
+        });
       },
     );
 
@@ -132,6 +146,7 @@ export function registerVoiceChatHandlers(io: SocketIOServer): void {
       io.to(room.id).emit('room:closed', { roomId: room.id });
       rooms.delete(room.id);
       io.emit('room:list', getRoomList());
+      logger.info(LOG_CONTEXT.VOICE, 'Room closed', { roomId: room.id });
     });
 
     socket.on('room:list', () => {
@@ -153,6 +168,7 @@ export function registerVoiceChatHandlers(io: SocketIOServer): void {
     });
 
     socket.on('disconnect', () => {
+      logger.debug(LOG_CONTEXT.VOICE, 'Socket disconnected', { socketId: socket.id, currentRoomId, currentDeviceId });
       handleLeave(socket, io);
     });
 

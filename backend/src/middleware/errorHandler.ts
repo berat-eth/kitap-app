@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { env } from '../config/env';
+import { logger, LOG_CONTEXT } from '../utils/logger';
 
 export class AppError extends Error {
   constructor(
@@ -13,6 +14,10 @@ export class AppError extends Error {
 }
 
 export function notFoundHandler(req: Request, res: Response): void {
+  logger.warn(LOG_CONTEXT.ERROR, 'Route not found', {
+    method: req.method,
+    url: req.originalUrl,
+  });
   res.status(404).json({
     success: false,
     error: 'Not Found',
@@ -28,6 +33,12 @@ export function errorHandler(
   _next: NextFunction,
 ): void {
   if (err instanceof AppError) {
+    logger.warn(LOG_CONTEXT.ERROR, 'AppError', {
+      statusCode: err.statusCode,
+      message: err.message,
+      method: req.method,
+      url: req.originalUrl,
+    });
     res.status(err.statusCode).json({
       success: false,
       error: err.name,
@@ -36,7 +47,7 @@ export function errorHandler(
     return;
   }
 
-  console.error('[Unhandled Error]', err);
+  logger.errorEx(LOG_CONTEXT.ERROR, 'Unhandled error', err);
 
   res.status(500).json({
     success: false,

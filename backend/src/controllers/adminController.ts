@@ -6,6 +6,7 @@ import * as deviceService from '../services/deviceService';
 import * as submissionService from '../services/submissionService';
 import { getRoomList } from '../socket/voiceChat';
 import { AppError } from '../middleware/errorHandler';
+import { logger, LOG_CONTEXT } from '../utils/logger';
 import { Book } from '../types';
 
 export async function getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -144,6 +145,7 @@ export async function approveSubmission(req: Request, res: Response, next: NextF
     const { note } = req.body as { note?: string };
     const submission = await submissionService.updateSubmissionStatus(id, 'approved', note);
     if (!submission) throw new AppError(404, 'Submission not found');
+    logger.info(LOG_CONTEXT.ADMIN, 'Submission approved', { submissionId: id, title: submission.title });
     res.json({ success: true, data: submission, message: 'Kitap onaylandı' });
   } catch (err) {
     next(err);
@@ -156,6 +158,7 @@ export async function rejectSubmission(req: Request, res: Response, next: NextFu
     const { note } = req.body as { note?: string };
     const submission = await submissionService.updateSubmissionStatus(id, 'rejected', note);
     if (!submission) throw new AppError(404, 'Submission not found');
+    logger.info(LOG_CONTEXT.ADMIN, 'Submission rejected', { submissionId: id, title: submission.title, note });
     res.json({ success: true, data: submission, message: 'Kitap reddedildi' });
   } catch (err) {
     next(err);

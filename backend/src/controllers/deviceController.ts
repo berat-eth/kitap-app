@@ -2,11 +2,17 @@ import { Request, Response, NextFunction } from 'express';
 import * as deviceService from '../services/deviceService';
 import * as bookService from '../services/bookService';
 import { AppError } from '../middleware/errorHandler';
+import { logger, LOG_CONTEXT } from '../utils/logger';
 
 export async function registerDevice(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { deviceName, platform } = req.body as { deviceName?: string; platform?: string };
     const device = await deviceService.registerDevice({ deviceName, platform });
+    logger.info(LOG_CONTEXT.DEVICE, 'Device registered', {
+      deviceId: device.id,
+      deviceName: device.device_name,
+      platform: device.platform,
+    });
     res.status(201).json({ success: true, data: device });
   } catch (err) {
     next(err);
@@ -54,6 +60,7 @@ export async function saveProgress(req: Request, res: Response, next: NextFuncti
 
     await deviceService.touchDevice(deviceId);
     const progress = await deviceService.saveProgress({ deviceId, bookId, chapterId, currentTime, isCompleted });
+    logger.debug(LOG_CONTEXT.DEVICE, 'Progress saved', { deviceId, bookId, currentTime });
     res.json({ success: true, data: progress });
   } catch (err) {
     next(err);
