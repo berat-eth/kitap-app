@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # =============================================================
 # Sesli Kitap - Sunucu Kurulum Scripti (Linux)
-# kitap1.beratsimsek.com.tr  → Web sitesi
-# api1.beratsimsek.com.tr    → API
+# plaxsy.com      → Web sitesi
+# api.plaxsy.com  → API
 # Kullanım: bash setup-deploy.sh
 # =============================================================
 
@@ -25,7 +25,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 echo ""
 echo -e "${CYAN}============================================${NC}"
 echo -e "${CYAN}  Sesli Kitap - Sunucu Kurulum Scripti     ${NC}"
-echo -e "${CYAN}  kitap1 + api1.beratsimsek.com.tr         ${NC}"
+  echo -e "${CYAN}  plaxsy.com + api.plaxsy.com             ${NC}"
 echo -e "${CYAN}============================================${NC}"
 echo ""
 
@@ -55,9 +55,9 @@ success "Backend kopyalandı."
 info "CORS ayarları kontrol ediliyor..."
 ENV_FILE="$DEPLOY_DIR/backend/.env"
 if [ -f "$ENV_FILE" ]; then
-  if ! grep -q "kitap1.beratsimsek.com.tr" "$ENV_FILE"; then
-    warn "ALLOWED_ORIGINS'a https://kitap1.beratsimsek.com.tr ekleyin!"
-    echo "  Örnek: ALLOWED_ORIGINS=https://kitap1.beratsimsek.com.tr,https://api1.beratsimsek.com.tr"
+  if ! grep -q "plaxsy.com" "$ENV_FILE"; then
+    warn "ALLOWED_ORIGINS'a https://plaxsy.com ekleyin!"
+    echo "  Örnek: ALLOWED_ORIGINS=https://plaxsy.com,https://api.plaxsy.com"
   else
     success "CORS origins mevcut."
   fi
@@ -67,7 +67,7 @@ fi
 info "Web uygulaması kuruluyor..."
 cd "$PROJECT_ROOT/web app"
 # Production API URL (build zamanında gerekli)
-export NEXT_PUBLIC_API_URL="https://api1.beratsimsek.com.tr/api"
+export NEXT_PUBLIC_API_URL="https://api.plaxsy.com/api"
 [ -f .env.local ] && export $(grep -v '^#' .env.local | xargs) 2>/dev/null || true
 npm install
 npm run build
@@ -149,13 +149,13 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 echo -e "${GREEN}  Kurulum tamamlandı!                                          ${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-echo "  Web sitesi : https://kitap1.beratsimsek.com.tr"
-echo "  API        : https://api1.beratsimsek.com.tr"
+echo "  Web sitesi : https://plaxsy.com"
+echo "  API        : https://api.plaxsy.com"
 echo ""
 echo "  DNS kayıtları (A veya CNAME) sunucu IP'nize yönlendirilmeli."
 echo ""
 echo "  HTTPS için Let's Encrypt:"
-echo "    sudo certbot --nginx -d kitap1.beratsimsek.com.tr -d api1.beratsimsek.com.tr"
+echo "    sudo certbot --nginx -d plaxsy.com -d api.plaxsy.com"
 echo ""
 echo "  PM2 komutları:"
 echo "    pm2 status"

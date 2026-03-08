@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================
 # Sesli Kitap - SSL Kurulum Scripti (Let's Encrypt)
-# kitap1.beratsimsek.com.tr + api1.beratsimsek.com.tr
+# plaxsy.com + api.plaxsy.com
 # Kullanım: sudo bash ssl-setup.sh
 # =============================================================
 
@@ -23,8 +23,8 @@ if [ "$(id -u)" -ne 0 ]; then
   error "Bu script root olarak çalıştırılmalı: sudo bash ssl-setup.sh"
 fi
 
-DOMAIN_WEB="kitap1.beratsimsek.com.tr"
-DOMAIN_API="api1.beratsimsek.com.tr"
+DOMAIN_WEB="plaxsy.com"
+DOMAIN_API="api.plaxsy.com"
 
 echo ""
 echo -e "${CYAN}============================================${NC}"

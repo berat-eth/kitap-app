@@ -3,7 +3,7 @@ import { apiLogger } from '../utils/logger';
 
 // API Configuration - Tüm ayarlar burada
 export const API_CONFIG = {
-  baseURL: process.env.EXPO_PUBLIC_API_URL ?? process.env.EXPO_PUBLIC_API_URL_PROD ?? 'https://api.kitap.beratsimsek.com.tr/api',
+  baseURL: process.env.EXPO_PUBLIC_API_URL ?? process.env.EXPO_PUBLIC_API_URL_PROD ?? 'https://api.plaxsy.com/api',
 
   apiKey: process.env.EXPO_PUBLIC_API_KEY ?? '',
 

@@ -4,8 +4,8 @@
 
 | Domain | Servis | Port |
 |--------|--------|------|
-| kitap1.beratsimsek.com.tr | Web sitesi (Next.js) | 3000 |
-| api1.beratsimsek.com.tr | API (Express) | 3001 |
+| plaxsy.com | Web sitesi (Next.js) | 3000 |
+| api.plaxsy.com | API (Express) | 3001 |
 
 ## Hızlı Kurulum (Linux)
 
@@ -27,7 +27,7 @@ chmod +x deploy/setup-deploy.sh
 `backend/.env` dosyasında:
 
 ```
-ALLOWED_ORIGINS=https://kitap1.beratsimsek.com.tr,http://kitap1.beratsimsek.com.tr,https://api1.beratsimsek.com.tr,http://api1.beratsimsek.com.tr
+ALLOWED_ORIGINS=https://plaxsy.com,http://plaxsy.com,https://api.plaxsy.com,http://api.plaxsy.com
 ```
 
 ### 2. Nginx
@@ -53,10 +53,10 @@ sudo ./deploy/ssl-setup.sh
 sudo apt update && sudo apt install -y certbot python3-certbot-nginx
 
 # SSL sertifikası al (Nginx config otomatik güncellenir)
-sudo certbot --nginx -d kitap1.beratsimsek.com.tr -d api1.beratsimsek.com.tr --redirect
+sudo certbot --nginx -d plaxsy.com -d api.plaxsy.com --redirect
 
 # E-posta ile (yenileme bildirimi)
-sudo certbot --nginx -d kitap1.beratsimsek.com.tr -d api1.beratsimsek.com.tr -m email@example.com --agree-tos --redirect
+sudo certbot --nginx -d plaxsy.com -d api.plaxsy.com -m email@example.com --agree-tos --redirect
 ```
 
 **Ön koşullar:** DNS kayıtları sunucuya yönlendirilmiş olmalı, port 80 dışarıdan erişilebilir olmalı.
@@ -64,8 +64,8 @@ sudo certbot --nginx -d kitap1.beratsimsek.com.tr -d api1.beratsimsek.com.tr -m 
 ### 4. DNS
 
 A veya CNAME kayıtları sunucu IP'nize yönlendirilmeli:
-- kitap1.beratsimsek.com.tr → Sunucu IP
-- api1.beratsimsek.com.tr → Sunucu IP
+- plaxsy.com → Sunucu IP
+- api.plaxsy.com → Sunucu IP
 
 ## Dizin Yapısı (Kurulum Sonrası)
 

@@ -77,7 +77,7 @@ if [ ! -f ".env" ]; then
   echo "    DB_USER          → MySQL kullanıcı adı"
   echo "    DB_PASSWORD      → MySQL şifresi"
   echo "    DB_NAME          → Veritabanı adı"
-  echo "    ALLOWED_ORIGINS  → CORS (örn: https://kitap1.beratsimsek.com.tr,https://api1.beratsimsek.com.tr)"
+  echo "    ALLOWED_ORIGINS  → CORS (örn: https://plaxsy.com,https://api.plaxsy.com)"
   echo ""
   echo "  Örnek API key üretmek için:"
   echo "    openssl rand -hex 32"

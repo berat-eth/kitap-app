@@ -3,6 +3,10 @@ import { env } from '../config/env';
 import { logger, LOG_CONTEXT } from '../utils/logger';
 
 export function requireApiKey(req: Request, res: Response, next: NextFunction): void {
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
   const key = req.headers['x-api-key'];
 
   if (!key || key !== env.API_KEY) {

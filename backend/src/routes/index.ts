@@ -10,7 +10,16 @@ import uploadRouter from './upload';
 const router = Router();
 
 router.get('/health', (req, res) => {
-  res.json({ success: true, message: 'API is running', timestamp: new Date().toISOString() });
+  const forwarded = req.headers['x-forwarded-for'];
+  const clientIp = forwarded
+    ? (typeof forwarded === 'string' ? forwarded : forwarded[0]).split(',')[0].trim()
+    : req.ip || req.socket.remoteAddress || 'unknown';
+  res.json({
+    success: true,
+    message: 'API is running',
+    timestamp: new Date().toISOString(),
+    clientIp,
+  });
 });
 
 router.use('/books', booksRouter);

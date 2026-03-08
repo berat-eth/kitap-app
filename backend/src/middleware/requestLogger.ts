@@ -27,15 +27,25 @@ function truncateBody(body: unknown): string | undefined {
   }
 }
 
+function getClientIp(req: Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    const ips = (typeof forwarded === 'string' ? forwarded : forwarded[0]).split(',').map((s) => s.trim());
+    return ips[0] || req.ip || req.socket.remoteAddress || 'unknown';
+  }
+  return req.ip || req.socket.remoteAddress || 'unknown';
+}
+
 export function requestLogger(req: Request, res: Response, next: NextFunction): void {
   const start = Date.now();
-  const { method, originalUrl, ip } = req;
+  const { method, originalUrl } = req;
+  const clientIp = getClientIp(req);
   const deviceId = req.headers['x-device-id'] as string | undefined;
 
   const meta: Record<string, unknown> = {
+    clientIp,
     method,
     endpoint: originalUrl,
-    ip: ip || req.socket.remoteAddress,
     deviceId: deviceId || '-',
     headers: sanitizeHeaders(req.headers as Record<string, unknown>),
   };
@@ -44,13 +54,14 @@ export function requestLogger(req: Request, res: Response, next: NextFunction): 
     meta.body = truncateBody(req.body);
   }
 
-  logger.info(LOG_CONTEXT.HTTP, 'Request started', meta);
+  logger.info(LOG_CONTEXT.HTTP, `[BAĞLANTI] IP: ${clientIp} | ${method} ${originalUrl}`, meta);
 
   res.on('finish', () => {
     const duration = Date.now() - start;
     const { statusCode } = res;
 
     const meta: Record<string, unknown> = {
+      clientIp: getClientIp(req),
       method,
       endpoint: originalUrl,
       status: statusCode,
