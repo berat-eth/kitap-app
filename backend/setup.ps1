@@ -70,7 +70,7 @@ if (-not (Test-Path ".env")) {
     Write-Host "    DB_USER       → MySQL kullanıcı adı" -ForegroundColor White
     Write-Host "    DB_PASSWORD   → MySQL şifresi" -ForegroundColor White
     Write-Host "    DB_NAME       → Veritabanı adı" -ForegroundColor White
-    Write-Host "    ALLOWED_ORIGINS → CORS (örn: https://plaxsy.com,https://api.plaxsy.com)" -ForegroundColor White
+    Write-Host "    ALLOWED_ORIGINS → CORS (örn: https://kitap1.beratsimsek.com.tr)" -ForegroundColor White
     Write-Host ""
 
     $editNow = Read-Host "  .env dosyasını şimdi Notepad ile açmak ister misiniz? [E/h]"
