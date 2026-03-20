@@ -170,17 +170,35 @@ export const registerDevice = async (
 
       clearTimeout(timeoutId);
 
+      // Bazı durumlarda (proxy/redirect) content-type yanıltıcı olabilir.
+      // Bu yüzden önce text alıp güvenli JSON parse ediyoruz.
       const contentType = response.headers.get('content-type') || '';
-      let data: any = null;
-      if (contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        // Nginx/SSL redirect veya hata sayfaları JSON olmayan body döndürebilir.
-        const text = await response.text();
-        apiLogger.error('registerDevice.nonJsonResponse', {
+      const text = await response.text();
+      const trimmed = (text || '').trim();
+
+      if (!trimmed) {
+        apiLogger.error('registerDevice.emptyResponse', { status: response.status, contentType });
+        return null;
+      }
+
+      if (trimmed.startsWith('<')) {
+        apiLogger.error('registerDevice.htmlResponse', {
           status: response.status,
           contentType,
-          textSnippet: text?.slice(0, 200),
+          textSnippet: trimmed.slice(0, 200),
+        });
+        return null;
+      }
+
+      let data: any = null;
+      try {
+        data = JSON.parse(trimmed);
+      } catch (e) {
+        apiLogger.error('registerDevice.invalidJson', {
+          status: response.status,
+          contentType,
+          textSnippet: trimmed.slice(0, 200),
+          error: String(e),
         });
         return null;
       }
