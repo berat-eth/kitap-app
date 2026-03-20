@@ -5,7 +5,9 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node src/server.js"
+    "dev": "node src/server.js",
+    "seed": "node src/db/seed.js",
+    "seed:reset": "node src/db/seed.js --reset"
   },
   "license": "MIT",
   "dependencies": {
