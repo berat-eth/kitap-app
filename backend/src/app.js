@@ -17,6 +17,11 @@ const chaptersRoutes = require('./routes/chapters.routes');
 function createApp() {
   const app = express();
 
+  // Nginx proxy arkasında Express'e gerçek client IP'leri (X-Forwarded-For)
+  // doğru yansısın diye gerekli. Aksi halde express-rate-limit
+  // ERR_ERL_UNEXPECTED_X_FORWARDED_FOR hatası üretebilir.
+  app.set('trust proxy', 1);
+
   app.use(helmet());
   app.use(cors());
 

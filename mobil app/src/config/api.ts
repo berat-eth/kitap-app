@@ -3,7 +3,11 @@ import { apiLogger } from '../utils/logger';
 
 // API Configuration - Tüm ayarlar burada
 export const API_CONFIG = {
-  baseURL: process.env.EXPO_PUBLIC_API_URL ?? process.env.EXPO_PUBLIC_API_URL_PROD ?? 'https://api.kitap.beratsimsek.com.tr/api',
+  // 443 (HTTPS) şimdilik çalışmıyorsa 80 (HTTP) üzerinden istek atabilmek için fallback'i HTTP yaptık.
+  baseURL:
+    process.env.EXPO_PUBLIC_API_URL ??
+    process.env.EXPO_PUBLIC_API_URL_PROD ??
+    'http://api.wirbooks.com.tr/api',
 
   apiKey: process.env.EXPO_PUBLIC_API_KEY ?? '',
 
