@@ -120,6 +120,7 @@ rsync -av --delete \
 
 cd $DEPLOY_DIR/web
 npm install
+rm -rf .next
 npm run build
 
 # --- 5. Nginx + PM2 ---
