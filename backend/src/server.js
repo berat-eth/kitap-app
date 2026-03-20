@@ -100,6 +100,7 @@ async function start() {
     cors: {
       origin: '*',
     },
+    path: '/socket.io',
   });
 
   registerVoiceChatSocket(io, { pool, logger });

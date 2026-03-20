@@ -3,7 +3,16 @@ const util = require('util');
 
 function safeInspect(value, { maxLen = 2000 } = {}) {
   if (value == null) return String(value);
-  let str = util.inspect(value, {
+  // Winston bazen Symbol bazlı internal alanlar da meta içine koyabiliyor.
+  // Onları atıp sadece string key'li alanları basıyoruz.
+  let normalized = value;
+  if (typeof value === 'object') {
+    const onlyStringKeys = {};
+    for (const [k, v] of Object.entries(value)) onlyStringKeys[k] = v;
+    normalized = onlyStringKeys;
+  }
+
+  let str = util.inspect(normalized, {
     depth: 6,
     maxArrayLength: 50,
     breakLength: 120,
