@@ -50,6 +50,16 @@ function registerVoiceChatSocket(io, { pool, logger }) {
   const rooms = new Map(); // roomId -> room
   const socketState = new Map(); // socket.id -> { deviceId, currentRoomId }
 
+  function safePayload(obj, maxLen = 500) {
+    try {
+      const s = JSON.stringify(obj);
+      if (s.length <= maxLen) return obj;
+      return { ...obj, _truncated: true, _len: s.length };
+    } catch {
+      return { _unserializable: true };
+    }
+  }
+
   async function validateDevice(deviceId) {
     const bypass = String(process.env.VOICECHAT_BYPASS_DEVICE_AUTH || '').toLowerCase() === 'true';
     if (bypass) {
@@ -74,6 +84,12 @@ function registerVoiceChatSocket(io, { pool, logger }) {
   io.on('connection', async (socket) => {
     try {
       const deviceId = socket.handshake?.auth?.deviceId || socket.handshake?.headers?.['x-device-id'];
+      logger?.info?.('voiceChatSocket.handshake', {
+        socketId: socket.id,
+        deviceId: deviceId || null,
+        authHasDeviceId: Boolean(socket.handshake?.auth?.deviceId),
+        transport: socket.handshake?.query?.transport || null,
+      });
       const validated = await validateDevice(deviceId);
       if (!validated) {
         socket.emit('connect_error', { message: 'Invalid deviceId', code: 'EINVALID_DEVICE' });
@@ -94,11 +110,27 @@ function registerVoiceChatSocket(io, { pool, logger }) {
 
       const { deviceId, deviceName, name, topic, maxParticipants } = payload || {};
       const roomName = String(name || '').trim();
-      if (!roomName) return;
+      if (!roomName) {
+        logger?.warn?.('voiceChatSocket.room:create.invalidName', {
+          socketId: socket.id,
+          deviceId: st.deviceId,
+          payload: safePayload(payload),
+        });
+        return;
+      }
 
       // Only allow creator to be the host
       const hostDeviceId = st.deviceId || deviceId;
       const hostName = deviceName || 'Cihaz';
+
+      logger?.info?.('voiceChatSocket.room:create', {
+        socketId: socket.id,
+        deviceId: st.deviceId,
+        hostDeviceId,
+        name: roomName,
+        topic: topic ? String(topic).slice(0, 120) : undefined,
+        maxParticipants: Number.isFinite(Number(maxParticipants)) ? Number(maxParticipants) : 10,
+      });
 
       const room = createRoom({
         deviceId: hostDeviceId,
@@ -119,6 +151,12 @@ function registerVoiceChatSocket(io, { pool, logger }) {
     });
 
     socket.on('room:list', () => {
+      const st = socketState.get(socket.id);
+      logger?.info?.('voiceChatSocket.room:list', {
+        socketId: socket.id,
+        deviceId: st?.deviceId || null,
+        roomsCount: rooms.size,
+      });
       const list = Array.from(rooms.values()).map(serializeRoom);
       socket.emit('room:list', list);
     });
@@ -129,12 +167,35 @@ function registerVoiceChatSocket(io, { pool, logger }) {
 
       const { roomId, deviceId, deviceName } = payload || {};
       const room = rooms.get(roomId);
-      if (!room) return;
-      if (room.participants.length >= room.maxParticipants) return;
+      if (!room) {
+        logger?.warn?.('voiceChatSocket.room:join.notFound', {
+          socketId: socket.id,
+          deviceId: st.deviceId,
+          roomId,
+        });
+        return;
+      }
+      if (room.participants.length >= room.maxParticipants) {
+        logger?.warn?.('voiceChatSocket.room:join.full', {
+          socketId: socket.id,
+          deviceId: st.deviceId,
+          roomId,
+          participants: room.participants.length,
+          maxParticipants: room.maxParticipants,
+        });
+        return;
+      }
 
       // Prevent joining with mismatched deviceId
       const joinDeviceId = st.deviceId || deviceId;
       const joinName = deviceName || 'Cihaz';
+
+      logger?.info?.('voiceChatSocket.room:join', {
+        socketId: socket.id,
+        deviceId: st.deviceId,
+        roomId,
+        existingParticipant: Boolean(findParticipant(room, joinDeviceId)),
+      });
 
       const existing = findParticipant(room, joinDeviceId);
       if (existing) {
@@ -170,11 +231,17 @@ function registerVoiceChatSocket(io, { pool, logger }) {
       const roomId = st.currentRoomId;
       const room = rooms.get(roomId);
       if (!room) {
+        logger?.warn?.('voiceChatSocket.room:leave.roomMissing', {
+          socketId: socket.id,
+          deviceId: st.deviceId,
+          roomId,
+        });
         st.currentRoomId = null;
         return;
       }
 
       const deviceId = st.deviceId;
+      logger?.info?.('voiceChatSocket.room:leave', { socketId: socket.id, deviceId, roomId });
       removeParticipant(room, deviceId);
 
       st.currentRoomId = null;
@@ -204,6 +271,12 @@ function registerVoiceChatSocket(io, { pool, logger }) {
       const callerDeviceId = st.deviceId || deviceId;
 
       if (room.hostDeviceId !== callerDeviceId) return; // only host can close
+      logger?.warn?.('voiceChatSocket.room:close', {
+        socketId: socket.id,
+        hostDeviceId: room.hostDeviceId,
+        callerDeviceId,
+        roomId,
+      });
 
       rooms.delete(roomId);
       io.emit('room:closed', { roomId });
@@ -222,9 +295,22 @@ function registerVoiceChatSocket(io, { pool, logger }) {
       const targetDeviceId = st.deviceId || deviceId;
 
       const p = findParticipant(room, targetDeviceId);
-      if (!p) return;
+      if (!p) {
+        logger?.warn?.('voiceChatSocket.participant:mute.participantMissing', {
+          socketId: socket.id,
+          roomId,
+          targetDeviceId,
+        });
+        return;
+      }
       p.isMuted = Boolean(isMuted);
 
+      logger?.info?.('voiceChatSocket.participant:mute', {
+        socketId: socket.id,
+        roomId,
+        deviceId: targetDeviceId,
+        isMuted: p.isMuted,
+      });
       io.emit('participant:muted', { roomId, deviceId: targetDeviceId, isMuted: p.isMuted });
       io.emit('room:updated', serializeRoom(room));
     });
@@ -232,6 +318,12 @@ function registerVoiceChatSocket(io, { pool, logger }) {
     socket.on('disconnect', (reason) => {
       const st = socketState.get(socket.id);
       if (!st) return;
+      logger?.info?.('voiceChatSocket.disconnect', {
+        socketId: socket.id,
+        deviceId: st.deviceId,
+        currentRoomId: st.currentRoomId,
+        reason,
+      });
 
       if (st.currentRoomId) {
         const roomId = st.currentRoomId;
