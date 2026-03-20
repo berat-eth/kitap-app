@@ -16,7 +16,7 @@ DOMAIN_API="api.wirbooks.com.tr"
 DOMAIN_WEB="wirbooks.com.tr"
 
 # Proje kökü kontrolü
-if [ ! -d "$PROJECT_ROOT/sesli-kitap-backend" ] || [ ! -d "$PROJECT_ROOT/web app" ]; then
+if [ ! -d "$PROJECT_ROOT/backend" ] || [ ! -d "$PROJECT_ROOT/web app" ]; then
   echo "HATA: Proje dizini bulunamadı. deploy.sh proje kökünden çalıştırılmalı."
   echo "Örnek: cd /path/to/kitap-app && sudo bash deploy/deploy.sh"
   exit 1
@@ -83,14 +83,15 @@ echo "[3/6] Backend deploy ediliyor..."
 rsync -av --delete \
   --exclude 'node_modules' \
   --exclude '.env' \
+  --exclude 'uploads' \
   --exclude '.git' \
-  "$PROJECT_ROOT/sesli-kitap-backend/" "$DEPLOY_DIR/backend/"
+  "$PROJECT_ROOT/backend/" "$DEPLOY_DIR/backend/"
 
-if [ -f "$PROJECT_ROOT/sesli-kitap-backend/.env" ]; then
-  cp "$PROJECT_ROOT/sesli-kitap-backend/.env" "$DEPLOY_DIR/backend/.env"
+if [ -f "$PROJECT_ROOT/backend/.env" ]; then
+  cp "$PROJECT_ROOT/backend/.env" "$DEPLOY_DIR/backend/.env"
   echo "  .env kopyalandı"
 else
-  echo "  UYARI: sesli-kitap-backend/.env bulunamadı - manuel ekleyin"
+  echo "  UYARI: backend/.env bulunamadı - manuel ekleyin"
 fi
 
 cd $DEPLOY_DIR/backend
@@ -172,7 +173,7 @@ module.exports = {
     {
       name: 'wirbooks-api',
       cwd: '${DEPLOY_DIR}/backend',
-      script: 'src/index.js',
+      script: 'src/server.js',
       instances: 1,
       exec_mode: 'fork',
       env: { NODE_ENV: 'production' },
