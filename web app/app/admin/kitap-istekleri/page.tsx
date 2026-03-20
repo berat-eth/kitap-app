@@ -158,10 +158,6 @@ export default function AdminKitapIstekleriPage() {
               <span className="text-sm">Kitap İstekleri</span>
               {pendingCount > 0 && <span className="ml-auto bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">{pendingCount}</span>}
             </Link>
-            <Link href="/admin/sesli-sohbet" className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group font-medium">
-              <span className="material-symbols-outlined group-hover:text-primary transition-colors text-[22px]">groups</span>
-              <span className="text-sm">Sesli Sohbet</span>
-            </Link>
             <Link href="/admin/kullanicilar" className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group font-medium">
               <span className="material-symbols-outlined group-hover:text-primary transition-colors text-[22px]">people</span>
               <span className="text-sm">Kullanıcılar</span>
