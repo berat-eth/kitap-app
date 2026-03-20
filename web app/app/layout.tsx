@@ -4,7 +4,7 @@ import './globals.css';
 import ThemeProviderWrapper from '@/components/ThemeProviderWrapper';
 
 export const metadata: Metadata = {
-  title: 'AudioBook - İstediğin Zaman Dinle',
+  title: 'Wirbooks - İstediğin Zaman Dinle',
   description: 'Modern sesli kitap dinleme platformu',
 };
 

@@ -100,7 +100,7 @@ export default function KesfetPage() {
                 <div className="bg-primary/20 p-1.5 rounded-lg group-hover:bg-primary/30 transition-colors">
                   <span className="material-symbols-outlined text-2xl text-primary">graphic_eq</span>
                 </div>
-                <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">AudioBook</h2>
+                <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Wirbooks</h2>
               </Link>
               <div className="hidden lg:flex items-center gap-6">
                 <Link

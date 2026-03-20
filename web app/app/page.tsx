@@ -159,7 +159,7 @@ export default function HomePage() {
                 <div className="bg-primary/20 p-1.5 rounded-lg group-hover:bg-primary/30 transition-colors">
                   <span className="material-symbols-outlined text-2xl text-primary">graphic_eq</span>
                 </div>
-                <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">AudioBook</h2>
+                <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Wirbooks</h2>
               </Link>
               <div className="hidden lg:flex items-center gap-6">
                 <Link
@@ -550,7 +550,7 @@ export default function HomePage() {
                 Projeyi Destekleyin
               </h2>
               <p className="text-emerald-100 text-lg md:text-xl leading-relaxed">
-                AudioBook platformunu geliştirmeye devam edebilmemiz için bağışlarınız bizim için çok değerli. 
+                Wirbooks platformunu geliştirmeye devam edebilmemiz için bağışlarınız bizim için çok değerli. 
                 Her bağış, daha fazla kitap ve daha iyi bir deneyim anlamına geliyor.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
@@ -634,7 +634,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto pt-8 border-t border-slate-200 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-700 dark:text-secondary-text text-sm">© 2025 AudioBook Inc. Gelecek için Tasarlandı.</p>
+          <p className="text-slate-700 dark:text-secondary-text text-sm">© 2025 Wirbooks. Gelecek için Tasarlandı.</p>
           <div className="flex gap-6">
             <a className="text-slate-700 dark:text-secondary-text hover:text-slate-900 dark:hover:text-white" href="#">
               <span className="material-symbols-outlined">public</span>

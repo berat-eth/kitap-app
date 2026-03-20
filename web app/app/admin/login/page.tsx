@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
 
     // Mock authentication - gerçek uygulamada API'ye istek atılacak
     setTimeout(() => {
-      if (email === 'admin@audiobook.com' && password === 'admin123') {
+      if (email === 'admin@wirbooks.com.tr' && password === 'admin123') {
         // Login başarılı
         localStorage.setItem('admin_token', 'mock_admin_token');
         localStorage.setItem('admin_user', JSON.stringify({ email, name: 'Admin' }));
@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
               <div className="size-12 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                 <span className="material-symbols-outlined text-[48px]">graphic_eq</span>
               </div>
-              <h1 className="text-2xl font-bold text-white">AudioBook</h1>
+              <h1 className="text-2xl font-bold text-white">Wirbooks</h1>
             </Link>
             <h2 className="text-2xl font-bold text-white mb-2">Admin Paneli</h2>
             <p className="text-text-secondary text-sm">Yönetim paneline giriş yapın</p>
@@ -71,7 +71,7 @@ export default function AdminLoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full pl-12 pr-4 py-3 bg-surface-dark border border-border-dark rounded-xl text-white placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                  placeholder="admin@audiobook.com"
+                  placeholder="admin@wirbooks.com.tr"
                 />
               </div>
             </div>
@@ -118,7 +118,7 @@ export default function AdminLoginPage() {
           {/* Demo Credentials */}
           <div className="mt-6 p-4 rounded-xl bg-primary/10 border border-primary/20">
             <p className="text-xs text-text-secondary mb-2 font-semibold">Demo Giriş Bilgileri:</p>
-            <p className="text-xs text-white">E-posta: admin@audiobook.com</p>
+            <p className="text-xs text-white">E-posta: admin@wirbooks.com.tr</p>
             <p className="text-xs text-white">Şifre: admin123</p>
           </div>
 

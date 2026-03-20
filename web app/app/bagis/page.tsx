@@ -8,7 +8,7 @@ export default function DonationPage() {
   const [copied, setCopied] = useState(false);
   
   const iban = 'TR330006400000112345678901'; // Örnek IBAN - gerçek IBAN ile değiştirilmeli (boşluksuz)
-  const accountName = 'AudioBook Platform';
+  const accountName = 'Wirbooks Platform';
   const bankName = 'Türkiye İş Bankası';
 
   const copyToClipboard = async (text: string) => {
@@ -30,7 +30,7 @@ export default function DonationPage() {
             <div className="size-10 text-primary group-hover:scale-110 transition-transform">
               <span className="material-symbols-outlined text-[40px]">graphic_eq</span>
             </div>
-            <h1 className="text-xl font-bold">AudioBook</h1>
+            <h1 className="text-xl font-bold">Wirbooks</h1>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link href="/" className="text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors font-medium">
@@ -65,7 +65,7 @@ export default function DonationPage() {
               Projeyi Destekleyin
             </h1>
             <p className="text-emerald-100 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
-              AudioBook platformunu geliştirmeye devam edebilmemiz için bağışlarınız bizim için çok değerli. 
+              Wirbooks platformunu geliştirmeye devam edebilmemiz için bağışlarınız bizim için çok değerli. 
               Her bağış, daha fazla kitap ve daha iyi bir deneyim anlamına geliyor.
             </p>
           </div>
@@ -211,7 +211,7 @@ export default function DonationPage() {
                       </li>
                       <li className="flex items-start gap-3">
                         <span className="flex items-center justify-center size-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs flex-shrink-0 mt-0.5">3</span>
-                        <span>İşlem açıklamasına "AudioBook Bağış" yazabilirsiniz</span>
+                        <span>İşlem açıklamasına "Wirbooks Bağış" yazabilirsiniz</span>
                       </li>
                       <li className="flex items-start gap-3">
                         <span className="flex items-center justify-center size-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs flex-shrink-0 mt-0.5">4</span>

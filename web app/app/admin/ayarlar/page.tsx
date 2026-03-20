@@ -8,7 +8,7 @@ export default function AdminSettingsPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [settings, setSettings] = useState({
-    siteName: 'AudioBook',
+    siteName: 'Wirbooks',
     siteDescription: 'Modern sesli kitap dinleme platformu',
     maintenanceMode: false,
     allowRegistration: true,
@@ -312,7 +312,7 @@ export default function AdminSettingsPage() {
             <div className="flex items-center justify-end gap-4">
               <button
                 onClick={() => setSettings({
-                  siteName: 'AudioBook',
+                  siteName: 'Wirbooks',
                   siteDescription: 'Modern sesli kitap dinleme platformu',
                   maintenanceMode: false,
                   allowRegistration: true,

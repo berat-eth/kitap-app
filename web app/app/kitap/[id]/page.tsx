@@ -106,7 +106,7 @@ export default function BookDetailPage() {
               <span className="material-symbols-outlined text-[40px]">graphic_eq</span>
             </div>
             <h2 className="text-slate-900 dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] hidden sm:block bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-white/70 bg-clip-text text-transparent">
-              AudioBook
+              Wirbooks
             </h2>
           </Link>
           <nav className="hidden md:flex items-center gap-8">
