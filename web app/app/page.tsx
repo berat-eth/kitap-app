@@ -13,7 +13,7 @@ interface Category {
 }
 import Image from 'next/image';
 import Link from 'next/link';
-import ThemeToggle from '@/components/ThemeToggle';
+import PublicLayout from '@/components/layout/PublicLayout';
 
 declare global {
   interface Window {
@@ -149,62 +149,22 @@ export default function HomePage() {
   };
 
   return (
-    <>
-      {/* Header */}
-      <header className="fixed top-0 w-full z-50 transition-all duration-300">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="flex items-center justify-between rounded-2xl glass-header px-4 py-3">
-            <div className="flex items-center gap-8">
-              <Link href="/" className="flex items-center gap-2 cursor-pointer group">
-                <div className="bg-primary/20 p-1.5 rounded-lg group-hover:bg-primary/30 transition-colors">
-                  <span className="material-symbols-outlined text-2xl text-primary">graphic_eq</span>
-                </div>
-                <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Wirbooks</h2>
-              </Link>
-              <div className="hidden lg:flex items-center gap-6">
-                <Link
-                  href="/kesfet"
-                  className="text-sm font-medium text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white transition-colors"
-                >
-                  Keşfet
-                </Link>
-                <Link
-                  href="/kutuphane"
-                  className="text-sm font-medium text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white transition-colors"
-                >
-                  Kütüphane
-                </Link>
-                <a className="text-sm font-medium text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">
-                  Topluluk
-                </a>
-              </div>
-            </div>
-            <div className="flex flex-1 justify-end gap-4 items-center">
-              <ThemeToggle />
-              <Link
-                href="/bagis"
-                className="hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-all"
-              >
-                <span className="material-symbols-outlined text-[18px]">favorite</span>
-                <span>Bağış Yap</span>
-              </Link>
-              <form onSubmit={handleSearch} className="hidden md:flex relative group w-full max-w-xs">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500 dark:text-white/40">
-                  <span className="material-symbols-outlined text-[20px]">search</span>
-                </div>
-                <input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full rounded-xl border border-slate-300 dark:border-white/10 bg-white/80 dark:bg-white/5 backdrop-blur-md py-2 pl-10 pr-3 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-white/40 focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-white/10 focus:border-primary/50 transition-all sm:text-sm sm:leading-6"
-                  placeholder="Bir sonraki hikayeni bul..."
-                  type="text"
-                />
-              </form>
-            </div>
+    <PublicLayout
+      headerRight={
+        <form onSubmit={handleSearch} className="hidden md:flex relative group w-full max-w-xs">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500 dark:text-white/40">
+            <span className="material-symbols-outlined text-[20px]">search</span>
           </div>
-        </div>
-      </header>
-
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="block w-full rounded-xl border border-slate-300 dark:border-white/10 bg-white/80 dark:bg-white/5 backdrop-blur-md py-2 pl-10 pr-3 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-white/40 focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-white/10 focus:border-primary/50 transition-all sm:text-sm sm:leading-6"
+            placeholder="Bir sonraki hikayeni bul..."
+            type="text"
+          />
+        </form>
+      }
+    >
       <main className="flex-1 flex flex-col w-full pt-28">
         {/* Hero Section */}
         <section className="relative w-full px-4 sm:px-6 lg:px-8 mb-20 overflow-hidden">
@@ -232,7 +192,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl relative z-10">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
               <div className="flex flex-col gap-8 text-center lg:text-left pt-10 relative z-20">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-card w-fit mx-auto lg:mx-0">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full corp-card w-fit mx-auto lg:mx-0">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -252,11 +212,11 @@ export default function HomePage() {
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
                   <Link
                     href={books.length > 0 ? `/kitap/${books[0].id}` : '#'}
-                    className="h-14 px-8 rounded-2xl bg-white text-black font-bold text-lg hover:scale-105 transition-transform shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] flex items-center justify-center"
+                    className="corp-button h-14 px-8 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-primary-dark hover:scale-105 transition-all flex items-center justify-center"
                   >
                     Ücretsiz Dinlemeye Başla
                   </Link>
-                  <button className="h-14 px-8 rounded-2xl glass-card text-slate-900 dark:text-white font-semibold text-lg hover:bg-white/80 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-2 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 dark:hover:shadow-white/10">
+                  <button className="corp-button h-14 px-8 rounded-2xl corp-card text-slate-900 dark:text-white font-semibold text-lg hover:bg-white/80 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-2 hover:scale-105">
                     <span className="material-symbols-outlined text-[24px]">play_circle</span>
                     <span>Demoyu İncele</span>
                   </button>
@@ -299,7 +259,7 @@ export default function HomePage() {
                   )}
                   
                   {/* Floating Badge - Üst */}
-                  <div data-depth="0.3" className="absolute top-8 left-8 glass-card-strong px-4 py-2 rounded-xl z-10 shadow-xl">
+                  <div data-depth="0.3" className="absolute top-8 left-8 corp-card px-4 py-2 rounded-xl z-10 shadow-xl">
                     <p className="text-slate-900 dark:text-white text-sm font-semibold flex items-center gap-2">
                       <span className="material-symbols-outlined text-lg">headphones</span>
                       Şimdi Dinleniyor
@@ -307,7 +267,7 @@ export default function HomePage() {
                   </div>
                   
                   {/* Bottom Player Card */}
-                  <div data-depth="0.2" className="absolute bottom-6 left-6 right-6 glass-card-strong p-4 rounded-2xl flex items-center gap-4 shadow-2xl">
+                  <div data-depth="0.2" className="absolute bottom-6 left-6 right-6 corp-card p-4 rounded-2xl flex items-center gap-4 shadow-2xl">
                     <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-700">
                       {featuredBooks.length > 0 && featuredBooks[0].coverImage ? (
                         <Image
@@ -339,7 +299,7 @@ export default function HomePage() {
                 </div>
                 
                 {/* Floating Badge - Sağ */}
-                <div data-depth="0.4" className="absolute top-1/4 -right-4 lg:right-8 glass-card-strong p-3 rounded-2xl flex items-center gap-3 shadow-2xl animate-float-delayed max-w-[180px] z-10">
+                <div data-depth="0.4" className="absolute top-1/4 -right-4 lg:right-8 corp-card p-3 rounded-2xl flex items-center gap-3 shadow-2xl animate-float-delayed max-w-[180px] z-10">
                   <span className="material-symbols-outlined text-yellow-500 text-2xl">auto_awesome</span>
                   <div>
                     <p className="text-xs text-slate-700 dark:text-white/60 font-medium">YZ Eşleşmesi</p>
@@ -370,7 +330,7 @@ export default function HomePage() {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-auto md:h-[500px]">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-card-dark rounded-3xl animate-pulse"></div>
+                <div key={i} className="corp-card rounded-3xl animate-pulse"></div>
               ))}
             </div>
           ) : (
@@ -428,7 +388,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="relative group rounded-3xl glass-card-strong overflow-hidden p-6 flex flex-col justify-center items-start text-left hover:brightness-110 transition-all cursor-pointer bg-gradient-to-br from-indigo-900/40 to-purple-900/40">
+              <div className="relative group rounded-3xl corp-card overflow-hidden p-6 flex flex-col justify-center items-start text-left hover:brightness-110 transition-all cursor-pointer bg-gradient-to-br from-indigo-900/40 to-purple-900/40">
                 <span className="material-symbols-outlined text-white/50 text-4xl mb-auto">auto_stories</span>
                 <div>
                   <h3 className="text-xl font-bold text-white mb-1">2024 Özetiniz</h3>
@@ -466,7 +426,7 @@ export default function HomePage() {
               {isLoading ? (
                 [...Array(5)].map((_, i) => (
                   <div key={i} className="flex-none w-[220px] snap-start">
-                    <div className="w-full aspect-[2/3] rounded-2xl bg-card-dark animate-pulse mb-4"></div>
+                    <div className="w-full aspect-[2/3] rounded-2xl corp-card animate-pulse mb-4"></div>
                   </div>
                 ))
               ) : (
@@ -504,7 +464,7 @@ export default function HomePage() {
 
         {/* Features Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
-          <div className="rounded-[2.5rem] glass-card-strong p-8 md:p-12 overflow-hidden relative">
+          <div className="rounded-[2.5rem] corp-card p-8 md:p-12 overflow-hidden relative">
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 blur-[80px] rounded-full pointer-events-none"></div>
             <div className="grid md:grid-cols-3 gap-8 relative z-10">
               <div className="flex flex-col gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors group">
@@ -563,7 +523,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/kesfet"
-                  className="h-14 px-8 rounded-2xl glass-card text-white font-bold text-lg hover:bg-white/30 dark:hover:bg-white/20 transition-all flex items-center justify-center hover:scale-105 hover:shadow-xl"
+                  className="corp-button h-14 px-8 rounded-2xl corp-card text-white font-bold text-lg hover:bg-white/30 dark:hover:bg-white/20 transition-all flex items-center justify-center hover:scale-105 hover:shadow-xl"
                 >
                   <span>Kitapları Keşfet</span>
                 </Link>
@@ -645,6 +605,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-    </>
+    </PublicLayout>
   );
 }

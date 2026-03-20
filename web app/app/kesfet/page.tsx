@@ -15,7 +15,7 @@ interface Category {
 }
 import Image from 'next/image';
 import Link from 'next/link';
-import ThemeToggle from '@/components/ThemeToggle';
+import PublicLayout from '@/components/layout/PublicLayout';
 
 export default function KesfetPage() {
   const router = useRouter();
@@ -90,62 +90,29 @@ export default function KesfetPage() {
   };
 
   return (
-    <>
-      {/* Header */}
-      <header className="fixed top-0 w-full z-50 transition-all duration-300">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="flex items-center justify-between rounded-2xl neu-glass px-4 py-3">
-            <div className="flex items-center gap-8">
-              <Link href="/" className="flex items-center gap-2 cursor-pointer group">
-                <div className="bg-primary/20 p-1.5 rounded-lg group-hover:bg-primary/30 transition-colors">
-                  <span className="material-symbols-outlined text-2xl text-primary">graphic_eq</span>
-                </div>
-                <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Wirbooks</h2>
-              </Link>
-              <div className="hidden lg:flex items-center gap-6">
-                <Link
-                  href="/kesfet"
-                  className="text-sm font-medium text-primary border-b-2 border-primary pb-1 transition-colors"
-                >
-                  Keşfet
-                </Link>
-                <Link
-                  href="/kutuphane"
-                  className="text-sm font-medium text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white transition-colors"
-                >
-                  Kütüphane
-                </Link>
-                <a className="text-sm font-medium text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">
-                  Topluluk
-                </a>
-              </div>
-            </div>
-            <div className="flex flex-1 justify-end gap-4 items-center">
-              <ThemeToggle />
-              <form onSubmit={handleSearch} className="hidden md:flex relative group w-full max-w-xs">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500 dark:text-white/40">
-                  <span className="material-symbols-outlined text-[20px]">search</span>
-                </div>
-                <input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full rounded-xl neu-glass-input py-2 pl-10 pr-3 placeholder:text-slate-500 dark:placeholder:text-white/40 focus:outline-none transition-all sm:text-sm sm:leading-6"
-                  placeholder="Kitap ara..."
-                  type="text"
-                />
-              </form>
-            </div>
+    <PublicLayout
+      headerRight={
+        <form onSubmit={handleSearch} className="hidden md:flex relative group w-full max-w-xs">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500 dark:text-white/40">
+            <span className="material-symbols-outlined text-[20px]">search</span>
           </div>
-        </div>
-      </header>
-
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="block w-full rounded-xl neu-glass-input py-2 pl-10 pr-3 placeholder:text-slate-500 dark:placeholder:text-white/40 focus:outline-none transition-all sm:text-sm sm:leading-6"
+            placeholder="Kitap ara..."
+            type="text"
+          />
+        </form>
+      }
+    >
       <main className="flex-1 flex flex-col w-full pt-28 min-h-screen bg-slate-50 dark:bg-background-dark">
         {/* Hero Section */}
         <section className="relative w-full px-4 sm:px-6 lg:px-8 mb-12">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[400px] bg-hero-glow pointer-events-none opacity-50"></div>
           <div className="mx-auto max-w-7xl relative z-10">
             <div className="text-center py-12">
-              <div className="inline-block neu-glass-card px-6 py-3 rounded-2xl mb-6">
+              <div className="inline-block corp-card px-6 py-3 rounded-2xl mb-6">
                 <span className="text-xs font-bold text-primary uppercase tracking-wider">Keşfet</span>
               </div>
               <h1 className="text-5xl sm:text-6xl font-black tracking-tighter text-slate-900 dark:text-white mb-4">
@@ -160,7 +127,7 @@ export default function KesfetPage() {
 
         {/* Filters Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 w-full">
-          <div className="neu-glass-card rounded-2xl p-6">
+          <div className="corp-card rounded-2xl p-6">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
               {/* Kategori Filtreleri */}
               <div className="flex flex-wrap gap-3 w-full md:w-auto">
@@ -168,8 +135,8 @@ export default function KesfetPage() {
                   onClick={() => setSelectedCategory(null)}
                   className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                     selectedCategory === null
-                      ? 'neu-glass-button bg-primary/20 text-primary border-primary/30'
-                      : 'neu-glass-button text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white'
+                      ? 'corp-button bg-primary/20 text-primary border-primary/30'
+                      : 'corp-button text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   Tümü
@@ -180,8 +147,8 @@ export default function KesfetPage() {
                     onClick={() => setSelectedCategory(category)}
                     className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                       selectedCategory?.id === category.id
-                        ? 'neu-glass-button bg-primary/20 text-primary border-primary/30'
-                        : 'neu-glass-button text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white'
+                        ? 'corp-button bg-primary/20 text-primary border-primary/30'
+                        : 'corp-button text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     {category.name}
@@ -213,7 +180,7 @@ export default function KesfetPage() {
               {[...Array(12)].map((_, i) => (
                 <div
                   key={i}
-                  className="neu-glass-card rounded-2xl overflow-hidden animate-pulse"
+                  className="corp-card rounded-2xl overflow-hidden animate-pulse"
                 >
                   <div className="w-full aspect-[2/3] bg-gray-700"></div>
                   <div className="p-3 space-y-2">
@@ -224,7 +191,7 @@ export default function KesfetPage() {
               ))}
             </div>
           ) : filteredBooks.length === 0 ? (
-            <div className="neu-glass-card rounded-2xl p-12 text-center">
+            <div className="corp-card rounded-2xl p-12 text-center">
               <span className="material-symbols-outlined text-6xl text-slate-500 dark:text-secondary-text mb-4 block">
                 search_off
               </span>
@@ -238,7 +205,7 @@ export default function KesfetPage() {
                     setSearchQuery('');
                     setSelectedCategory(null);
                   }}
-                  className="px-6 py-3 rounded-xl neu-glass-button bg-primary/20 text-primary font-semibold hover:bg-primary/30 transition-all"
+                  className="px-6 py-3 rounded-xl corp-button bg-primary/20 text-primary font-semibold hover:bg-primary/30 transition-all"
                 >
                   Filtreleri Temizle
                 </button>
@@ -246,7 +213,7 @@ export default function KesfetPage() {
             </div>
           ) : (
             <>
-              <div className="neu-glass-card rounded-xl px-4 py-3 mb-4 inline-block">
+              <div className="corp-card rounded-xl px-4 py-3 mb-4 inline-block">
                 <span className="text-slate-700 dark:text-secondary-text text-sm font-semibold">
                   {filteredBooks.length} kitap bulundu
                 </span>
@@ -256,7 +223,7 @@ export default function KesfetPage() {
                   <Link
                     key={book.id}
                     href={`/kitap/${book.id}`}
-                    className="group neu-glass-card rounded-2xl overflow-hidden hover:neu-glass-elevated transition-all duration-300"
+                    className="group corp-card rounded-2xl overflow-hidden hover:shadow-card transition-all duration-300"
                   >
                     <div className="relative w-full aspect-[2/3] bg-gray-300 dark:bg-gray-800 overflow-hidden">
                       {book.coverImage ? (
@@ -275,7 +242,7 @@ export default function KesfetPage() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                        <div className="w-12 h-12 rounded-full neu-glass-button bg-white/20 text-white flex items-center justify-center scale-90 group-hover:scale-100 transition-transform">
+                        <div className="w-12 h-12 rounded-full corp-button bg-white/20 text-white flex items-center justify-center scale-90 group-hover:scale-100 transition-transform">
                           <span className="material-symbols-outlined text-2xl filled">play_arrow</span>
                         </div>
                       </div>
@@ -286,7 +253,7 @@ export default function KesfetPage() {
                       </h3>
                       <p className="text-slate-700 dark:text-secondary-text text-xs truncate">{book.author}</p>
                       {book.category && (
-                        <span className="inline-block mt-2 px-2 py-0.5 rounded-md neu-glass-button bg-primary/20 text-primary text-xs">
+                        <span className="inline-block mt-2 px-2 py-0.5 rounded-md corp-button bg-primary/20 text-primary text-xs">
                           {book.category}
                         </span>
                       )}
@@ -298,6 +265,6 @@ export default function KesfetPage() {
           )}
         </section>
       </main>
-    </>
+    </PublicLayout>
   );
 }

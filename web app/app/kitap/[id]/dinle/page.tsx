@@ -177,7 +177,7 @@ export default function BookListenPage() {
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background-light dark:bg-background-dark">
       {/* Header */}
-      <header className="flex shrink-0 items-center justify-between whitespace-nowrap px-6 py-3 neu-glass z-20">
+      <header className="flex shrink-0 items-center justify-between whitespace-nowrap px-6 py-3 border-b border-slate-200/70 dark:border-border-dark bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl z-20">
         <div className="flex items-center gap-8">
           <Link href={`/kitap/${bookId}`} className="flex items-center gap-3 text-slate-900 dark:text-white group cursor-pointer">
             <div className="size-10 text-primary group-hover:scale-110 transition-transform duration-300">
@@ -200,7 +200,7 @@ export default function BookListenPage() {
           <ThemeToggle />
           <Link
             href={`/kitap/${bookId}`}
-            className="px-4 py-2 rounded-xl neu-glass-button text-sm font-medium text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white transition-all"
+            className="corp-button px-4 py-2 rounded-xl bg-white/70 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 text-sm font-medium text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white transition-all"
           >
             Kitap Detayı
           </Link>
@@ -246,7 +246,7 @@ export default function BookListenPage() {
 
             {/* Progress Bar */}
             <div className="flex flex-col gap-3 w-full mt-2">
-              <div className="neu-glass-card rounded-xl p-4">
+              <div className="corp-card rounded-xl p-4">
                 <div
                   onClick={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -271,10 +271,10 @@ export default function BookListenPage() {
             </div>
 
             {/* Player Controls */}
-            <div className="neu-glass-card rounded-2xl p-6">
+            <div className="corp-card rounded-2xl p-6">
               <div className="flex items-center justify-between w-full gap-2 sm:gap-4">
                 <button
-                  className="p-3 neu-glass-button text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white rounded-xl transition-all duration-300"
+                  className="corp-button p-3 bg-white/70 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white rounded-xl transition-all duration-300"
                   title="Karıştır"
                 >
                   <span className="material-symbols-outlined text-[24px]">shuffle</span>

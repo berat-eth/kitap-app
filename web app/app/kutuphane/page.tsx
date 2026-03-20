@@ -7,7 +7,7 @@ import { getBookById, getBooks } from '@/lib/api';
 import { getAllProgress, clearProgress } from '@/lib/storage';
 import Image from 'next/image';
 import Link from 'next/link';
-import ThemeToggle from '@/components/ThemeToggle';
+import PublicLayout from '@/components/layout/PublicLayout';
 
 interface BookWithProgress extends Book {
   progress?: Progress;
@@ -104,43 +104,7 @@ export default function KutuphanePage() {
   });
 
   return (
-    <>
-      {/* Header */}
-      <header className="fixed top-0 w-full z-50 transition-all duration-300">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="flex items-center justify-between rounded-2xl border border-slate-300 dark:border-white/10 bg-white/80 dark:bg-black/60 backdrop-blur-xl px-4 py-3 shadow-2xl shadow-black/10 dark:shadow-black/20">
-            <div className="flex items-center gap-8">
-              <Link href="/" className="flex items-center gap-2 cursor-pointer group">
-                <div className="bg-primary/20 p-1.5 rounded-lg group-hover:bg-primary/30 transition-colors">
-                  <span className="material-symbols-outlined text-2xl text-primary">graphic_eq</span>
-                </div>
-                <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Wirbooks</h2>
-              </Link>
-              <div className="hidden lg:flex items-center gap-6">
-                <Link
-                  href="/kesfet"
-                  className="text-sm font-medium text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white transition-colors"
-                >
-                  Keşfet
-                </Link>
-                <Link
-                  href="/kutuphane"
-                  className="text-sm font-medium text-primary border-b-2 border-primary pb-1 transition-colors"
-                >
-                  Kütüphane
-                </Link>
-                <a className="text-sm font-medium text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">
-                  Topluluk
-                </a>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <PublicLayout>
       <main className="flex-1 flex flex-col w-full pt-28">
         {/* Hero Section */}
         <section className="relative w-full px-4 sm:px-6 lg:px-8 mb-12">
@@ -200,7 +164,7 @@ export default function KutuphanePage() {
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="bg-card-dark rounded-2xl p-6 animate-pulse"
+                  className="corp-card rounded-2xl p-6 animate-pulse"
                 >
                   <div className="flex gap-6">
                     <div className="w-32 h-48 bg-gray-700 rounded-xl"></div>
@@ -250,7 +214,7 @@ export default function KutuphanePage() {
                 return (
                   <div
                     key={book.id}
-                    className="bg-white dark:bg-card-dark rounded-2xl p-6 border border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 transition-colors group"
+                    className="corp-card rounded-2xl p-6 border border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 transition-colors group"
                   >
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Kitap Kapağı */}
@@ -358,7 +322,7 @@ export default function KutuphanePage() {
           )}
         </section>
       </main>
-    </>
+    </PublicLayout>
   );
 }
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import ThemeToggle from '@/components/ThemeToggle';
+import PublicLayout from '@/components/layout/PublicLayout';
 
 export default function DonationPage() {
   const [copied, setCopied] = useState(false);
@@ -22,38 +22,8 @@ export default function DonationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-slate-200 dark:border-border-dark bg-white/90 dark:bg-background-dark/80 backdrop-blur-xl px-4 md:px-6 lg:px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 text-slate-900 dark:text-white group">
-            <div className="size-10 text-primary group-hover:scale-110 transition-transform">
-              <span className="material-symbols-outlined text-[40px]">graphic_eq</span>
-            </div>
-            <h1 className="text-xl font-bold">Wirbooks</h1>
-          </Link>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors font-medium">
-              Ana Sayfa
-            </Link>
-            <Link href="/kesfet" className="text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors font-medium">
-              Keşfet
-            </Link>
-            <Link href="/kutuphane" className="text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors font-medium">
-              Kütüphane
-            </Link>
-            <Link
-              href="/bagis"
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
-            >
-              <span className="material-symbols-outlined text-[20px]">favorite</span>
-              Bağış Yap
-            </Link>
-          </nav>
-        </div>
-      </header>
-
-      <main>
+    <PublicLayout>
+      <main className="pt-28">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 py-20 px-4 sm:px-6 lg:px-8">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
@@ -238,14 +208,14 @@ export default function DonationPage() {
                   <div className="flex flex-col gap-3">
                     <button
                       onClick={() => copyToClipboard(iban.replace(/\s/g, ''))}
-                      className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
+                      className="corp-button w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
                     >
                       <span className="material-symbols-outlined">content_copy</span>
                       IBAN'ı Kopyala
                     </button>
                     <Link
                       href="/kesfet"
-                      className="w-full h-12 bg-slate-200 dark:bg-surface-hover hover:bg-slate-300 dark:hover:bg-slate-700 border border-slate-300 dark:border-border-dark text-slate-900 dark:text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+                      className="corp-button w-full h-12 bg-slate-200 dark:bg-surface-hover hover:bg-slate-300 dark:hover:bg-slate-700 border border-slate-300 dark:border-border-dark text-slate-900 dark:text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
                     >
                       <span className="material-symbols-outlined">library_books</span>
                       Kitapları Keşfet
@@ -257,7 +227,7 @@ export default function DonationPage() {
           </div>
         </section>
       </main>
-    </div>
+    </PublicLayout>
   );
 }
 

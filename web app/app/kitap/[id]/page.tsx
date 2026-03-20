@@ -99,7 +99,7 @@ export default function BookDetailPage() {
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 font-display flex flex-col min-h-screen text-slate-900 dark:text-white antialiased">
       {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap clay border-b border-white/20 px-4 md:px-10 py-3 transition-all duration-300">
+      <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-slate-200/70 dark:border-border-dark bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl px-4 md:px-10 py-3 transition-all duration-300">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-4 text-slate-900 dark:text-white group cursor-pointer">
             <div className="size-10 text-primary group-hover:scale-110 transition-transform duration-300">
@@ -142,7 +142,7 @@ export default function BookDetailPage() {
         </div>
         <div className="flex flex-1 justify-end gap-4 md:gap-8">
           <label className="hidden md:flex flex-col min-w-40 h-10 max-w-64 relative group">
-            <div className="flex w-full flex-1 items-stretch rounded-full h-full clay-input focus-within:border-blue-400/50 focus-within:ring-2 focus-within:ring-blue-400/20 transition-all duration-300">
+            <div className="flex w-full flex-1 items-stretch rounded-full h-full bg-white/80 dark:bg-white/5 backdrop-blur-md border border-slate-200/70 dark:border-white/10 focus-within:border-blue-400/50 focus-within:ring-2 focus-within:ring-blue-400/20 transition-all duration-300">
               <div className="text-slate-500 dark:text-text-secondary flex border-none items-center justify-center pl-4 rounded-l-full">
                 <span className="material-symbols-outlined">search</span>
               </div>
@@ -155,7 +155,7 @@ export default function BookDetailPage() {
           </label>
           <div className="flex gap-2 items-center">
             <ThemeToggle />
-            <button className="size-10 rounded-full clay-button flex items-center justify-center text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors">
+            <button className="corp-button size-10 rounded-full bg-white/70 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors">
               <span className="material-symbols-outlined">notifications</span>
             </button>
           </div>

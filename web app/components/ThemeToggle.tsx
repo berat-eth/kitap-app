@@ -8,7 +8,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="size-10 rounded-full clay-button flex items-center justify-center text-slate-700 dark:text-text-secondary hover:text-blue-600 dark:hover:text-blue-400 transition-all group relative"
+      className="corp-button size-10 rounded-full bg-white/70 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white transition-all group relative"
       title={theme === 'dark' ? 'Açık Moda Geç' : 'Koyu Moda Geç'}
       aria-label={theme === 'dark' ? 'Açık Moda Geç' : 'Koyu Moda Geç'}
     >
