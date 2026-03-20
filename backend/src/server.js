@@ -83,6 +83,19 @@ async function start() {
   const app = createApp();
   const server = http.createServer(app);
 
+  // Socket.IO istekleri Express middleware'inden geçmeyebilir.
+  // Bu yüzden doğrudan HTTP katmanında /socket.io isteklerini loglayalım.
+  server.on('request', (req, res) => {
+    try {
+      const url = req?.url || '';
+      if (url.startsWith('/socket.io')) {
+        logger.info('socket.http', { method: req.method, url, host: req.headers?.host });
+      }
+    } catch {
+      // ignore logging failures
+    }
+  });
+
   const io = new Server(server, {
     cors: {
       origin: '*',
