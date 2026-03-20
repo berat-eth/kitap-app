@@ -35,28 +35,37 @@ async function start() {
   const dbHost = process.env.DB_HOST || 'localhost';
   const dbUser = process.env.DB_USER || 'root';
   const dbName = process.env.DB_NAME;
+  const skipDbInit = String(process.env.SKIP_DB_INIT || '').toLowerCase() === 'true';
 
   try {
-    // MySQL bazen servise geç başlıyor; kısa retry'ler için.
-    const maxAttempts = 6;
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        await initDb();
-        logger.info('server.db.init.done', { DB_NAME: dbName, DB_HOST: dbHost, DB_USER: dbUser, attempt });
-        break;
-      } catch (err) {
-        const isLast = attempt === maxAttempts;
-        logger.error('server.db.init.attempt.failed', {
-          message: err.message,
-          DB_NAME: dbName,
-          DB_HOST: dbHost,
-          DB_USER: dbUser,
-          attempt,
-          isLast,
-        });
-        if (isLast) throw err;
-        // 3s bekle, ardından tekrar dene
-        await new Promise((r) => setTimeout(r, 3000));
+    if (skipDbInit) {
+      logger.warn('server.db.init.skipped', {
+        DB_NAME: dbName,
+        DB_HOST: dbHost,
+        DB_USER: dbUser,
+      });
+    } else {
+      // MySQL bazen servise geç başlıyor; kısa retry'ler için.
+      const maxAttempts = 6;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          await initDb();
+          logger.info('server.db.init.done', { DB_NAME: dbName, DB_HOST: dbHost, DB_USER: dbUser, attempt });
+          break;
+        } catch (err) {
+          const isLast = attempt === maxAttempts;
+          logger.error('server.db.init.attempt.failed', {
+            message: err.message,
+            DB_NAME: dbName,
+            DB_HOST: dbHost,
+            DB_USER: dbUser,
+            attempt,
+            isLast,
+          });
+          if (isLast) throw err;
+          // 3s bekle, ardından tekrar dene
+          await new Promise((r) => setTimeout(r, 3000));
+        }
       }
     }
   } catch (err) {

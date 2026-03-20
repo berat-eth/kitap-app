@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { API_CONFIG, getDeviceId, registerDevice } from '../config/api';
+import { API_CONFIG, getDeviceId, registerDevice, setDeviceId } from '../config/api';
 import { Platform } from 'react-native';
 
 export interface RoomParticipant {
@@ -63,8 +63,16 @@ class VoiceChatService {
       }
 
       if (!this.deviceId) {
-        console.error('Device ID alınamadı');
-        return false;
+        // DB kapalıyken / HTTP register başarısızken bile sesli sohbet UI'sını test edebilmek için
+        // yerel bir deviceId üretip saklıyoruz. Backend tarafında VOICECHAT_BYPASS_DEVICE_AUTH açık olmalı.
+        const gen = (): string => {
+          // UUID benzeri (yaklaşık) üretim
+          const hex = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).slice(1);
+          return `${hex()}${hex()}-${hex()}-4${hex().slice(0, 3)}-${hex().slice(0, 4)}-${hex()}${hex()}${hex()}`;
+        };
+        this.deviceId = gen();
+        await setDeviceId(this.deviceId);
+        console.warn('Device ID local üretildi (registerDevice başarısız).', this.deviceId);
       }
 
       const socketUrl = API_CONFIG.baseURL.replace('/api', '');
