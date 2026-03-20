@@ -1,2 +1,5 @@
 # Expo
 .expo/
+
+# Node
+**/node_modules/
