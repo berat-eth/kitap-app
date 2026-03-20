@@ -1,19 +1,19 @@
 #!/bin/bash
 # ============================================================
-# Plaxsy - Tek Script Canlıya Alma
+# Wirbooks - Tek Script Canlıya Alma
 # Sunucu kurulumu + Deploy + SSL (Let's Encrypt)
-# Domain: api.plaxsy.com, plaxsy.com
-# Kullanım: sudo bash deploy.sh
+# API: api.wirbooks.com.tr | Ana site: wirbooks.com.tr
+# Kullanım: sudo bash deploy/deploy.sh
 # ============================================================
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-DEPLOY_DIR="/var/www/plaxsy"
-LOG_DIR="/var/log/plaxsy"
-DOMAIN_API="api.plaxsy.com"
-DOMAIN_WEB="plaxsy.com"
+DEPLOY_DIR="/var/www/wirbooks"
+LOG_DIR="/var/log/wirbooks"
+DOMAIN_API="api.wirbooks.com.tr"
+DOMAIN_WEB="wirbooks.com.tr"
 
 # Proje kökü kontrolü
 if [ ! -d "$PROJECT_ROOT/sesli-kitap-backend" ] || [ ! -d "$PROJECT_ROOT/web app" ]; then
@@ -23,7 +23,7 @@ if [ ! -d "$PROJECT_ROOT/sesli-kitap-backend" ] || [ ! -d "$PROJECT_ROOT/web app
 fi
 
 echo "=============================================="
-echo "  Plaxsy - Canlıya Alma (Tek Script)"
+echo "  Wirbooks - Canlıya Alma (Tek Script)"
 echo "=============================================="
 echo ""
 
@@ -124,71 +124,72 @@ npm run build
 echo ""
 echo "[5/6] Nginx ve PM2 yapılandırılıyor..."
 
-cat > /etc/nginx/sites-available/plaxsy << 'NGINXEOF'
+cat > /etc/nginx/sites-available/wirbooks << NGINXEOF
 server {
     listen 80;
-    server_name api.plaxsy.com;
+    server_name ${DOMAIN_API};
     location / {
         proxy_pass http://127.0.0.1:3001;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
         client_max_body_size 50M;
     }
     location /uploads {
-        alias /var/www/plaxsy/backend/uploads;
+        alias ${DEPLOY_DIR}/backend/uploads;
     }
 }
 server {
     listen 80;
-    server_name plaxsy.com www.plaxsy.com;
+    server_name ${DOMAIN_WEB} www.${DOMAIN_WEB};
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
     }
 }
 NGINXEOF
 
-ln -sf /etc/nginx/sites-available/plaxsy /etc/nginx/sites-enabled/
+ln -sf /etc/nginx/sites-available/wirbooks /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
+rm -f /etc/nginx/sites-enabled/plaxsy 2>/dev/null || true
 nginx -t && systemctl reload nginx
 
-cat > $DEPLOY_DIR/ecosystem.config.js << 'PM2EOF'
+cat > $DEPLOY_DIR/ecosystem.config.js << PM2EOF
 module.exports = {
   apps: [
     {
-      name: 'plaxsy-api',
-      cwd: '/var/www/plaxsy/backend',
+      name: 'wirbooks-api',
+      cwd: '${DEPLOY_DIR}/backend',
       script: 'src/index.js',
       instances: 1,
       exec_mode: 'fork',
       env: { NODE_ENV: 'production' },
-      error_file: '/var/log/plaxsy/api-error.log',
-      out_file: '/var/log/plaxsy/api-out.log',
+      error_file: '${LOG_DIR}/api-error.log',
+      out_file: '${LOG_DIR}/api-out.log',
       merge_logs: true,
     },
     {
-      name: 'plaxsy-web',
-      cwd: '/var/www/plaxsy/web',
+      name: 'wirbooks-web',
+      cwd: '${DEPLOY_DIR}/web',
       script: 'node_modules/next/dist/bin/next',
       args: 'start',
       instances: 1,
       exec_mode: 'fork',
       env: { NODE_ENV: 'production', PORT: 3000 },
-      error_file: '/var/log/plaxsy/web-error.log',
-      out_file: '/var/log/plaxsy/web-out.log',
+      error_file: '${LOG_DIR}/web-error.log',
+      out_file: '${LOG_DIR}/web-out.log',
       merge_logs: true,
     },
   ],
@@ -196,6 +197,7 @@ module.exports = {
 PM2EOF
 
 cd $DEPLOY_DIR
+pm2 delete wirbooks-api wirbooks-web 2>/dev/null || true
 pm2 delete plaxsy-api plaxsy-web 2>/dev/null || true
 pm2 start ecosystem.config.js
 pm2 save
@@ -214,7 +216,7 @@ fi
 
 echo ""
 echo "=============================================="
-echo "  Deploy tamamlandı"
+echo "  Wirbooks deploy tamamlandı"
 echo "=============================================="
 echo "API:  https://$DOMAIN_API"
 echo "Web:  https://$DOMAIN_WEB"
