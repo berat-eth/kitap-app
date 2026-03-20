@@ -3,9 +3,14 @@ const dotenv = require('dotenv');
 const envPath = process.env.ENV_PATH || '/root/data/.env';
 const dotenvResult = dotenv.config({ path: envPath });
 
+const http = require('http');
 const { createApp } = require('./app');
 const { initDb } = require('./db/init');
 const { logger } = require('./utils/logger');
+
+const { Server } = require('socket.io');
+const { registerVoiceChatSocket } = require('./sockets/voiceChatSocket');
+const pool = require('./db/pool');
 
 if (dotenvResult && dotenvResult.error) {
   logger.warn('server.env.missing', {
@@ -26,7 +31,17 @@ async function start() {
   }
 
   const app = createApp();
-  app.listen(PORT, () => {
+  const server = http.createServer(app);
+
+  const io = new Server(server, {
+    cors: {
+      origin: '*',
+    },
+  });
+
+  registerVoiceChatSocket(io, { pool, logger });
+
+  server.listen(PORT, () => {
     logger.info('server.started', { port: PORT });
   });
 }
