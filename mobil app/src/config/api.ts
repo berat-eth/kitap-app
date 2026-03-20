@@ -3,11 +3,10 @@ import { apiLogger } from '../utils/logger';
 
 // API Configuration - Tüm ayarlar burada
 export const API_CONFIG = {
-  // 443 (HTTPS) şimdilik çalışmıyorsa 80 (HTTP) üzerinden istek atabilmek için fallback'i HTTP yaptık.
   baseURL:
     process.env.EXPO_PUBLIC_API_URL ??
     process.env.EXPO_PUBLIC_API_URL_PROD ??
-    'http://api.wirbooks.com.tr/api',
+    'https://api.wirbooks.com.tr/api',
 
   apiKey: process.env.EXPO_PUBLIC_API_KEY ?? '',
 
@@ -170,7 +169,21 @@ export const registerDevice = async (
       });
 
       clearTimeout(timeoutId);
-      const data = await response.json();
+
+      const contentType = response.headers.get('content-type') || '';
+      let data: any = null;
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // Nginx/SSL redirect veya hata sayfaları JSON olmayan body döndürebilir.
+        const text = await response.text();
+        apiLogger.error('registerDevice.nonJsonResponse', {
+          status: response.status,
+          contentType,
+          textSnippet: text?.slice(0, 200),
+        });
+        return null;
+      }
       const durationMs = Date.now() - startTime;
       apiLogger.response('POST', API_ENDPOINTS.DEVICE_REGISTER, response.status, durationMs);
 
