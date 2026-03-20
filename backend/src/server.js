@@ -1,8 +1,18 @@
-require('dotenv').config();
+// Tek env dosyası: /root/data/.env (deploy script ile)
+const dotenv = require('dotenv');
+const envPath = process.env.ENV_PATH || '/root/data/.env';
+const dotenvResult = dotenv.config({ path: envPath });
 
 const { createApp } = require('./app');
 const { initDb } = require('./db/init');
 const { logger } = require('./utils/logger');
+
+if (dotenvResult && dotenvResult.error) {
+  logger.warn('server.env.missing', {
+    envPath,
+    error: dotenvResult.error.message,
+  });
+}
 
 async function start() {
   const PORT = process.env.PORT || 3001;

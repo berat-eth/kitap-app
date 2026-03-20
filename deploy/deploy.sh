@@ -14,6 +14,8 @@ DEPLOY_DIR="/var/www/wirbooks"
 LOG_DIR="/var/log/wirbooks"
 DOMAIN_API="api.wirbooks.com.tr"
 DOMAIN_WEB="wirbooks.com.tr"
+DATA_DIR="/root/data"
+ENV_FILE="$DATA_DIR/.env"
 
 # Proje kökü kontrolü
 if [ ! -d "$PROJECT_ROOT/backend" ] || [ ! -d "$PROJECT_ROOT/web app" ]; then
@@ -77,6 +79,21 @@ echo ""
 echo "[2/6] Dizinler oluşturuluyor..."
 mkdir -p $DEPLOY_DIR/backend $DEPLOY_DIR/web $LOG_DIR
 
+# Tek env dosyası kontrolü
+if [ ! -f "$ENV_FILE" ]; then
+  echo "HATA: Tek env dosyası bulunamadı: $ENV_FILE"
+  echo "Lütfen $ENV_FILE dosyasını DB + NEXT_PUBLIC + API_KEY değerleriyle oluşturun."
+  exit 1
+fi
+
+# Env'i yükle (web build sırasında NEXT_PUBLIC değerleri gerekli)
+set -a
+source "$ENV_FILE"
+set +a
+
+export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://$DOMAIN_API/api}"
+export NEXT_PUBLIC_API_KEY="${NEXT_PUBLIC_API_KEY:-${API_KEY:-}}"
+
 # --- 3. Backend Deploy ---
 echo ""
 echo "[3/6] Backend deploy ediliyor..."
@@ -86,13 +103,6 @@ rsync -av --delete \
   --exclude 'uploads' \
   --exclude '.git' \
   "$PROJECT_ROOT/backend/" "$DEPLOY_DIR/backend/"
-
-if [ -f "$PROJECT_ROOT/backend/.env" ]; then
-  cp "$PROJECT_ROOT/backend/.env" "$DEPLOY_DIR/backend/.env"
-  echo "  .env kopyalandı"
-else
-  echo "  UYARI: backend/.env bulunamadı - manuel ekleyin"
-fi
 
 cd $DEPLOY_DIR/backend
 npm install --production
@@ -107,15 +117,6 @@ rsync -av --delete \
   --exclude '.env.local' \
   --exclude '.git' \
   "$PROJECT_ROOT/web app/" "$DEPLOY_DIR/web/"
-
-cat > "$DEPLOY_DIR/web/.env.local" << ENVEOF
-NEXT_PUBLIC_API_URL=https://$DOMAIN_API/api
-NEXT_PUBLIC_API_KEY=
-ENVEOF
-if [ -f "$PROJECT_ROOT/web app/.env.local" ]; then
-  NEXT_KEY=$(grep NEXT_PUBLIC_API_KEY "$PROJECT_ROOT/web app/.env.local" | cut -d'=' -f2)
-  [ -n "$NEXT_KEY" ] && sed -i "s|NEXT_PUBLIC_API_KEY=|NEXT_PUBLIC_API_KEY=$NEXT_KEY|" "$DEPLOY_DIR/web/.env.local"
-fi
 
 cd $DEPLOY_DIR/web
 npm install
@@ -188,7 +189,12 @@ module.exports = {
       args: 'start',
       instances: 1,
       exec_mode: 'fork',
-      env: { NODE_ENV: 'production', PORT: 3000 },
+      env: { 
+        NODE_ENV: 'production',
+        PORT: 3000,
+        NEXT_PUBLIC_API_URL: '${NEXT_PUBLIC_API_URL}',
+        NEXT_PUBLIC_API_KEY: '${NEXT_PUBLIC_API_KEY}'
+      },
       error_file: '${LOG_DIR}/web-error.log',
       out_file: '${LOG_DIR}/web-out.log',
       merge_logs: true,
