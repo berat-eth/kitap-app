@@ -78,6 +78,8 @@ class VoiceChatService {
       const socketUrl = API_CONFIG.baseURL.replace('/api', '');
 
       this.socket = io(socketUrl, {
+        // server tarafında path'i sabitledik; client de aynı path'i kullansın.
+        path: '/socket.io',
         auth: {
           deviceId: this.deviceId,
         },

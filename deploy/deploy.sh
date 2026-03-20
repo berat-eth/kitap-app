@@ -141,7 +141,14 @@ server {
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_cache_bypass \$http_upgrade;
+        proxy_buffering off;
+        proxy_read_timeout 3600;
+        proxy_send_timeout 3600;
         client_max_body_size 50M;
+    }
+    # bazen /socket.io (sonundaki / olmadan) istenebiliyor
+    location = /socket.io {
+        return 301 /socket.io/;
     }
     location / {
         proxy_pass http://127.0.0.1:3001;
