@@ -3,57 +3,187 @@ import Link from "next/link";
 import type { Book } from "@/lib/types";
 import { formatDuration, resolveMediaUrl } from "@/lib/utils";
 
-type Props = { book: Book; index?: number };
+interface BookCardProps {
+  book: Book;
+  index?: number;
+}
 
-export function BookCard({ book, index = 0 }: Props) {
-  const cover = resolveMediaUrl(book.cover_image);
-  const delay = Math.min(index, 10) * 0.04;
+function StarRating({ rating }: { rating: number }) {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5;
+  return (
+    <span className="stars" aria-label={`${rating} yıldız`}>
+      {Array.from({ length: 5 }, (_, i) => {
+        if (i < full) return (
+          <svg key={i} width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        );
+        if (i === full && half) return (
+          <svg key={i} width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ opacity: 0.5 }}>
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        );
+        return (
+          <svg key={i} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" style={{ opacity: 0.3 }}>
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        );
+      })}
+    </span>
+  );
+}
+
+function BookInitials({ title }: { title: string }) {
+  const initials = title
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, var(--surface-2) 0%, var(--surface-3) 100%)",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "3rem",
+          fontWeight: "900",
+          color: "#ffffff",
+          opacity: 0.3,
+          letterSpacing: "-0.04em",
+        }}
+      >
+        {initials}
+      </span>
+    </div>
+  );
+}
+
+export function BookCard({ book, index = 0 }: BookCardProps) {
+  const delay = Math.min(index, 7);
+  const delayClass = delay > 0 ? `delay-${delay}` : "";
+  const coverUrl = book.cover_image ? resolveMediaUrl(book.cover_image) : null;
 
   return (
-    <article
-      className="book-card group relative"
-      style={{ animationDelay: `${delay}s` }}
+    <Link
+      href={`/kitap/${book.id}`}
+      className={`book-card animate-scale-in ${delayClass}`}
+      aria-label={`${book.title} — ${book.author}`}
+      style={{ display: "block", textDecoration: "none" }}
     >
-      <Link
-        href={`/kitap/${book.id}`}
-        className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--page-bg)]"
+      {/* Cover */}
+      <div
+        style={{
+          position: "relative",
+          aspectRatio: "2/3",
+          overflow: "hidden",
+          background: "var(--surface-2)",
+        }}
       >
+        {coverUrl ? (
+          <Image
+            src={coverUrl}
+            alt={`${book.title} kapak görseli`}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            className="book-cover-img"
+            style={{ objectFit: "cover" }}
+          />
+        ) : (
+          <BookInitials title={book.title} />
+        )}
+
+        {/* Gradient overlay */}
+        <div className="book-card-overlay" />
+
+        {/* Bottom info */}
         <div
-          className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-[var(--stroke)] bg-[var(--surface-muted)] shadow-[var(--shadow-card)] transition-[transform,box-shadow] duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-[0_28px_60px_-24px_rgba(15,23,42,0.22)]"
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: "16px 14px 14px",
+          }}
         >
-          {cover ? (
-            <Image
-              src={cover}
-              alt={`${book.title} kapak görseli`}
-              fill
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-              sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px"
-            />
-          ) : (
-            <div
-              className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--surface-muted)] to-[var(--surface)] p-4 text-center font-display text-2xl font-semibold text-[var(--muted)]"
-              aria-hidden
+          {book.category && (
+            <span
+              className="badge badge-gold"
+              style={{ marginBottom: "8px", fontSize: "0.65rem" }}
             >
-              {book.title.slice(0, 2).toUpperCase()}
-            </div>
-          )}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/88 via-slate-900/20 to-transparent opacity-95" />
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            <p className="line-clamp-2 font-display text-base font-semibold leading-snug text-white drop-shadow-sm">
-              {book.title}
-            </p>
-            <p className="mt-1 text-xs font-medium text-white/80">{book.author}</p>
-          </div>
-        </div>
-        <div className="mt-3 flex items-center justify-between gap-2 px-0.5 text-xs text-[var(--muted)]">
-          <span className="font-medium">{formatDuration(book.duration)}</span>
-          {book.category?.name ? (
-            <span className="truncate rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
               {book.category.name}
             </span>
-          ) : null}
+          )}
+          <h3
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "0.95rem",
+              fontWeight: "700",
+              color: "var(--ink)",
+              lineHeight: "1.25",
+              marginBottom: "3px",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {book.title}
+          </h3>
+          <p
+            style={{
+              fontSize: "0.78rem",
+              color: "var(--ink-2)",
+              fontStyle: "italic",
+            }}
+          >
+            {book.author}
+          </p>
         </div>
-      </Link>
-    </article>
+      </div>
+
+      {/* Meta row */}
+      <div
+        style={{
+          padding: "12px 14px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "8px",
+          borderTop: "1px solid var(--border)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <StarRating rating={book.rating} />
+          <span style={{ fontSize: "0.75rem", color: "var(--ink-3)" }}>
+            {book.rating.toFixed(1)}
+          </span>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            fontSize: "0.75rem",
+            color: "var(--ink-3)",
+          }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          {formatDuration(book.duration)}
+        </div>
+      </div>
+    </Link>
   );
 }

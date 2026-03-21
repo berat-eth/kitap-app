@@ -1,71 +1,197 @@
 import Link from "next/link";
 
-const secondary = [
-  { href: "/dinle", label: "Dinleme rehberi" },
-  { href: "/oynatma", label: "Oynatma" },
-  { href: "/bagis", label: "Bağış" },
-];
-
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-[var(--stroke)] bg-[var(--surface)]">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-5 py-14 md:px-8">
-        <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
-          <div className="max-w-md">
-            <p className="font-display text-lg font-semibold text-[var(--ink-bright)]">
-              Wirbooks
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-              Türkçe sesli kitaplar için sade, okunaklı bir web kataloğu. Tam deneyim
-              için mobil uygulamayı kullanın.
+    <footer
+      role="contentinfo"
+      style={{
+        position: "relative",
+        zIndex: 10,
+        borderTop: "1px solid var(--border)",
+        background: "var(--surface)",
+        marginTop: "auto",
+      }}
+    >
+      <div className="container" style={{ paddingBlock: "48px 32px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "40px",
+            marginBottom: "40px",
+          }}
+        >
+          {/* Brand */}
+          <div>
+            <Link
+              href="/"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "10px",
+                marginBottom: "16px",
+                textDecoration: "none",
+              }}
+            >
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "32px",
+                  height: "32px",
+                  background: "#ffffff",
+                  borderRadius: "7px",
+                  fontSize: "15px",
+                  fontWeight: "700",
+                  color: "#0a0a0a",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                W
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "1.1rem",
+                  fontWeight: "700",
+                  color: "var(--ink)",
+                }}
+              >
+                Wirbooks
+              </span>
+            </Link>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                color: "var(--ink-3)",
+                lineHeight: "1.6",
+                maxWidth: "240px",
+              }}
+            >
+              Türkçe sesli kitapları tek platformda keşfedin. Binlerce eser, dilediğiniz zaman.
             </p>
           </div>
-          <div className="flex flex-col gap-4 sm:flex-row sm:gap-12">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
-                Keşfet
-              </p>
-              <ul className="mt-3 space-y-2 text-sm">
-                <li>
-                  <Link
-                    href="/kitaplar"
-                    className="text-[var(--ink)] underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline"
-                  >
-                    Tüm kitaplar
-                  </Link>
-                </li>
-                <li>
-                  <a
-                    href="https://api.wirbooks.com.tr/api/health"
-                    className="text-[var(--ink)] underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    API durumu
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
-                Yardım & destek
-              </p>
-              <ul className="mt-3 space-y-2 text-sm">
-                {secondary.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="text-[var(--ink)] underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline"
-                    >
-                      {item.label}
+
+          {/* Keşfet */}
+          <div>
+            <h3
+              style={{
+                fontSize: "0.75rem",
+                fontWeight: "600",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "#d0d0d0",
+                marginBottom: "16px",
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              Keşfet
+            </h3>
+            <nav aria-label="Keşfet bağlantıları">
+              <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
+                {[
+                  { href: "/kitaplar", label: "Tüm Kitaplar" },
+                  { href: "/kategoriler", label: "Kategoriler" },
+                  { href: "/kitaplar?sort=popular", label: "Popüler" },
+                  { href: "/kitaplar?sort=newest", label: "Yeni Eklenenler" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} className="footer-link">
+                      {link.label}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
+          </div>
+
+          {/* Yardım */}
+          <div>
+            <h3
+              style={{
+                fontSize: "0.75rem",
+                fontWeight: "600",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "#d0d0d0",
+                marginBottom: "16px",
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              Yardım & Destek
+            </h3>
+            <nav aria-label="Yardım bağlantıları">
+              <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
+                {[
+                  { href: "/dinle", label: "Dinleme Rehberi" },
+                  { href: "/oynatma", label: "Oynatma Kontrolleri" },
+                  { href: "/bagis", label: "Bağış Yap" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} className="footer-link">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
         </div>
+
+        {/* Bottom bar */}
+        <div className="divider" style={{ marginBottom: "24px" }} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "12px",
+          }}
+        >
+          <p style={{ fontSize: "0.8rem", color: "var(--ink-4)" }}>
+            © {new Date().getFullYear()} Wirbooks. Tüm hakları saklıdır.
+          </p>
+          <a
+            href="https://api.wirbooks.com.tr/health"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-status"
+          >
+            <span
+              style={{
+                width: "7px",
+                height: "7px",
+                borderRadius: "50%",
+                background: "var(--success)",
+                display: "inline-block",
+              }}
+            />
+            API Durumu
+          </a>
+        </div>
       </div>
+
+      <style>{`
+        .footer-link {
+          font-size: 0.875rem;
+          color: var(--ink-3);
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .footer-link:hover { color: var(--ink); }
+        .footer-status {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.8rem;
+          color: var(--ink-4);
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .footer-status:hover { color: var(--ink-2); }
+      `}</style>
     </footer>
   );
 }

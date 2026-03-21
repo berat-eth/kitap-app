@@ -1,82 +1,232 @@
+import Link from "next/link";
 import { BookCard } from "@/components/book-card";
 import { HeroIntro } from "@/components/hero-intro";
 import { SectionHeading } from "@/components/section-heading";
-import { getFeaturedBooks, getPopularBooks } from "@/lib/api";
+import { getFeaturedBooks, getPopularBooks, getCategories } from "@/lib/api";
 
 export default async function Home() {
-  const [featured, popular] = await Promise.all([
+  const [featured, popular, categories] = await Promise.all([
     getFeaturedBooks(),
     getPopularBooks(),
+    getCategories(),
   ]);
 
   return (
     <>
-      <section className="relative z-[1] px-5 pb-6 pt-4 md:px-8 md:pb-10 md:pt-6">
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-[var(--stroke)] bg-[var(--surface)] shadow-[var(--shadow-soft)] md:rounded-[2.25rem]">
-          <div
-            className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[var(--accent-soft)] blur-3xl"
-            aria-hidden
-          />
-          <div
-            className="pointer-events-none absolute -bottom-16 left-1/4 h-56 w-56 rounded-full bg-orange-100/80 blur-3xl"
-            aria-hidden
-          />
-          <div className="relative grid gap-12 px-6 py-14 md:grid-cols-[1.1fr_minmax(0,0.9fr)] md:items-center md:px-14 md:py-20">
-            <HeroIntro />
-            <div className="relative hidden min-h-[280px] md:block" aria-hidden>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="relative h-[min(100%,320px)] w-[min(100%,280px)] rotate-3 rounded-2xl border border-[var(--stroke)] bg-gradient-to-br from-teal-50 via-white to-orange-50/90 shadow-[var(--shadow-card)]" />
-                <div className="absolute -bottom-4 -left-2 h-24 w-24 rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] shadow-lg" />
-                <div className="absolute -right-1 top-8 h-16 w-40 rounded-full bg-[var(--accent)]/15 blur-xl" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroIntro />
 
-      <main className="relative z-[1] mx-auto max-w-6xl px-5 py-12 md:px-8 md:py-20">
-        <section id="one-cikan">
+      {/* Featured Books */}
+      <section
+        id="one-cikan"
+        aria-labelledby="featured-heading"
+        className="section"
+      >
+        <div className="container">
           <SectionHeading
-            eyebrow="Öne çıkanlar"
-            title="Yeni ve seçilmiş başlıklar"
-            description="Kapak ve süre bilgisiyle hızlıca göz atın; detay için karta tıklayın."
+            titleId="featured-heading"
+            eyebrow="Editörün Seçimi"
+            title="Öne Çıkan Kitaplar"
+            description="Uzman editörlerimiz tarafından seçilen, en çok beğenilen sesli kitaplar."
           />
-          {featured.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[var(--stroke-strong)] bg-[var(--surface)] px-6 py-10 text-center">
-              <p className="text-[var(--muted)]">
-                Şu an listelenecek kitap yok. Backend&apos;in çalıştığından ve{" "}
-                <code className="rounded-md bg-[var(--surface-muted)] px-2 py-0.5 text-xs font-medium text-[var(--ink-bright)]">
-                  NEXT_PUBLIC_API_URL
-                </code>{" "}
-                ayarının doğru olduğundan emin olun.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 lg:gap-8">
+          {featured.length > 0 ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                gap: "20px",
+              }}
+            >
               {featured.map((book, i) => (
                 <BookCard key={book.id} book={book} index={i} />
               ))}
             </div>
-          )}
-        </section>
-
-        <section className="mt-20 md:mt-28">
-          <SectionHeading
-            eyebrow="Popüler"
-            title="En çok dinlenenler"
-            description="Dinlenme sayısına göre sıralanan başlıklar."
-          />
-          {popular.length === 0 ? (
-            <p className="text-[var(--muted)]">Popüler liste henüz dolmuyor.</p>
           ) : (
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 lg:gap-8">
-              {popular.map((book, i) => (
-                <BookCard key={`pop-${book.id}`} book={book} index={i} />
+            <EmptyState message="Henüz öne çıkan kitap yok." />
+          )}
+        </div>
+      </section>
+
+      {/* Categories Strip */}
+      {categories.length > 0 && (
+        <section aria-labelledby="categories-heading" style={{ paddingBlock: "0 clamp(48px, 8vw, 80px)" }}>
+          <div className="container">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "24px",
+                flexWrap: "wrap",
+                gap: "12px",
+              }}
+            >
+              <SectionHeading
+                titleId="categories-heading"
+                eyebrow="Türler"
+                title="Kategoriler"
+              />
+              <Link
+                href="/kategoriler"
+                className="btn btn-ghost"
+                style={{ fontSize: "0.85rem", flexShrink: 0 }}
+              >
+                Tümünü Gör
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                flexWrap: "wrap",
+              }}
+            >
+              {categories.slice(0, 12).map((cat, i) => (
+                <Link
+                  key={cat.id}
+                  href={`/kitaplar?category=${cat.slug}`}
+                  className={`category-pill animate-fade-up delay-${Math.min(i + 1, 8)}`}
+                >
+                  {cat.icon && <span aria-hidden="true">{cat.icon}</span>}
+                  {cat.name}
+                </Link>
               ))}
             </div>
-          )}
+          </div>
         </section>
-      </main>
+      )}
+
+      {/* Divider */}
+      <div className="container">
+        <div className="divider" />
+      </div>
+
+      {/* Popular Books */}
+      <section
+        aria-labelledby="popular-heading"
+        className="section"
+      >
+        <div className="container">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "16px",
+              marginBottom: "clamp(32px, 5vw, 48px)",
+            }}
+          >
+            <SectionHeading
+              titleId="popular-heading"
+              eyebrow="Trend"
+              title="Popüler Kitaplar"
+              description="En çok dinlenen ve beğenilen sesli kitaplar."
+            />
+            <Link
+              href="/kitaplar?sort=popular"
+              className="btn btn-secondary"
+              style={{ flexShrink: 0, alignSelf: "flex-start" }}
+            >
+              Tümünü Gör
+            </Link>
+          </div>
+          {popular.length > 0 ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                gap: "20px",
+              }}
+            >
+              {popular.map((book, i) => (
+                <BookCard key={book.id} book={book} index={i} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState message="Henüz popüler kitap yok." />
+          )}
+        </div>
+      </section>
+
+      {/* CTA Banner */}
+      <section aria-labelledby="cta-heading" style={{ paddingBottom: "clamp(48px, 8vw, 96px)" }}>
+        <div className="container">
+          <div
+            style={{
+              background: "linear-gradient(135deg, var(--surface-2) 0%, var(--surface-3) 100%)",
+              border: "1px solid var(--border-2)",
+              borderRadius: "var(--radius-xl)",
+              padding: "clamp(32px, 6vw, 64px)",
+              textAlign: "center",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              top: "-50%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "600px",
+              height: "300px",
+              background: "radial-gradient(ellipse, rgba(255,255,255,0.04) 0%, transparent 70%)",
+                pointerEvents: "none",
+              }}
+            />
+            <span className="badge badge-amber" style={{ marginBottom: "20px" }}>
+              Hepsini Keşfet
+            </span>
+            <h2
+              id="cta-heading"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(1.8rem, 4vw, 3rem)",
+                fontWeight: "700",
+                color: "var(--ink)",
+                marginBottom: "16px",
+                letterSpacing: "-0.025em",
+              }}
+            >
+              Tüm kataloğu keşfetmeye hazır mısın?
+            </h2>
+            <p
+              style={{
+                color: "var(--ink-2)",
+                fontSize: "1rem",
+                marginBottom: "32px",
+                maxWidth: "480px",
+                marginInline: "auto",
+              }}
+            >
+              Yüzlerce sesli kitap seni bekliyor. Hemen başla, ücretsiz dinle.
+            </p>
+            <Link href="/kitaplar" className="btn btn-primary" style={{ padding: "14px 32px", fontSize: "1rem" }}>
+              Tüm Kitaplara Bak
+            </Link>
+          </div>
+        </div>
+      </section>
     </>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div
+      role="status"
+      style={{
+        textAlign: "center",
+        padding: "64px 24px",
+        color: "var(--ink-3)",
+        fontSize: "0.95rem",
+      }}
+    >
+      {message}
+    </div>
   );
 }

@@ -26,130 +26,310 @@ export default async function BookPage({ params }: Props) {
   const cover = resolveMediaUrl(book.cover_image);
 
   return (
-    <main className="relative z-[1] mx-auto max-w-6xl px-5 py-12 md:px-8 md:py-16">
-      <Link
-        href="/kitaplar"
-        className="inline-flex items-center gap-1 text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline"
-      >
-        ← Kataloga dön
-      </Link>
+    <div className="section">
+      <div className="container">
+        {/* Back link */}
+        <Link
+          href="/kitaplar"
+          aria-label="Kitap kataloğuna dön"
+          className="back-link"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
+          Kataloğa Dön
+        </Link>
 
-      <div className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,300px)_1fr] lg:items-start lg:gap-16">
-        <div className="relative mx-auto w-full max-w-[280px] lg:mx-0 lg:max-w-none">
-          <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-[var(--stroke)] bg-[var(--surface-muted)] shadow-[var(--shadow-card)] lg:rotate-[-2deg]">
-            {cover ? (
-              <Image
-                src={cover}
-                alt={`${book.title} kapak görseli`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 280px, 300px"
-                priority
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center font-display text-4xl text-[var(--muted)]">
-                {book.title.slice(0, 2).toUpperCase()}
+        {/* Book Hero */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 280px) 1fr",
+            gap: "clamp(32px, 6vw, 64px)",
+            alignItems: "start",
+            marginBottom: "clamp(48px, 8vw, 80px)",
+          }}
+          className="book-detail-grid"
+        >
+          {/* Cover */}
+          <div
+            className="animate-scale-in"
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: "280px",
+              margin: "0 auto",
+            }}
+          >
+            <figure style={{ margin: 0 }}>
+              <div
+                style={{
+                  position: "relative",
+                  aspectRatio: "2/3",
+                  borderRadius: "var(--radius-lg)",
+                  overflow: "hidden",
+                  border: "1px solid var(--border-2)",
+                  boxShadow: "var(--shadow-card)",
+                  background: "var(--surface-2)",
+                  transform: "rotate(-1.5deg)",
+                }}
+              >
+                {cover ? (
+                  <Image
+                    src={cover}
+                    alt=""
+                    fill
+                    style={{ objectFit: "cover" }}
+                    sizes="280px"
+                    priority
+                    aria-hidden
+                  />
+                ) : (
+                  <div
+                    style={{
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "var(--font-display)",
+                      fontSize: "4rem",
+                      fontWeight: "900",
+                      color: "#ffffff",
+                      opacity: 0.3,
+                    }}
+                    aria-hidden
+                  >
+                    {book.title.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <figcaption className="sr-only">{book.title} kapak görseli</figcaption>
+            </figure>
+
+            {/* Glow decoration */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                bottom: "-20px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "80%",
+                height: "40px",
+                background: "radial-gradient(ellipse, rgba(255,255,255,0.08) 0%, transparent 70%)",
+                filter: "blur(12px)",
+                pointerEvents: "none",
+              }}
+            />
+          </div>
+
+          {/* Info */}
+          <div className="animate-fade-up">
+            {book.category?.name && (
+              <span className="badge badge-gold" style={{ marginBottom: "16px" }}>
+                {book.category.name}
+              </span>
+            )}
+
+            <h1
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(1.8rem, 4vw, 3rem)",
+                fontWeight: "900",
+                lineHeight: "1.1",
+                letterSpacing: "-0.03em",
+                color: "var(--ink)",
+                marginBottom: "12px",
+              }}
+            >
+              {book.title}
+            </h1>
+
+            <p
+              style={{
+                fontSize: "1.1rem",
+                color: "var(--ink-2)",
+                marginBottom: "6px",
+                fontStyle: "italic",
+              }}
+            >
+              {book.author}
+            </p>
+
+            {book.narrator && (
+              <p style={{ fontSize: "0.875rem", color: "var(--ink-3)", marginBottom: "24px" }}>
+                Seslendiren:{" "}
+                <span style={{ color: "var(--ink-2)", fontWeight: "500" }}>{book.narrator}</span>
+              </p>
+            )}
+
+            {/* Stats */}
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px",
+                marginBottom: "28px",
+                marginTop: book.narrator ? 0 : "24px",
+              }}
+            >
+              <div className="stat-card" style={{ flex: "1 1 100px", minWidth: "100px" }}>
+                <div style={{ fontSize: "0.7rem", color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>
+                  Süre
+                </div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: "700", color: "var(--ink)" }}>
+                  {formatDuration(book.duration)}
+                </div>
+              </div>
+              <div className="stat-card" style={{ flex: "1 1 100px", minWidth: "100px" }}>
+                <div style={{ fontSize: "0.7rem", color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>
+                  Puan
+                </div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: "700",                 color: "#d0d0d0" }}>
+                  {book.rating > 0 ? (
+                    <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      {book.rating.toFixed(1)}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    </span>
+                  ) : "—"}
+                </div>
+              </div>
+              <div className="stat-card" style={{ flex: "1 1 100px", minWidth: "100px" }}>
+                <div style={{ fontSize: "0.7rem", color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>
+                  Dinlenme
+                </div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: "700", color: "var(--ink)" }}>
+                  {(book.play_count ?? 0).toLocaleString("tr-TR")}
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            {book.description && (
+              <div
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-lg)",
+                  padding: "24px",
+                  maxWidth: "600px",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "0.95rem",
+                    lineHeight: "1.75",
+                    color: "var(--ink-2)",
+                    whiteSpace: "pre-line",
+                  }}
+                >
+                  {book.description}
+                </p>
               </div>
             )}
           </div>
-          <div
-            className="pointer-events-none absolute -bottom-5 -right-5 hidden h-28 w-28 rounded-full border border-[var(--stroke)] bg-[var(--accent-soft)] lg:block"
-            aria-hidden
+        </div>
+
+        {/* Chapters */}
+        <section aria-labelledby="heading-chapters">
+          <SectionHeading
+            titleId="heading-chapters"
+            eyebrow="Bölümler"
+            title="Dinle"
+            description="Tarayıcıda önizleme. Kesintisiz dinleme için mobil uygulamayı kullanın."
           />
-        </div>
 
-        <div>
-          {book.category?.name ? (
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
-              {book.category.name}
+          {chapters.length === 0 ? (
+            <p style={{ color: "var(--ink-3)" }} role="status">
+              Bu kitap için bölüm listesi yok.
             </p>
-          ) : null}
-          <h1 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-tight text-[var(--ink-bright)] md:text-[2.75rem]">
-            {book.title}
-          </h1>
-          <p className="mt-4 text-lg text-[var(--muted)]">{book.author}</p>
-          {book.narrator ? (
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              Seslendiren:{" "}
-              <span className="font-medium text-[var(--ink)]">{book.narrator}</span>
-            </p>
-          ) : null}
-          <dl className="mt-8 flex flex-wrap gap-8 rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] px-6 py-5 text-sm shadow-[var(--shadow-soft)]">
-            <div>
-              <dt className="text-[var(--muted)]">Süre</dt>
-              <dd className="mt-1 font-semibold text-[var(--ink-bright)]">
-                {formatDuration(book.duration)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-[var(--muted)]">Puan</dt>
-              <dd className="mt-1 font-semibold text-[var(--ink-bright)]">
-                {book.rating > 0 ? book.rating.toFixed(1) : "—"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-[var(--muted)]">Dinlenme</dt>
-              <dd className="mt-1 font-semibold text-[var(--ink-bright)]">
-                {book.play_count ?? 0}
-              </dd>
-            </div>
-          </dl>
-          {book.description ? (
-            <div className="mt-10 max-w-2xl rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] p-6 shadow-[var(--shadow-soft)] md:p-8">
-              <p className="whitespace-pre-line leading-relaxed text-[var(--ink)]">
-                {book.description}
-              </p>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      <section className="mt-16 md:mt-24">
-        <SectionHeading
-          eyebrow="Bölümler"
-          title="Dinle"
-          description="Tarayıcıda önizleme. Kesintisiz dinleme için mobil uygulamayı kullanın."
-        />
-        {chapters.length === 0 ? (
-          <p className="text-[var(--muted)]">Bu kitap için bölüm listesi yok.</p>
-        ) : (
-          <ol className="space-y-3">
-            {chapters.map((ch, idx) => {
-              const src = resolveMediaUrl(ch.audio_url);
-              return (
-                <li
-                  key={String(ch.id)}
-                  className="flex flex-col gap-4 rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] p-5 shadow-sm md:flex-row md:items-center md:justify-between"
-                >
-                  <div className="flex items-start gap-4">
-                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--page-bg)] text-xs font-bold text-[var(--accent)]">
+          ) : (
+            <ul
+              style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}
+              role="list"
+            >
+              {chapters.map((ch, idx) => {
+                const src = resolveMediaUrl(ch.audio_url);
+                const label = `${book.title}: ${ch.title}. Ses oynatıcısı.`;
+                return (
+                  <li
+                    key={String(ch.id)}
+                    className="chapter-row animate-fade-up"
+                    style={{ animationDelay: `${Math.min(idx * 40, 320)}ms` }}
+                  >
+                    {/* Number */}
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        flexShrink: 0,
+                        width: "36px",
+                        height: "36px",
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "0.75rem",
+                        fontWeight: "700",
+                        color: "#d0d0d0",
+                      }}
+                    >
                       {idx + 1}
                     </span>
-                    <div>
-                      <p className="font-semibold text-[var(--ink-bright)]">{ch.title}</p>
-                      <p className="text-xs text-[var(--muted)]">
+
+                    {/* Title + duration */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontWeight: "600", color: "var(--ink)", fontSize: "0.9rem", marginBottom: "2px" }}>
+                        <span className="sr-only">Bölüm {idx + 1}. </span>
+                        {ch.title}
+                      </p>
+                      <p style={{ fontSize: "0.75rem", color: "var(--ink-3)" }}>
                         {formatDuration(ch.duration)}
                       </p>
                     </div>
-                  </div>
-                  {src ? (
-                    <audio
-                      controls
-                      preload="none"
-                      className="h-10 w-full max-w-md accent-[var(--accent)]"
-                      src={src}
-                    >
-                      Tarayıcı ses oynatmayı desteklemiyor.
-                    </audio>
-                  ) : (
-                    <span className="text-xs text-[var(--muted)]">Ses dosyası yok</span>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        )}
-      </section>
-    </main>
+
+                    {/* Audio */}
+                    {src ? (
+                      <audio
+                        controls
+                        preload="none"
+                        className="audio-player"
+                        style={{ maxWidth: "320px", flexShrink: 0 }}
+                        src={src}
+                        aria-label={label}
+                      >
+                        Tarayıcı ses oynatmayı desteklemiyor.
+                      </audio>
+                    ) : (
+                      <span style={{ fontSize: "0.75rem", color: "var(--ink-4)" }} role="status">
+                        Ses dosyası yok
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .book-detail-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .chapter-row {
+            flex-wrap: wrap;
+          }
+          .audio-player {
+            max-width: 100% !important;
+            width: 100% !important;
+          }
+        }
+      `}</style>
+    </div>
   );
 }

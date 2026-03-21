@@ -2,22 +2,57 @@ import Link from "next/link";
 
 export default function BookNotFound() {
   return (
-    <main className="relative z-[1] mx-auto max-w-6xl px-5 py-24 md:px-8">
-      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--accent)]">
-        404
-      </p>
-      <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--ink-bright)]">
-        Bu kitap bulunamadı
-      </h1>
-      <p className="mt-4 max-w-md text-[var(--muted)]">
-        Bağlantı eski olabilir veya içerik kaldırılmış olabilir.
-      </p>
-      <Link
-        href="/kitaplar"
-        className="mt-8 inline-block text-sm font-medium text-[var(--accent-2)] underline-offset-4 hover:underline"
-      >
-        Kataloga dön
-      </Link>
-    </main>
+    <div
+      style={{
+        minHeight: "60vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "48px 24px",
+      }}
+    >
+      <div style={{ textAlign: "center", maxWidth: "440px" }}>
+        <div
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "6rem",
+            fontWeight: "900",
+            lineHeight: "1",
+            marginBottom: "16px",
+            background: "linear-gradient(135deg, #ffffff 0%, #888888 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+          aria-hidden="true"
+        >
+          404
+        </div>
+        <h1
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "1.6rem",
+            fontWeight: "700",
+            color: "var(--ink)",
+            marginBottom: "12px",
+            letterSpacing: "-0.02em",
+          }}
+        >
+          Kitap bulunamadı
+        </h1>
+        <p style={{ color: "var(--ink-2)", marginBottom: "32px", lineHeight: "1.6" }}>
+          Aradığınız kitap mevcut değil veya kaldırılmış olabilir.
+          Katalogdan başka kitaplara göz atabilirsiniz.
+        </p>
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+          <Link href="/kitaplar" className="btn btn-primary">
+            Kataloğa Dön
+          </Link>
+          <Link href="/" className="btn btn-secondary">
+            Ana Sayfa
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }

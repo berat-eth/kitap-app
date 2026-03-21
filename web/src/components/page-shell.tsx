@@ -1,13 +1,16 @@
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "./site-header";
+import { SiteFooter } from "./site-footer";
+import { SkipLink } from "./skip-link";
 
 export function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex min-h-full flex-col">
-      <div className="noise-overlay" aria-hidden />
-      <div className="mesh-bg" aria-hidden />
+    <div className="relative flex min-h-dvh flex-col">
+      <SkipLink />
+      <div className="page-bg" aria-hidden="true" />
       <SiteHeader />
-      <div className="flex-1">{children}</div>
+      <main id="main-content" className="relative z-10 flex-1">
+        {children}
+      </main>
       <SiteFooter />
     </div>
   );
