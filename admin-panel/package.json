@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node server.js",
     "typecheck": "tsc --noEmit",
-    "build": "node ./node_modules/typescript/lib/tsc.js --noEmit && vite build",
+    "build": "vite build",
     "start": "cross-env NODE_ENV=production node server.js",
     "preview": "vite preview"
   },
