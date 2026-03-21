@@ -23,27 +23,35 @@ sudo bash deploy/deploy.sh
   - `www.wirbooks.com.tr`
   - `api.wirbooks.com.tr`
   - `admin.wirbooks.com.tr`
-- `/root/data/.env` production değerleriyle hazır (aşağıya bakın)
+- `/root/data/.env` production değerleriyle hazır — **tek dosya**; API, Next.js ve admin panel aynı dosyayı okur (`ENV_PATH` ile başka yol da verilebilir). Şablon: repoda `/.env.example`
 
-## `/root/data/.env` Örneği
+## `/root/data/.env` (özet)
 
 ```env
-# Veritabanı
+# Backend
+PORT=3001
 DB_HOST=localhost
 DB_USER=wirbooks
 DB_PASSWORD=...
 DB_NAME=wirbooks
-
-# API
 API_KEY=...
+ADMIN_API_KEY=...
+UPLOAD_BASE_URL=https://api.wirbooks.com.tr
 
-# Next.js web
+# Next.js (build/start sırasında next.config yükler)
 NEXT_PUBLIC_API_URL=https://api.wirbooks.com.tr/api
 NEXT_PUBLIC_API_KEY=...
 
-# Admin paneli
-SESSION_SECRET=...          # güçlü rastgele string
+# Admin panel (PORT ile çakışmaması için ayrı port anahtarı)
+ADMIN_PANEL_PORT=3050
+BACKEND_URL=http://127.0.0.1:3001
+SESSION_SECRET=...
+ADMIN_USERNAME=...
+ADMIN_PASSWORD=...
+# ADMIN_API_KEY yukarıdaki ile aynı olmalı
 ```
+
+Ayrıntılı liste için proje kökündeki **`.env.example`** dosyasına bakın.
 
 ## Sunucu Dizinleri
 

@@ -6,9 +6,18 @@
 // NOTE: This uses deterministic UUIDs so running it multiple times won't
 // spam duplicate rows (unless --reset is provided).
 
+const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
-const envPath = process.env.ENV_PATH || '/root/data/.env';
-dotenv.config({ path: envPath });
+
+function resolveEnvPath() {
+  if (process.env.ENV_PATH) return process.env.ENV_PATH;
+  const central = '/root/data/.env';
+  if (fs.existsSync(central)) return central;
+  return path.join(__dirname, '..', '..', '.env');
+}
+
+dotenv.config({ path: resolveEnvPath(), override: true });
 
 const { initDb } = require('./init');
 const pool = require('./pool');

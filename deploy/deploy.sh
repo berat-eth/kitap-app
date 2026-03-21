@@ -246,7 +246,7 @@ module.exports = {
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
-        PORT: 3050,
+        ADMIN_PANEL_PORT: 3050,
         BACKEND_URL: 'http://127.0.0.1:3001',
         SESSION_SECRET: '${SESSION_SECRET:-change-me-in-env}',
         TRUST_SECURE_COOKIE: 'true',

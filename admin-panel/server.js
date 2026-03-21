@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import crypto from 'crypto';
 import http from 'http';
 import fs from 'fs';
@@ -8,6 +8,19 @@ import express from 'express';
 import session from 'express-session';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { createServer as createViteServer } from 'vite';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** Tek .env: önce ENV_PATH, sonra /root/data/.env, yoksa admin-panel/.env */
+function resolveEnvPath() {
+  if (process.env.ENV_PATH) return process.env.ENV_PATH;
+  const central = '/root/data/.env';
+  if (fs.existsSync(central)) return central;
+  return path.join(__dirname, '.env');
+}
+
+const _envFile = resolveEnvPath();
+dotenv.config({ path: _envFile, override: true });
 
 function sha256Utf8(s) {
   return crypto.createHash('sha256').update(String(s), 'utf8').digest();
@@ -23,9 +36,9 @@ function safeCredentialEq(provided, expected) {
   }
 }
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProd = process.env.NODE_ENV === 'production';
-const PORT = Number(process.env.PORT) || 3050;
+/** Birleşik .env içinde PORT backend ile çakışmasın diye ADMIN_PANEL_PORT kullanın */
+const PORT = Number(process.env.ADMIN_PANEL_PORT) || 3050;
 const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:3001';
 
 async function main() {
@@ -176,6 +189,8 @@ async function main() {
   server.listen(PORT, () => {
     // eslint-disable-next-line no-console
     console.log(`[wirbooks-admin] ${isProd ? 'production' : 'dev'} → http://127.0.0.1:${PORT}`);
+    // eslint-disable-next-line no-console
+    console.log(`[wirbooks-admin] env file → ${_envFile}`);
     // eslint-disable-next-line no-console
     console.log(`[wirbooks-admin] backend proxy → ${BACKEND_URL}`);
   });

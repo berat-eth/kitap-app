@@ -1,6 +1,16 @@
-// Tek env dosyası: /root/data/.env (deploy script ile)
+// Tek env: ENV_PATH → /root/data/.env (varsa) → backend/.env
+const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
-const envPath = process.env.ENV_PATH || '/root/data/.env';
+
+function resolveEnvPath() {
+  if (process.env.ENV_PATH) return process.env.ENV_PATH;
+  const central = '/root/data/.env';
+  if (fs.existsSync(central)) return central;
+  return path.join(__dirname, '..', '.env');
+}
+
+const envPath = resolveEnvPath();
 const dotenvResult = dotenv.config({ path: envPath, override: true });
 
 const http = require('http');
