@@ -35,6 +35,32 @@ export function HeroIntro() {
           Öne çıkanlar
         </a>
       </div>
+      <p className="hero-reveal mt-6 text-sm text-[var(--muted)] [animation-delay:320ms]">
+        <Link
+          href="/dinle"
+          className="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
+        >
+          Dinleme rehberi
+        </Link>
+        <span className="mx-2 text-[var(--stroke-strong)]" aria-hidden>
+          ·
+        </span>
+        <Link
+          href="/oynatma"
+          className="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
+        >
+          Oynatma
+        </Link>
+        <span className="mx-2 text-[var(--stroke-strong)]" aria-hidden>
+          ·
+        </span>
+        <Link
+          href="/bagis"
+          className="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
+        >
+          Bağış
+        </Link>
+      </p>
     </div>
   );
 }
