@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-ink-950 text-zinc-200 min-h-screen;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 100% -20%, rgba(232, 165, 75, 0.12), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 0% 100%, rgba(99, 102, 241, 0.06), transparent 50%);
+}
