@@ -13,6 +13,7 @@ const categoriesRoutes = require('./routes/categories.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const submitRoutes = require('./routes/submit.routes');
 const chaptersRoutes = require('./routes/chapters.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 function createApp() {
   const app = express();
@@ -59,6 +60,7 @@ function createApp() {
   app.use('/api/upload', uploadRoutes);
   app.use('/api/submit-book', submitRoutes);
   app.use('/api/chapters', chaptersRoutes);
+  app.use('/api/admin', adminRoutes);
 
   app.get('/api/health', (req, res) => {
     res.json({ success: true, message: 'Wirbooks API', timestamp: new Date().toISOString() });

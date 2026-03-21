@@ -31,6 +31,58 @@ interface ApiResponse<T> {
   };
 }
 
+// Backend payload'ları (web UI contract'ına map etmek için)
+interface ApiBook {
+  id: string;
+  title: string;
+  author: string;
+  description?: string | null;
+  narrator?: string | null;
+  cover_image?: string | null;
+  cover_url?: string | null;
+  duration?: number;
+  duration_seconds?: number;
+  rating?: number;
+  play_count?: number;
+  category?: string | { name?: string | null } | null;
+}
+
+interface ApiChapter {
+  id: string;
+  book_id?: string;
+  title: string;
+  order_no?: number;
+  order_num?: number;
+  audio_url?: string;
+}
+
+function mapApiBookToWebBook(api: ApiBook): Book {
+  const coverImage = api.cover_image || api.cover_url || '';
+  const categoryName =
+    typeof api.category === 'string' ? api.category : (api.category as any)?.name || '';
+
+  return {
+    id: api.id,
+    title: api.title,
+    author: api.author,
+    description: api.description ?? '',
+    coverImage,
+    category: categoryName,
+    duration: api.duration ?? api.duration_seconds ?? undefined,
+  };
+}
+
+function mapApiChapterToWebChapter(api: ApiChapter): Chapter {
+  return {
+    id: api.id,
+    bookId: api.book_id || '',
+    title: api.title,
+    order: api.order_no ?? api.order_num ?? 0,
+    audioUrl: api.audio_url || '',
+    duration: undefined,
+  };
+}
+
 // Fetch wrapper
 const apiFetch = async <T>(
   endpoint: string,
@@ -100,41 +152,41 @@ export const getBooks = async (params?: {
   const query = queryParams.toString();
   const endpoint = `/books${query ? `?${query}` : ''}`;
   
-  const result = await apiFetch<Book[]>(endpoint);
-  return result.success && result.data ? result.data : [];
+  const result = await apiFetch<ApiBook[]>(endpoint);
+  return result.success && result.data ? result.data.map(mapApiBookToWebBook) : [];
 };
 
 export const getBookById = async (id: string): Promise<Book> => {
-  const result = await apiFetch<Book>(`/books/${id}`);
+  const result = await apiFetch<ApiBook>(`/books/${id}`);
   
   if (!result.success || !result.data) {
     throw new Error(result.error || 'Kitap bulunamadı');
   }
   
-  return result.data;
+  return mapApiBookToWebBook(result.data);
 };
 
 export const getFeaturedBooks = async (): Promise<Book[]> => {
-  const result = await apiFetch<Book[]>('/books/featured');
-  return result.success && result.data ? result.data : [];
+  const result = await apiFetch<ApiBook[]>('/books/featured');
+  return result.success && result.data ? result.data.map(mapApiBookToWebBook) : [];
 };
 
 export const getPopularBooks = async (): Promise<Book[]> => {
-  const result = await apiFetch<Book[]>('/books/popular');
-  return result.success && result.data ? result.data : [];
+  const result = await apiFetch<ApiBook[]>('/books/popular');
+  return result.success && result.data ? result.data.map(mapApiBookToWebBook) : [];
 };
 
 export const searchBooks = async (query: string): Promise<Book[]> => {
   if (!query.trim()) return [];
   
-  const result = await apiFetch<Book[]>(`/books/search?q=${encodeURIComponent(query)}`);
-  return result.success && result.data ? result.data : [];
+  const result = await apiFetch<ApiBook[]>(`/books/search?q=${encodeURIComponent(query)}`);
+  return result.success && result.data ? result.data.map(mapApiBookToWebBook) : [];
 };
 
 // Bölüm API'leri
 export const getChapters = async (bookId: string): Promise<Chapter[]> => {
-  const result = await apiFetch<Chapter[]>(`/books/${bookId}/chapters`);
-  return result.success && result.data ? result.data : [];
+  const result = await apiFetch<ApiChapter[]>(`/books/${bookId}/chapters`);
+  return result.success && result.data ? result.data.map(mapApiChapterToWebChapter) : [];
 };
 
 export const getAudioUrl = async (chapterId: string): Promise<string> => {
@@ -166,8 +218,8 @@ export const getCategoriesWithDetails = async (): Promise<CategoryWithCount[]> =
 };
 
 export const getBooksByCategory = async (slug: string): Promise<Book[]> => {
-  const result = await apiFetch<{ books: Book[] }>(`/categories/${slug}/books`);
-  return result.success && result.data?.books ? result.data.books : [];
+  const result = await apiFetch<{ books: ApiBook[] }>(`/categories/${slug}/books`);
+  return result.success && result.data?.books ? result.data.books.map(mapApiBookToWebBook) : [];
 };
 
 // Progress API'leri (Device ID gerekli)
@@ -191,8 +243,8 @@ export const saveProgress = async (
 
 // Favoriler API'leri
 export const getFavorites = async (): Promise<Book[]> => {
-  const result = await apiFetch<Book[]>('/device/favorites');
-  return result.success && result.data ? result.data : [];
+  const result = await apiFetch<ApiBook[]>('/device/favorites');
+  return result.success && result.data ? result.data.map(mapApiBookToWebBook) : [];
 };
 
 export const addToFavorites = async (bookId: string): Promise<boolean> => {

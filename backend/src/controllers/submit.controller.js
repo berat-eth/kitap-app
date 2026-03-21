@@ -58,14 +58,18 @@ async function submitBook(req, res) {
     // Pending: client admin approval bekliyor olabilir
     await pool.query(
       `
-      INSERT INTO books (id, title, author, description, category_id, cover_url, duration_seconds, play_count, rating, is_premium, is_active)
-      VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0)
+      INSERT INTO books
+        (id, title, author, description, device_id, narrator, category_id, cover_url, duration_seconds, play_count, rating, is_premium, status, admin_note, is_active)
+      VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 'pending', NULL, 0)
       `,
       [
         bookId,
         String(title).trim(),
         String(author).trim(),
         description ? String(description) : null,
+        req.deviceId || null,
+        narrator ? String(narrator) : null,
         categoryRow.id,
         cover_image ? String(cover_image) : null,
       ]

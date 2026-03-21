@@ -4,6 +4,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
 const ADMIN_KEY = process.env.ADMIN_API_KEY || '';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   if (!ADMIN_KEY) {
     return NextResponse.json({ success: false, error: 'Admin API key not configured' }, { status: 500 });
@@ -19,6 +22,8 @@ export async function GET(request: NextRequest) {
         'X-API-Key': API_KEY,
         'X-Admin-Key': ADMIN_KEY,
       },
+      cache: 'no-store',
+      next: { revalidate: 0 },
     });
     const data = await res.json();
     return NextResponse.json(data);
