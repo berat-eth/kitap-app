@@ -121,7 +121,9 @@ rsync -av --delete \
 cd $DEPLOY_DIR/web
 npm install
 rm -rf .next
-npm run build
+# Ortak /root/data/.env içindeki NODE_ENV=development burada aktif kalır; Next.js
+# production build bununla bozulur (non-standard NODE_ENV, useContext, 404/500).
+NODE_ENV=production npm run build
 
 # --- 5. Nginx + PM2 ---
 echo ""
