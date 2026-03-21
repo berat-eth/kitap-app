@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import crypto from 'crypto';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
@@ -7,6 +8,20 @@ import express from 'express';
 import session from 'express-session';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { createServer as createViteServer } from 'vite';
+
+function sha256Utf8(s) {
+  return crypto.createHash('sha256').update(String(s), 'utf8').digest();
+}
+
+/** Zamanlama saldırılarına karşı güvenli karşılaştırma (uzunluk sabit: 32 bayt) */
+function safeCredentialEq(provided, expected) {
+  if (expected == null || expected === '') return false;
+  try {
+    return crypto.timingSafeEqual(sha256Utf8(provided), sha256Utf8(expected));
+  } catch {
+    return false;
+  }
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProd = process.env.NODE_ENV === 'production';
@@ -34,16 +49,45 @@ async function main() {
   );
 
   app.post('/api/auth/login', async (req, res) => {
-    const adminKey = req.body?.adminKey != null ? String(req.body.adminKey).trim() : '';
-    if (!adminKey) {
-      return res.status(400).json({ success: false, message: 'Admin anahtarı gerekli' });
+    const envUser = process.env.ADMIN_USERNAME;
+    const envPass = process.env.ADMIN_PASSWORD;
+    const adminApiKey = process.env.ADMIN_API_KEY != null ? String(process.env.ADMIN_API_KEY).trim() : '';
+
+    if (!envUser || !envPass) {
+      return res.status(503).json({
+        success: false,
+        message: 'Sunucu yapılandırması eksik: ADMIN_USERNAME ve ADMIN_PASSWORD .env içinde tanımlı olmalı.',
+      });
     }
+    if (!adminApiKey) {
+      return res.status(503).json({
+        success: false,
+        message: 'Sunucu yapılandırması eksik: ADMIN_API_KEY .env içinde tanımlı olmalı (backend X-Admin-Key).',
+      });
+    }
+
+    const username = req.body?.username != null ? String(req.body.username) : '';
+    const password = req.body?.password != null ? String(req.body.password) : '';
+
+    if (!username.trim() || !password) {
+      return res.status(400).json({ success: false, message: 'Kullanıcı adı ve şifre gerekli' });
+    }
+
+    const userOk = safeCredentialEq(username, envUser);
+    const passOk = safeCredentialEq(password, envPass);
+    if (!userOk || !passOk) {
+      return res.status(401).json({ success: false, message: 'Geçersiz kullanıcı adı veya şifre' });
+    }
+
     try {
       const r = await fetch(`${BACKEND_URL}/api/admin/stats`, {
-        headers: { 'X-Admin-Key': adminKey },
+        headers: { 'X-Admin-Key': adminApiKey },
       });
       if (r.status === 401) {
-        return res.status(401).json({ success: false, message: 'Geçersiz admin anahtarı' });
+        return res.status(401).json({
+          success: false,
+          message: 'ADMIN_API_KEY backend tarafından reddedildi; anahtarı ve BACKEND_URL değerini kontrol edin.',
+        });
       }
       if (!r.ok) {
         const t = await r.text();
@@ -53,7 +97,7 @@ async function main() {
           detail: t.slice(0, 400),
         });
       }
-      req.session.adminKey = adminKey;
+      req.session.adminKey = adminApiKey;
       req.session.authenticated = true;
       return res.json({ success: true });
     } catch (e) {

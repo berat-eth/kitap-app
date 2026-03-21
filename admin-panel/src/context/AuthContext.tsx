@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 type AuthState = {
   ready: boolean;
   authenticated: boolean;
-  login: (adminKey: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -25,12 +25,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void refresh();
   }, [refresh]);
 
-  const login = useCallback(async (adminKey: string) => {
+  const login = useCallback(async (username: string, password: string) => {
     const r = await fetch('/api/auth/login', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminKey }),
+      body: JSON.stringify({ username, password }),
     });
     const j = (await r.json()) as { success?: boolean; message?: string };
     if (!r.ok || !j.success) {

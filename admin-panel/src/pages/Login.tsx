@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { BookMarked, KeyRound } from 'lucide-react';
+import { BookMarked, KeyRound, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const { ready, authenticated, login } = useAuth();
   const navigate = useNavigate();
-  const [key, setKey] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +20,7 @@ export default function Login() {
     setErr(null);
     setLoading(true);
     try {
-      await login(key.trim());
+      await login(username.trim(), password);
       navigate('/', { replace: true });
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Giriş başarısız');
@@ -37,24 +38,43 @@ export default function Login() {
           </div>
           <h1 className="font-display text-2xl font-bold text-white">Wirbooks Admin</h1>
           <p className="mt-2 text-sm text-zinc-500">
-            Sunucudaki <code className="text-accent/90">ADMIN_API_KEY</code> ile giriş yapın. Anahtar tarayıcıya
-            gönderilmez; oturum sunucuda saklanır.
+            Kullanıcı adı ve şifre sunucudaki <code className="text-accent/90">.env</code> dosyasından doğrulanır.
+            Oturum çerezi yalnızca bu sunucuda saklanır; API anahtarı tarayıcıya gönderilmez.
           </p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">
-              Admin API anahtarı
+              Kullanıcı adı
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <input
+                type="text"
+                name="username"
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-ink-950 py-3 pl-10 pr-4 text-sm text-white outline-none ring-accent/40 placeholder:text-zinc-600 focus:border-accent/50 focus:ring-2"
+                placeholder="ADMIN_USERNAME"
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">
+              Şifre
             </label>
             <div className="relative">
               <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
               <input
                 type="password"
-                autoComplete="off"
-                value={key}
-                onChange={(e) => setKey(e.target.value)}
+                name="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-xl border border-white/10 bg-ink-950 py-3 pl-10 pr-4 text-sm text-white outline-none ring-accent/40 placeholder:text-zinc-600 focus:border-accent/50 focus:ring-2"
-                placeholder="X-Admin-Key değeri"
+                placeholder="••••••••"
                 required
               />
             </div>
