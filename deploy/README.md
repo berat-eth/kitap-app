@@ -78,6 +78,8 @@ git pull
 sudo bash deploy/deploy.sh
 ```
 
+**Not:** Script çalışır çalışmaz mevcut **Wirbooks PM2** süreçleri (`wirbooks-api`, `wirbooks-web`, `wirbooks-admin` ve eski `plaxsy-*` isimleri) durdurulup silinir; build bittikten sonra yeniden başlatılır. Deploy süresince API / web / admin kısa süre hizmet dışı kalabilir.
+
 ## Faydalı Komutlar
 
 | Komut | Açıklama |

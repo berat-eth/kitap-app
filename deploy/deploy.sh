@@ -98,6 +98,16 @@ set +a
 export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://$DOMAIN_API/api}"
 export NEXT_PUBLIC_API_KEY="${NEXT_PUBLIC_API_KEY:-${API_KEY:-}}"
 
+# Eski Wirbooks PM2 süreçleri: deploy başında kaldır (kesinti buradan başlar, sonunda yeniden kurulur)
+echo ""
+echo "  PM2: eski Wirbooks süreçleri siliniyor (yeniden kurulum öncesi)..."
+PM2_CLEANUP_APPS=(wirbooks-api wirbooks-web wirbooks-admin plaxsy-api plaxsy-web)
+if command -v pm2 &>/dev/null; then
+  pm2 stop "${PM2_CLEANUP_APPS[@]}" 2>/dev/null || true
+  pm2 delete "${PM2_CLEANUP_APPS[@]}" 2>/dev/null || true
+  pm2 delete wirbooks 2>/dev/null || true
+fi
+
 # --- 3. Backend Deploy ---
 echo ""
 echo "[3/7] Backend deploy ediliyor..."
@@ -144,6 +154,9 @@ NODE_ENV=production npm run build
 # --- 6. Nginx + PM2 ---
 echo ""
 echo "[6/7] Nginx ve PM2 yapılandırılıyor..."
+
+# Eski site symlink (yeniden ln -sf öncesi)
+rm -f /etc/nginx/sites-enabled/wirbooks
 
 cat > /etc/nginx/sites-available/wirbooks << NGINXEOF
 # API
@@ -216,7 +229,10 @@ module.exports = {
       script: 'src/server.js',
       instances: 1,
       exec_mode: 'fork',
-      env: { NODE_ENV: 'production' },
+      env: {
+        NODE_ENV: 'production',
+        ENV_PATH: '${ENV_FILE}',
+      },
       error_file: '${LOG_DIR}/api-error.log',
       out_file: '${LOG_DIR}/api-out.log',
       merge_logs: true,
@@ -230,6 +246,7 @@ module.exports = {
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
+        ENV_PATH: '${ENV_FILE}',
         PORT: 3000,
         NEXT_PUBLIC_API_URL: '${NEXT_PUBLIC_API_URL}',
         NEXT_PUBLIC_API_KEY: '${NEXT_PUBLIC_API_KEY}',
@@ -246,6 +263,7 @@ module.exports = {
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
+        ENV_PATH: '${ENV_FILE}',
         ADMIN_PANEL_PORT: 3050,
         BACKEND_URL: 'http://127.0.0.1:3001',
         SESSION_SECRET: '${SESSION_SECRET:-change-me-in-env}',
@@ -260,11 +278,10 @@ module.exports = {
 PM2EOF
 
 cd "$DEPLOY_DIR"
-pm2 delete wirbooks-api wirbooks-web wirbooks-admin 2>/dev/null || true
-pm2 delete plaxsy-api plaxsy-web 2>/dev/null || true
+echo "  PM2: yeni süreçler başlatılıyor..."
 pm2 start ecosystem.config.js
 pm2 save
-pm2 startup 2>/dev/null | tail -1 | bash 2>/dev/null || true
+pm2 startup 2>/dev/null | tail -n 1 | bash 2>/dev/null || true
 
 # --- 7. SSL ---
 echo ""
