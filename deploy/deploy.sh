@@ -133,7 +133,16 @@ rsync -av --delete \
   "$PROJECT_ROOT/web/" "$DEPLOY_DIR/web/"
 
 cd "$DEPLOY_DIR/web"
+
+# React versiyonlarını tamamen temizle ve düzelt
+echo "  React versiyonları düzeltiliyor..."
+rm -rf node_modules package-lock.json
+npm cache clean --force
+
+# Doğru React versiyonlarını yükle
+npm install react@18.3.1 react-dom@18.3.1 @types/react@18 @types/react-dom@18
 npm install
+
 echo "  Next.js: .next temizleniyor..."
 node scripts/clean-next.cjs
 
@@ -141,32 +150,12 @@ node scripts/clean-next.cjs
 AVAILABLE_MEM=$(free -m | awk 'NR==2{printf "%.0f", $7}')
 echo "  Kullanılabilir bellek: ${AVAILABLE_MEM}MB"
 
-# Swap kontrolü ve gerekirse oluştur
-if [ "$AVAILABLE_MEM" -lt 1024 ]; then
-  echo "  Düşük bellek tespit edildi. Swap kontrolü yapılıyor..."
-  if ! swapon --show | grep -q "/swapfile"; then
-    echo "  Geçici swap dosyası oluşturuluyor..."
-    fallocate -l 2G /tmp/buildswap 2>/dev/null || dd if=/dev/zero of=/tmp/buildswap bs=1M count=2048
-    chmod 600 /tmp/buildswap
-    mkswap /tmp/buildswap
-    swapon /tmp/buildswap
-    TEMP_SWAP_CREATED=true
-  fi
-fi
-
-echo "  Next.js: production build (bellek optimizasyonu ile)..."
-# Bellek sınırını artır ve build'i daha güvenli hale getir
-if ! NODE_OPTIONS="--max-old-space-size=4096" NODE_ENV=production npm run build; then
-  echo "  HATA: Build başarısız. Alternatif yöntem deneniyor..."
-  # Daha düşük bellek sınırı ile tekrar dene
-  NODE_OPTIONS="--max-old-space-size=2048" NODE_ENV=production npm run build
-fi
-
-# Geçici swap'ı temizle
-if [ "$TEMP_SWAP_CREATED" = true ]; then
-  echo "  Geçici swap dosyası temizleniyor..."
-  swapoff /tmp/buildswap 2>/dev/null || true
-  rm -f /tmp/buildswap
+echo "  Next.js: production build (düşük bellek sınırı ile)..."
+# Daha konservatif bellek sınırı kullan
+if ! NODE_OPTIONS="--max-old-space-size=1024 --optimize-for-size" NODE_ENV=production npm run build; then
+  echo "  HATA: Build başarısız. En düşük bellek sınırı ile deneniyor..."
+  # En düşük bellek sınırı
+  NODE_OPTIONS="--max-old-space-size=512 --optimize-for-size" NODE_ENV=production npm run build
 fi
 
 # --- 5. Admin Panel Deploy ---
