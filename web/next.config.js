@@ -1,9 +1,9 @@
-import { existsSync } from "node:fs";
-import path from "node:path";
-import dotenv from "dotenv";
+const { existsSync } = require("node:fs");
+const path = require("node:path");
+const dotenv = require("dotenv");
 
 /** Tek .env: ENV_PATH → /root/data/.env → web/.env */
-function resolveEnvPath(): string {
+function resolveEnvPath() {
   if (process.env.ENV_PATH) return process.env.ENV_PATH;
   if (existsSync("/root/data/.env")) return "/root/data/.env";
   return path.join(process.cwd(), ".env");
@@ -11,9 +11,8 @@ function resolveEnvPath(): string {
 
 dotenv.config({ path: resolveEnvPath(), override: true });
 
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "localhost", pathname: "/**" },
@@ -23,4 +22,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
