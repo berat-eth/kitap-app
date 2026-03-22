@@ -39,7 +39,9 @@ function safeCredentialEq(provided, expected) {
 const isProd = process.env.NODE_ENV === 'production';
 /** Birleşik .env içinde PORT backend ile çakışmasın diye ADMIN_PANEL_PORT kullanın */
 const PORT = Number(process.env.ADMIN_PANEL_PORT) || 3050;
-const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:3001';
+const BACKEND_URL = String(process.env.BACKEND_URL || 'http://127.0.0.1:3001')
+  .trim()
+  .replace(/\/+$/, '');
 
 async function main() {
   const app = express();
@@ -94,7 +96,10 @@ async function main() {
 
     try {
       const r = await fetch(`${BACKEND_URL}/api/admin/stats`, {
-        headers: { 'X-Admin-Key': adminApiKey },
+        headers: {
+          'X-Admin-Key': adminApiKey,
+          ...(process.env.API_KEY ? { 'X-API-Key': String(process.env.API_KEY).trim() } : {}),
+        },
       });
       if (r.status === 401) {
         return res.status(401).json({
