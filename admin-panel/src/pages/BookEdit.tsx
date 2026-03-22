@@ -3,10 +3,14 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react';
 import { apiJson, type SuccessWrap } from '../lib/api';
 import type { AdminBook, AdminChapter, BookStatus, CategoryRow } from '../types';
+import MediaUploadButton from '../components/MediaUploadButton';
+
+const NEW_BOOK_ID = 'new';
 
 export default function BookEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isNew = id === NEW_BOOK_ID;
   const [book, setBook] = useState<AdminBook | null>(null);
   const [chapters, setChapters] = useState<AdminChapter[]>([]);
   const [categories, setCategories] = useState<CategoryRow[]>([]);
@@ -31,20 +35,41 @@ export default function BookEdit() {
     setLoading(true);
     setErr(null);
     try {
-      const [detail, cats] = await Promise.all([
-        apiJson<SuccessWrap<{ book: AdminBook; chapters: AdminChapter[] }>>(`/api/admin/books/${id}`),
-        apiJson<SuccessWrap<CategoryRow[]>>('/api/admin/categories'),
-      ]);
-      setBook(detail.data.book);
-      setForm(detail.data.book);
-      setChapters(detail.data.chapters);
-      setCategories(cats.data);
+      if (isNew) {
+        const cats = await apiJson<SuccessWrap<CategoryRow[]>>('/api/admin/categories');
+        setCategories(cats.data);
+        setBook(null);
+        setChapters([]);
+        setForm({
+          title: '',
+          author: '',
+          narrator: null,
+          description: null,
+          category_id: null,
+          cover_url: null,
+          duration_seconds: 0,
+          play_count: 0,
+          rating: 0,
+          is_premium: false,
+          is_active: true,
+          status: 'approved',
+        });
+      } else {
+        const [detail, cats] = await Promise.all([
+          apiJson<SuccessWrap<{ book: AdminBook; chapters: AdminChapter[] }>>(`/api/admin/books/${id}`),
+          apiJson<SuccessWrap<CategoryRow[]>>('/api/admin/categories'),
+        ]);
+        setBook(detail.data.book);
+        setForm(detail.data.book);
+        setChapters(detail.data.chapters);
+        setCategories(cats.data);
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Yüklenemedi');
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, isNew]);
 
   useEffect(() => {
     void load();
@@ -54,6 +79,7 @@ export default function BookEdit() {
     if (!id) return;
     setBusy(true);
     setSavedMsg(null);
+    setErr(null);
     try {
       const body = {
         title: form.title,
@@ -69,6 +95,18 @@ export default function BookEdit() {
         is_active: form.is_active,
         status: form.status,
       };
+      if (isNew) {
+        if (!String(body.title || '').trim() || !String(body.author || '').trim()) {
+          setErr('Başlık ve yazar gerekli');
+          return;
+        }
+        const res = await apiJson<SuccessWrap<AdminBook>>('/api/admin/books', {
+          method: 'POST',
+          body: JSON.stringify(body),
+        });
+        navigate(`/books/${res.data.id}`, { replace: true });
+        return;
+      }
       const res = await apiJson<SuccessWrap<AdminBook>>(`/api/admin/books/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(body),
@@ -85,7 +123,7 @@ export default function BookEdit() {
   }
 
   async function deleteBook() {
-    if (!id || !confirm('Kitap ve bölümleri kalıcı olarak silinsin mi?')) return;
+    if (!id || isNew || !confirm('Kitap ve bölümleri kalıcı olarak silinsin mi?')) return;
     setBusy(true);
     try {
       await apiJson(`/api/admin/books/${id}`, { method: 'DELETE' });
@@ -98,7 +136,7 @@ export default function BookEdit() {
   }
 
   async function addChapter() {
-    if (!id) return;
+    if (!id || isNew) return;
     setBusy(true);
     try {
       await apiJson<SuccessWrap<AdminChapter>>('/api/admin/chapters', {
@@ -176,7 +214,19 @@ export default function BookEdit() {
     );
   }
 
-  if (err && !book) {
+  if (isNew && err && categories.length === 0) {
+    return (
+      <div>
+        <Link to="/books" className="mb-4 inline-flex items-center gap-1 text-sm text-accent hover:underline">
+          <ArrowLeft className="h-4 w-4" />
+          Kitaplara dön
+        </Link>
+        <p className="text-red-400">{err}</p>
+      </div>
+    );
+  }
+
+  if (err && !book && !isNew) {
     return (
       <div>
         <Link to="/books" className="mb-4 inline-flex items-center gap-1 text-sm text-accent hover:underline">
@@ -196,8 +246,10 @@ export default function BookEdit() {
             <ArrowLeft className="h-4 w-4" />
             Kitaplara dön
           </Link>
-          <h2 className="font-display text-3xl font-bold text-white">{book?.title}</h2>
-          <p className="mt-1 text-zinc-500">Kimlik: {id}</p>
+          <h2 className="font-display text-3xl font-bold text-white">
+            {isNew ? 'Yeni kitap' : book?.title}
+          </h2>
+          <p className="mt-1 text-zinc-500">{isNew ? 'Kaydettikten sonra bölüm ekleyebilirsiniz.' : `Kimlik: ${id}`}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {savedMsg && <span className="text-sm text-emerald-400">{savedMsg}</span>}
@@ -207,16 +259,18 @@ export default function BookEdit() {
             onClick={() => void saveBook()}
             className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-ink-950 hover:bg-accent-glow disabled:opacity-50"
           >
-            Kaydet
+            {isNew ? 'Oluştur' : 'Kaydet'}
           </button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void deleteBook()}
-            className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm font-medium text-rose-400 hover:bg-rose-500/20 disabled:opacity-50"
-          >
-            Kitabı sil
-          </button>
+          {!isNew && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void deleteBook()}
+              className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm font-medium text-rose-400 hover:bg-rose-500/20 disabled:opacity-50"
+            >
+              Kitabı sil
+            </button>
+          )}
         </div>
       </div>
 
@@ -251,10 +305,21 @@ export default function BookEdit() {
             className="w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-white outline-none focus:border-accent/50"
           />
           <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500">Kapak URL</label>
+          <div className="flex flex-wrap items-center gap-2">
+            <MediaUploadButton
+              variant="image"
+              accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
+              label="Görsel yükle"
+              disabled={busy}
+              onUploaded={(url) => setForm((f) => ({ ...f, cover_url: url }))}
+              onError={(m) => setErr(m)}
+            />
+            <span className="text-xs text-zinc-600">veya URL yapıştırın</span>
+          </div>
           <input
             value={form.cover_url ?? ''}
             onChange={(e) => setForm((f) => ({ ...f, cover_url: e.target.value || null }))}
-            className="w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-white outline-none focus:border-accent/50"
+            className="mt-2 w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-white outline-none focus:border-accent/50"
           />
           <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500">Kategori</label>
           <select
@@ -345,6 +410,7 @@ export default function BookEdit() {
             <h3 className="font-display text-lg font-semibold text-white">Bölümler</h3>
             <button
               type="button"
+              disabled={isNew}
               onClick={() => {
                 setNewCh((n) => ({
                   ...n,
@@ -352,14 +418,17 @@ export default function BookEdit() {
                 }));
                 setAddOpen(true);
               }}
-              className="inline-flex items-center gap-1 rounded-lg bg-accent/15 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/25"
+              className="inline-flex items-center gap-1 rounded-lg bg-accent/15 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/25 disabled:cursor-not-allowed disabled:opacity-40"
+              title={isNew ? 'Önce kitabı oluşturun' : undefined}
             >
               <Plus className="h-3.5 w-3.5" />
               Bölüm ekle
             </button>
           </div>
           <div className="space-y-3 max-h-[560px] overflow-y-auto pr-1">
-            {chapters.length === 0 ? (
+            {isNew ? (
+              <p className="text-sm text-zinc-500">Kitabı oluşturduktan sonra buradan sesli bölüm ekleyebilirsiniz.</p>
+            ) : chapters.length === 0 ? (
               <p className="text-sm text-zinc-500">Henüz bölüm yok</p>
             ) : (
               chapters.map((ch) => (
@@ -414,6 +483,19 @@ export default function BookEdit() {
                 onChange={(e) => setEditChForm((c) => ({ ...c, title: e.target.value }))}
                 className="w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-white outline-none"
               />
+              <div className="flex flex-wrap items-center gap-2">
+                <MediaUploadButton
+                  variant="audio"
+                  accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus,.webm,.flac"
+                  label="Ses dosyası yükle (MP3 vb.)"
+                  disabled={busy}
+                  onUploaded={(url) => setEditChForm((c) => ({ ...c, audio_url: url }))}
+                  onAudioDuration={(sec) => {
+                    if (sec != null) setEditChForm((c) => ({ ...c, duration_seconds: String(sec) }));
+                  }}
+                  onError={(m) => setErr(m)}
+                />
+              </div>
               <input
                 placeholder="Ses URL"
                 value={editChForm.audio_url}
@@ -469,6 +551,19 @@ export default function BookEdit() {
                 onChange={(e) => setNewCh((c) => ({ ...c, title: e.target.value }))}
                 className="w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-white outline-none"
               />
+              <div className="flex flex-wrap items-center gap-2">
+                <MediaUploadButton
+                  variant="audio"
+                  accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus,.webm,.flac"
+                  label="Ses dosyası yükle (MP3 vb.)"
+                  disabled={busy}
+                  onUploaded={(url) => setNewCh((c) => ({ ...c, audio_url: url }))}
+                  onAudioDuration={(sec) => {
+                    if (sec != null) setNewCh((c) => ({ ...c, duration_seconds: String(sec) }));
+                  }}
+                  onError={(m) => setErr(m)}
+                />
+              </div>
               <input
                 placeholder="Ses dosyası URL"
                 value={newCh.audio_url}

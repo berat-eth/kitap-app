@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react';
 import { apiJson, type PaginatedWrap } from '../lib/api';
 import type { AdminBook, BookStatus } from '../types';
 
@@ -46,9 +46,18 @@ export default function Books() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="font-display text-3xl font-bold text-white">Kitaplar</h2>
-        <p className="mt-1 text-zinc-500">Tüm kayıtlar — düzenleme ve bölüm yönetimi</p>
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="font-display text-3xl font-bold text-white">Kitaplar</h2>
+          <p className="mt-1 text-zinc-500">Tüm kayıtlar — düzenleme ve bölüm yönetimi</p>
+        </div>
+        <Link
+          to="/books/new"
+          className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-ink-950 hover:bg-accent-glow"
+        >
+          <Plus className="h-4 w-4" />
+          Yeni kitap
+        </Link>
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">

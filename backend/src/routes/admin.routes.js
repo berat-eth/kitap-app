@@ -16,6 +16,7 @@ router.patch('/categories/:id', adminAuth, adminController.updateCategory);
 router.delete('/categories/:id', adminAuth, adminController.deleteCategory);
 
 router.get('/books', adminAuth, adminController.listBooksAdmin);
+router.post('/books', adminAuth, adminController.createBookAdmin);
 router.get('/books/:bookId/chapters', adminAuth, adminController.listChaptersAdmin);
 router.get('/books/:id', adminAuth, adminController.getBookAdmin);
 router.patch('/books/:id', adminAuth, adminController.updateBookAdmin);

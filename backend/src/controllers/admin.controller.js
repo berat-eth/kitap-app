@@ -408,6 +408,82 @@ async function listBooksAdmin(req, res) {
   }
 }
 
+async function createBookAdmin(req, res) {
+  try {
+    const body = req.body || {};
+    const title = String(body.title || '').trim();
+    const author = String(body.author || '').trim();
+    if (!title || !author) {
+      return res.status(400).json({ success: false, message: 'title ve author gerekli' });
+    }
+
+    let category_id = null;
+    if (body.category_id != null && body.category_id !== '') {
+      const cid = Number(body.category_id);
+      if (!Number.isFinite(cid)) {
+        return res.status(400).json({ success: false, message: 'Geçersiz category_id' });
+      }
+      const [cat] = await pool.query('SELECT id FROM categories WHERE id = ? LIMIT 1', [cid]);
+      if (!cat.length) {
+        return res.status(400).json({ success: false, message: 'Kategori bulunamadı' });
+      }
+      category_id = cid;
+    }
+
+    const statusRaw = String(body.status || 'approved').toLowerCase();
+    const status = ['pending', 'approved', 'rejected'].includes(statusRaw) ? statusRaw : 'approved';
+
+    const narrator = body.narrator != null ? String(body.narrator).trim() || null : null;
+    const description = body.description != null && body.description !== '' ? String(body.description) : null;
+    const cover_url = body.cover_url != null ? String(body.cover_url).trim() || null : null;
+    const duration_seconds = Math.max(0, parseInt(body.duration_seconds, 10) || 0);
+    const play_count = Math.max(0, parseInt(body.play_count, 10) || 0);
+    const rating = Math.min(5, Math.max(0, Number(body.rating) || 0));
+    const is_premium = body.is_premium ? 1 : 0;
+    const is_active = body.is_active === undefined || body.is_active ? 1 : 0;
+
+    const bookId = uuidv4();
+    await pool.query(
+      `
+      INSERT INTO books (
+        id, title, author, description, device_id, narrator, category_id, cover_url,
+        duration_seconds, play_count, rating, is_premium, status, admin_note, is_active
+      ) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
+      `,
+      [
+        bookId,
+        title,
+        author,
+        description,
+        narrator,
+        category_id,
+        cover_url,
+        duration_seconds,
+        play_count,
+        rating,
+        is_premium,
+        status,
+        is_active,
+      ]
+    );
+
+    const [books] = await pool.query(
+      `
+      SELECT b.*, c.name AS category_name, c.slug AS category_slug
+      FROM books b
+      LEFT JOIN categories c ON b.category_id = c.id
+      WHERE b.id = ?
+      LIMIT 1
+      `,
+      [bookId]
+    );
+    return res.status(201).json({ success: true, data: mapAdminBookRow(books[0]) });
+  } catch (e) {
+    logger.error('admin.createBook.err', { requestId: req.requestId, error: e.message, stack: e.stack });
+    return res.status(500).json({ success: false, message: e.message });
+  }
+}
+
 async function getBookAdmin(req, res) {
   try {
     const { id } = req.params;
@@ -538,15 +614,32 @@ async function updateBookAdmin(req, res) {
 }
 
 async function deleteBookAdmin(req, res) {
+  const { id } = req.params;
+  let conn;
   try {
-    const { id } = req.params;
-    const [result] = await pool.query('DELETE FROM books WHERE id = ?', [id]);
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+    await conn.query('DELETE FROM listening_progress WHERE book_id = ?', [id]);
+    const [result] = await conn.query('DELETE FROM books WHERE id = ?', [id]);
     const affected = result && typeof result.affectedRows === 'number' ? result.affectedRows : 0;
-    if (affected === 0) return res.status(404).json({ success: false, message: 'Kitap bulunamadı' });
+    if (affected === 0) {
+      await conn.rollback();
+      return res.status(404).json({ success: false, message: 'Kitap bulunamadı' });
+    }
+    await conn.commit();
     return res.status(200).json({ success: true });
   } catch (e) {
+    if (conn) {
+      try {
+        await conn.rollback();
+      } catch (rollbackErr) {
+        logger.error('admin.deleteBook.rollback.err', { requestId: req.requestId, error: rollbackErr.message });
+      }
+    }
     logger.error('admin.deleteBook.err', { requestId: req.requestId, error: e.message, stack: e.stack });
     return res.status(500).json({ success: false, message: e.message });
+  } finally {
+    if (conn) conn.release();
   }
 }
 
@@ -699,6 +792,7 @@ module.exports = {
   updateCategory,
   deleteCategory,
   listBooksAdmin,
+  createBookAdmin,
   getBookAdmin,
   listChaptersAdmin,
   updateBookAdmin,

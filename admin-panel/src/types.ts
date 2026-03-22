@@ -11,6 +11,22 @@ export interface AdminStats {
   favorites: number;
 }
 
+/** POST /api/admin/books gövdesi */
+export interface AdminBookCreateInput {
+  title: string;
+  author: string;
+  narrator?: string | null;
+  description?: string | null;
+  category_id?: number | null;
+  cover_url?: string | null;
+  duration_seconds?: number;
+  play_count?: number;
+  rating?: number;
+  is_premium?: boolean;
+  is_active?: boolean;
+  status?: BookStatus;
+}
+
 export interface AdminBook {
   id: string;
   title: string;

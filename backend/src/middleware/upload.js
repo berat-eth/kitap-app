@@ -18,10 +18,42 @@ const UPLOAD_MAX_BYTES = (() => {
   return Number.isFinite(bytes) ? bytes : 50 * 1024 * 1024;
 })();
 
+const IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif']);
+const AUDIO_EXT = new Set([
+  '.mp3',
+  '.m4a',
+  '.aac',
+  '.wav',
+  '.ogg',
+  '.oga',
+  '.opus',
+  '.webm',
+  '.flac',
+]);
+
+function extOf(file) {
+  return path.extname(file.originalname || '').toLowerCase();
+}
+
+function looksLikeImage(file) {
+  if (file.mimetype && file.mimetype.startsWith('image/')) return true;
+  return IMAGE_EXT.has(extOf(file));
+}
+
+function looksLikeAudio(file) {
+  if (file.mimetype && file.mimetype.startsWith('audio/')) return true;
+  if (
+    (file.mimetype === 'application/octet-stream' || !file.mimetype) &&
+    AUDIO_EXT.has(extOf(file))
+  ) {
+    return true;
+  }
+  return AUDIO_EXT.has(extOf(file));
+}
+
 function getDestForFile(file) {
-  if (file.mimetype && file.mimetype.startsWith('audio/')) return audioDir;
-  if (file.mimetype && file.mimetype.startsWith('image/')) return coversDir;
-  // fallback
+  if (looksLikeImage(file)) return coversDir;
+  if (looksLikeAudio(file)) return audioDir;
   return audioDir;
 }
 
@@ -45,12 +77,14 @@ const upload = multer({
   }),
   limits: { fileSize: UPLOAD_MAX_BYTES },
   fileFilter: (req, file, cb) => {
-    const isAudio = file.mimetype && file.mimetype.startsWith('audio/');
-    const isImage = file.mimetype && file.mimetype.startsWith('image/');
-    if (!isAudio && !isImage) {
-      return cb(new Error('Sadece audio veya image dosyaları kabul edilir'));
+    if (looksLikeImage(file) || looksLikeAudio(file)) {
+      return cb(null, true);
     }
-    cb(null, true);
+    return cb(
+      new Error(
+        'Desteklenen türler: ses (mp3, m4a, aac, wav, ogg, opus, webm, flac, …) veya görsel (jpg, png, webp, gif)'
+      )
+    );
   },
 });
 

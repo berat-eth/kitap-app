@@ -161,9 +161,18 @@ async function main() {
       target: BACKEND_URL,
       changeOrigin: true,
       pathRewrite: { '^/api/backend': '' },
+      proxyTimeout: 600_000,
       // http-proxy-middleware v3: sadece options.on.proxyReq dinlenir; üst seviye onProxyReq yok sayılır.
       on: {
         proxyReq(proxyReq, req) {
+          const host = req.get('host');
+          if (host) {
+            proxyReq.setHeader('X-Forwarded-Host', host);
+          }
+          const xfProto = req.get('x-forwarded-proto');
+          if (xfProto) {
+            proxyReq.setHeader('X-Forwarded-Proto', xfProto.split(',')[0].trim());
+          }
           const apiKey = normalizeSecret(process.env.API_KEY);
           if (apiKey) {
             proxyReq.setHeader('X-API-Key', apiKey);

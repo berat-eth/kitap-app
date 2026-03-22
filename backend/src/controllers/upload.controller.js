@@ -5,16 +5,22 @@ async function uploadFile(req, res) {
   try {
     if (!req.file) return error(res, 'Dosya bulunamadı', 400);
 
-    const mimetype = req.file.mimetype || '';
     const filename = req.file.filename;
-    const isAudio = mimetype.startsWith('audio/');
+    const destPath = String(req.file.path || '').replace(/\\/g, '/');
+    const subdir = /\/covers\//.test(destPath) ? 'covers' : 'audio';
 
-    // Frontend (web) farklı domain'den görsel isteyebilir; bu yüzden mutlak URL döndür.
-    const proto = (req.headers['x-forwarded-proto'] || 'https').toString();
-    const host = (req.headers['x-forwarded-host'] || req.get('host')).toString();
-    const url = isAudio
-      ? `${proto}://${host}/uploads/audio/${filename}`
-      : `${proto}://${host}/uploads/covers/${filename}`;
+    const base = String(process.env.UPLOAD_BASE_URL || '')
+      .trim()
+      .replace(/\/+$/, '');
+    let url;
+    if (base) {
+      url = `${base}/uploads/${subdir}/${filename}`;
+    } else {
+      // Frontend (web) farklı domain'den görsel isteyebilir; bu yüzden mutlak URL döndür.
+      const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'https').toString().split(',')[0].trim();
+      const host = (req.headers['x-forwarded-host'] || req.get('host')).toString().split(',')[0].trim();
+      url = `${proto}://${host}/uploads/${subdir}/${filename}`;
+    }
 
     return success(res, { url }, 201);
   } catch (e) {
