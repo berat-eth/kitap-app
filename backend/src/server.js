@@ -1,4 +1,4 @@
-// Tek env: ENV_PATH → /root/data/.env (varsa) → backend/.env
+// Tek env: ENV_PATH → /root/data/.env → repo kökü .env → backend/.env
 const path = require('path');
 const fs = require('fs');
 const dotenv = require('dotenv');
@@ -7,6 +7,8 @@ function resolveEnvPath() {
   if (process.env.ENV_PATH) return process.env.ENV_PATH;
   const central = '/root/data/.env';
   if (fs.existsSync(central)) return central;
+  const repoRoot = path.join(__dirname, '..', '..', '.env');
+  if (fs.existsSync(repoRoot)) return repoRoot;
   return path.join(__dirname, '..', '.env');
 }
 
@@ -32,6 +34,7 @@ if (dotenvResult && dotenvResult.error) {
     DB_NAME: process.env.DB_NAME || null,
     HAS_DB_PASSWORD: Boolean(process.env.DB_PASSWORD),
     HAS_API_KEY: Boolean(process.env.API_KEY),
+    HAS_ADMIN_API_KEY: Boolean(process.env.ADMIN_API_KEY && String(process.env.ADMIN_API_KEY).trim()),
     HAS_UPLOAD_BASE_URL: Boolean(process.env.UPLOAD_BASE_URL),
   });
 }

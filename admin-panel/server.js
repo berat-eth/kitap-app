@@ -11,11 +11,13 @@ import { createServer as createViteServer } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-/** Tek .env: önce ENV_PATH, sonra /root/data/.env, yoksa admin-panel/.env */
+/** Tek .env: ENV_PATH → /root/data/.env → repo kökü .env → admin-panel/.env */
 function resolveEnvPath() {
   if (process.env.ENV_PATH) return process.env.ENV_PATH;
   const central = '/root/data/.env';
   if (fs.existsSync(central)) return central;
+  const repoRoot = path.join(__dirname, '..', '.env');
+  if (fs.existsSync(repoRoot)) return repoRoot;
   return path.join(__dirname, '.env');
 }
 
@@ -159,19 +161,21 @@ async function main() {
       target: BACKEND_URL,
       changeOrigin: true,
       pathRewrite: { '^/api/backend': '' },
-      onProxyReq(proxyReq, req) {
-        const apiKey = normalizeSecret(process.env.API_KEY);
-        if (apiKey) {
-          proxyReq.setHeader('X-API-Key', apiKey);
-        }
-        // proxyReq.path bazen tam yol / boş olabiliyor; gelen URL üzerinden karar ver.
-        const url = (req.originalUrl || req.url || '').split('?')[0];
-        if (url.includes('/api/admin')) {
-          const adminKey = normalizeSecret(req.session?.adminKey);
-          if (adminKey) {
-            proxyReq.setHeader('X-Admin-Key', adminKey);
+      // http-proxy-middleware v3: sadece options.on.proxyReq dinlenir; üst seviye onProxyReq yok sayılır.
+      on: {
+        proxyReq(proxyReq, req) {
+          const apiKey = normalizeSecret(process.env.API_KEY);
+          if (apiKey) {
+            proxyReq.setHeader('X-API-Key', apiKey);
           }
-        }
+          const url = (req.originalUrl || req.url || '').split('?')[0];
+          if (url.includes('/api/admin')) {
+            const adminKey = normalizeSecret(req.session?.adminKey);
+            if (adminKey) {
+              proxyReq.setHeader('X-Admin-Key', adminKey);
+            }
+          }
+        },
       },
     })
   );
