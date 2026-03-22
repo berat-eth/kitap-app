@@ -4,6 +4,8 @@ import { HeroIntro } from "@/components/hero-intro";
 import { SectionHeading } from "@/components/section-heading";
 import { getFeaturedBooks, getPopularBooks, getCategories } from "@/lib/api";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const [featured, popular, categories] = await Promise.all([
     getFeaturedBooks(),

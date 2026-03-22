@@ -13,6 +13,10 @@ dotenv.config({ path: resolveEnvPath(), override: true });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
+  experimental: {
+    staticWorkerRequestDeduping: false,
+  },
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "localhost", pathname: "/**" },
