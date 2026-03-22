@@ -160,6 +160,7 @@ async function main() {
       server: {
         middlewareMode: true,
         hmr: { server },
+        allowedHosts: ['admin.wirbooks.com.tr'],
       },
       appType: 'custom',
       root: __dirname,
