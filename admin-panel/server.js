@@ -22,6 +22,15 @@ function resolveEnvPath() {
 const _envFile = resolveEnvPath();
 dotenv.config({ path: _envFile, override: true });
 
+/** .env / kopyala-yapıştır kaynaklı BOM ve zero-width karakterleri temizler */
+function normalizeSecret(v) {
+  if (v == null || v === '') return '';
+  return String(v)
+    .replace(/^\uFEFF/, '')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .trim();
+}
+
 function sha256Utf8(s) {
   return crypto.createHash('sha256').update(String(s), 'utf8').digest();
 }
@@ -66,7 +75,7 @@ async function main() {
   app.post('/api/auth/login', async (req, res) => {
     const envUser = process.env.ADMIN_USERNAME;
     const envPass = process.env.ADMIN_PASSWORD;
-    const adminApiKey = process.env.ADMIN_API_KEY != null ? String(process.env.ADMIN_API_KEY).trim() : '';
+    const adminApiKey = normalizeSecret(process.env.ADMIN_API_KEY);
 
     if (!envUser || !envPass) {
       return res.status(503).json({
@@ -95,10 +104,11 @@ async function main() {
     }
 
     try {
+      const fetchApiKey = normalizeSecret(process.env.API_KEY);
       const r = await fetch(`${BACKEND_URL}/api/admin/stats`, {
         headers: {
           'X-Admin-Key': adminApiKey,
-          ...(process.env.API_KEY ? { 'X-API-Key': String(process.env.API_KEY).trim() } : {}),
+          ...(fetchApiKey ? { 'X-API-Key': fetchApiKey } : {}),
         },
       });
       if (r.status === 401) {
@@ -150,9 +160,17 @@ async function main() {
       changeOrigin: true,
       pathRewrite: { '^/api/backend': '' },
       onProxyReq(proxyReq, req) {
-        const p = proxyReq.path || '';
-        if (p.startsWith('/api/admin')) {
-          proxyReq.setHeader('X-Admin-Key', req.session.adminKey);
+        const apiKey = normalizeSecret(process.env.API_KEY);
+        if (apiKey) {
+          proxyReq.setHeader('X-API-Key', apiKey);
+        }
+        // proxyReq.path bazen tam yol / boş olabiliyor; gelen URL üzerinden karar ver.
+        const url = (req.originalUrl || req.url || '').split('?')[0];
+        if (url.includes('/api/admin')) {
+          const adminKey = normalizeSecret(req.session?.adminKey);
+          if (adminKey) {
+            proxyReq.setHeader('X-Admin-Key', adminKey);
+          }
         }
       },
     })

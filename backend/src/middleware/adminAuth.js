@@ -1,10 +1,9 @@
 const { error } = require('../utils/response');
+const { normalizeSecret } = require('../utils/normalizeSecret');
 
 function adminAuth(req, res, next) {
-  const expectedRaw = process.env.ADMIN_API_KEY;
-  const expected = expectedRaw != null ? String(expectedRaw).trim() : '';
-  const providedRaw = req.headers['x-admin-key'];
-  const provided = providedRaw != null ? String(providedRaw).trim() : '';
+  const expected = normalizeSecret(process.env.ADMIN_API_KEY);
+  const provided = normalizeSecret(req.headers['x-admin-key']);
 
   // Admin panel endpoint'leri için ADMIN_API_KEY yoksa istekleri reddet.
   if (!expected) {
