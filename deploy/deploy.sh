@@ -151,11 +151,11 @@ AVAILABLE_MEM=$(free -m | awk 'NR==2{printf "%.0f", $7}')
 echo "  Kullanılabilir bellek: ${AVAILABLE_MEM}MB"
 
 echo "  Next.js: production build (düşük bellek sınırı ile)..."
-# Daha konservatif bellek sınırı kullan
-if ! NODE_OPTIONS="--max-old-space-size=1024 --optimize-for-size" NODE_ENV=production npm run build; then
+# Node.js 20 uyumlu bellek optimizasyonu
+if ! NODE_OPTIONS="--max-old-space-size=1024" NODE_ENV=production npm run build; then
   echo "  HATA: Build başarısız. En düşük bellek sınırı ile deneniyor..."
   # En düşük bellek sınırı
-  NODE_OPTIONS="--max-old-space-size=512 --optimize-for-size" NODE_ENV=production npm run build
+  NODE_OPTIONS="--max-old-space-size=512" NODE_ENV=production npm run build
 fi
 
 # --- 5. Admin Panel Deploy ---
