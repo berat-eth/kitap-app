@@ -15,10 +15,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authenticated, setAuthenticated] = useState(false);
 
   const refresh = useCallback(async () => {
-    const r = await fetch('/api/auth/me', { credentials: 'include' });
-    const j = (await r.json()) as { authenticated?: boolean };
-    setAuthenticated(Boolean(j.authenticated));
-    setReady(true);
+    try {
+      const r = await fetch('/api/auth/me', { credentials: 'include' });
+      const ct = r.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) {
+        console.warn('[wirbooks-admin auth] /api/auth/me beklenmeyen içerik', r.status, ct);
+        setAuthenticated(false);
+        return;
+      }
+      const j = (await r.json()) as { authenticated?: boolean };
+      setAuthenticated(Boolean(j.authenticated));
+    } catch (e) {
+      console.warn('[wirbooks-admin auth] /api/auth/me hata', e);
+      setAuthenticated(false);
+    } finally {
+      setReady(true);
+    }
   }, []);
 
   useEffect(() => {

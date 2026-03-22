@@ -12,6 +12,7 @@ function looksLikeAudioFile(file: File): boolean {
 
 type Props = {
   disabled?: boolean;
+  bookId?: string;
   onUploaded: (url: string) => void;
   onAudioDuration?: (seconds: number | null) => void;
   onError?: (message: string) => void;
@@ -21,6 +22,7 @@ type Props = {
 
 export default function AudioUploadField({
   disabled,
+  bookId,
   onUploaded,
   onAudioDuration,
   onError,
@@ -40,7 +42,7 @@ export default function AudioUploadField({
         if (onAudioDuration) {
           void probeAudioDurationSeconds(file).then(onAudioDuration);
         }
-        const url = await uploadAsset(file);
+        const url = await uploadAsset(file, bookId ? { bookId } : undefined);
         onUploaded(url);
       } catch (err) {
         const msg =
@@ -50,7 +52,7 @@ export default function AudioUploadField({
         setBusy(false);
       }
     },
-    [onAudioDuration, onError, onUploaded]
+    [bookId, onAudioDuration, onError, onUploaded]
   );
 
   return (
@@ -89,6 +91,7 @@ export default function AudioUploadField({
         <div className="flex flex-wrap items-center gap-3">
           <MediaUploadButton
             variant="audio"
+            bookId={bookId}
             accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus,.webm,.flac"
             label={busy ? 'Yükleniyor…' : 'Dosya seç ve yükle'}
             disabled={disabled || busy}

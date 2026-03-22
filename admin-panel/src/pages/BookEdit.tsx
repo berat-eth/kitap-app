@@ -491,6 +491,7 @@ export default function BookEdit() {
               />
               <AudioUploadField
                 disabled={busy}
+                bookId={!isNew && id ? id : undefined}
                 onUploaded={(url) => setEditChForm((c) => ({ ...c, audio_url: url }))}
                 onAudioDuration={(sec) => {
                   if (sec != null) setEditChForm((c) => ({ ...c, duration_seconds: String(sec) }));
@@ -560,6 +561,7 @@ export default function BookEdit() {
               />
               <AudioUploadField
                 disabled={busy}
+                bookId={!isNew && id ? id : undefined}
                 onUploaded={(url) => setNewCh((c) => ({ ...c, audio_url: url }))}
                 onAudioDuration={(sec) => {
                   if (sec != null) setNewCh((c) => ({ ...c, duration_seconds: String(sec) }));

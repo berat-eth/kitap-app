@@ -51,8 +51,9 @@ function looksLikeAudio(file) {
   return AUDIO_EXT.has(extOf(file));
 }
 
-function getDestForFile(file) {
+function getDestForFile(req, file) {
   if (looksLikeImage(file)) return coversDir;
+  if (looksLikeAudio(file) && req.wirbooksBookAudioDir) return req.wirbooksBookAudioDir;
   if (looksLikeAudio(file)) return audioDir;
   return audioDir;
 }
@@ -69,7 +70,7 @@ function getExt(file) {
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, getDestForFile(file));
+      cb(null, getDestForFile(req, file));
     },
     filename: (req, file, cb) => {
       cb(null, `${uuidv4()}${getExt(file)}`);

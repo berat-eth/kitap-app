@@ -54,6 +54,22 @@ const BACKEND_URL = String(process.env.BACKEND_URL || 'http://127.0.0.1:3001')
   .trim()
   .replace(/\/+$/, '');
 
+const ADMIN_DEBUG_LOG = process.env.ADMIN_DEBUG_LOG !== '0';
+
+function adminLog(level, msg, extra = {}) {
+  if (!ADMIN_DEBUG_LOG && level === 'debug') return;
+  const line = JSON.stringify({
+    ts: new Date().toISOString(),
+    scope: 'wirbooks-admin',
+    level,
+    msg,
+    ...extra,
+  });
+  if (level === 'error') console.error(line);
+  else if (level === 'warn') console.warn(line);
+  else console.log(line);
+}
+
 async function main() {
   const app = express();
   app.disable('x-powered-by');
@@ -105,11 +121,13 @@ async function main() {
     const userOk = safeCredentialEq(username, envUser);
     const passOk = safeCredentialEq(password, envPass);
     if (!userOk || !passOk) {
+      adminLog('warn', 'auth.login.denied', { ip: req.ip, userLen: username.length });
       return res.status(401).json({ success: false, message: 'Geçersiz kullanıcı adı veya şifre' });
     }
 
     try {
       const fetchApiKey = normalizeSecret(process.env.API_KEY);
+      adminLog('info', 'auth.login.backend_check', { target: `${BACKEND_URL}/api/admin/stats` });
       const r = await fetch(`${BACKEND_URL}/api/admin/stats`, {
         headers: {
           'X-Admin-Key': adminApiKey,
@@ -117,6 +135,7 @@ async function main() {
         },
       });
       if (r.status === 401) {
+        adminLog('error', 'auth.login.admin_key_rejected', { backendStatus: 401 });
         return res.status(401).json({
           success: false,
           message: 'ADMIN_API_KEY backend tarafından reddedildi; anahtarı ve BACKEND_URL değerini kontrol edin.',
@@ -124,6 +143,7 @@ async function main() {
       }
       if (!r.ok) {
         const t = await r.text();
+        adminLog('error', 'auth.login.backend_bad_status', { status: r.status, bodySnippet: t.slice(0, 200) });
         return res.status(502).json({
           success: false,
           message: `Backend yanıtı: ${r.status}`,
@@ -132,8 +152,10 @@ async function main() {
       }
       req.session.adminKey = adminApiKey;
       req.session.authenticated = true;
+      adminLog('info', 'auth.login.ok', { ip: req.ip });
       return res.json({ success: true });
     } catch (e) {
+      adminLog('error', 'auth.login.backend_unreachable', { err: String(e) });
       return res.status(502).json({
         success: false,
         message: "Backend'e bağlanılamadı. BACKEND_URL ve API sunucusunu kontrol edin.",
@@ -152,6 +174,11 @@ async function main() {
 
   function requireSession(req, res, next) {
     if (!req.session?.authenticated || !req.session?.adminKey) {
+      adminLog('warn', 'proxy.session_required', {
+        method: req.method,
+        path: req.originalUrl || req.url,
+        ip: req.ip,
+      });
       return res.status(401).json({ success: false, message: 'Oturum gerekli' });
     }
     next();
@@ -167,6 +194,29 @@ async function main() {
       proxyTimeout: 600_000,
       // http-proxy-middleware v3: sadece options.on.proxyReq dinlenir; üst seviye onProxyReq yok sayılır.
       on: {
+        error(err, req, res) {
+          adminLog('error', 'proxy.upstream_error', {
+            err: err?.message || String(err),
+            path: req?.originalUrl || req?.url,
+          });
+          if (res && !res.headersSent) {
+            res.status(502).json({
+              success: false,
+              message: 'Backend bağlantı hatası (proxy)',
+              detail: err?.message || String(err),
+            });
+          }
+        },
+        proxyRes(proxyRes, req, res) {
+          const code = proxyRes.statusCode;
+          if (code >= 400) {
+            adminLog('warn', 'proxy.upstream_response', {
+              status: code,
+              path: req.originalUrl || req.url,
+              method: req.method,
+            });
+          }
+        },
         proxyReq(proxyReq, req) {
           // Admin paneli host'unu iletme: /api/upload yanıtındaki dosya URL'leri yanlış
           // olur (dosya API'de, link admin.wirbooks.../uploads olur ve 404 verir).
@@ -192,6 +242,8 @@ async function main() {
             const adminKey = normalizeSecret(req.session?.adminKey);
             if (adminKey) {
               proxyReq.setHeader('X-Admin-Key', adminKey);
+            } else {
+              adminLog('error', 'proxy.admin_key_missing', { path: pathForAdmin });
             }
           }
         },

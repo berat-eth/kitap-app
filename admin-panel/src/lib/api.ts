@@ -13,11 +13,33 @@ export class ApiError extends Error {
   }
 }
 
-function unwrapMessage(data: unknown): string {
-  if (data && typeof data === 'object' && 'message' in data && data.message != null) {
-    return String((data as { message: unknown }).message);
+function unwrapMessage(data: unknown, status?: number): string {
+  if (data && typeof data === 'object') {
+    const o = data as Record<string, unknown>;
+    if (o.message != null) return String(o.message);
+    if (o.detail != null) return String(o.detail);
   }
-  return 'İstek başarısız';
+  if (typeof data === 'string' && data.trim()) {
+    const t = data.trim();
+    if (t.startsWith('<')) {
+      return `Beklenmeyen yanıt (HTTP ${status ?? '?'}): sunucu HTML veya proxy hatası döndü. pm2 logs wirbooks-admin kontrol edin.`;
+    }
+    return t.length > 280 ? `${t.slice(0, 280)}…` : t;
+  }
+  return status != null ? `İstek başarısız (HTTP ${status})` : 'İstek başarısız';
+}
+
+function logClientApiFailure(path: string, status: number, data: unknown) {
+  let snippet = '';
+  try {
+    snippet =
+      typeof data === 'string'
+        ? data.slice(0, 120).replace(/\s+/g, ' ')
+        : JSON.stringify(data)?.slice(0, 200) ?? '';
+  } catch {
+    snippet = '[log-serialize-error]';
+  }
+  console.warn('[wirbooks-admin api]', path, status, snippet);
 }
 
 export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
@@ -47,21 +69,30 @@ export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (r.status === 401) {
-    throw new ApiError(401, unwrapMessage(data), data);
+    logClientApiFailure(path, r.status, data);
+    throw new ApiError(401, unwrapMessage(data, r.status), data);
   }
 
   if (!r.ok) {
-    throw new ApiError(r.status, unwrapMessage(data), data);
+    logClientApiFailure(path, r.status, data);
+    throw new ApiError(r.status, unwrapMessage(data, r.status), data);
   }
 
   return data as T;
 }
 
 /** Kapak (görsel) veya bölüm sesi — multipart, alan adı `file` */
-export async function uploadAsset(file: File): Promise<string> {
+export async function uploadAsset(file: File, opts?: { bookId?: string }): Promise<string> {
+  const bid = opts?.bookId?.trim() ?? '';
+  const q =
+    bid &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(bid)
+      ? `?book_id=${encodeURIComponent(bid)}`
+      : '';
   const fd = new FormData();
   fd.append('file', file);
-  const r = await fetch(`${PREFIX}/api/upload`, {
+  const path = `/api/upload${q}`;
+  const r = await fetch(`${PREFIX}${path}`, {
     method: 'POST',
     body: fd,
     credentials: 'include',
@@ -78,7 +109,8 @@ export async function uploadAsset(file: File): Promise<string> {
     data = await r.text();
   }
   if (!r.ok) {
-    throw new ApiError(r.status, unwrapMessage(data), data);
+    logClientApiFailure(path, r.status, data);
+    throw new ApiError(r.status, unwrapMessage(data, r.status), data);
   }
   const payload = data as SuccessWrap<{ url: string }>;
   const url = payload?.data?.url;

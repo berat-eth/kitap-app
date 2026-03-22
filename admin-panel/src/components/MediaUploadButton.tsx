@@ -7,6 +7,8 @@ type Props = {
   label: string;
   disabled?: boolean;
   variant: 'audio' | 'image';
+  /** Bölüm sesi: dosya uploads/books/<kitap>__/audio/ altına gider */
+  bookId?: string;
   onUploaded: (url: string) => void;
   onAudioDuration?: (seconds: number | null) => void;
   onError?: (message: string) => void;
@@ -18,6 +20,7 @@ export default function MediaUploadButton({
   label,
   disabled,
   variant,
+  bookId,
   onUploaded,
   onAudioDuration,
   onError,
@@ -35,7 +38,7 @@ export default function MediaUploadButton({
       if (variant === 'audio' && onAudioDuration) {
         void probeAudioDurationSeconds(file).then(onAudioDuration);
       }
-      const url = await uploadAsset(file);
+      const url = await uploadAsset(file, variant === 'audio' && bookId ? { bookId } : undefined);
       onUploaded(url);
     } catch (err) {
       const msg =
