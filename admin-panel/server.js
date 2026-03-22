@@ -165,14 +165,21 @@ async function main() {
       proxyTimeout: 600_000,
       // http-proxy-middleware v3: sadece options.on.proxyReq dinlenir; üst seviye onProxyReq yok sayılır.
       on: {
-        proxyReq(proxyReq, req) {
-          const host = req.get('host');
-          if (host) {
-            proxyReq.setHeader('X-Forwarded-Host', host);
-          }
-          const xfProto = req.get('x-forwarded-proto');
-          if (xfProto) {
-            proxyReq.setHeader('X-Forwarded-Proto', xfProto.split(',')[0].trim());
+        proxyReq(proxyReq) {
+          // Admin paneli host'unu iletme: /api/upload yanıtındaki dosya URL'leri yanlış
+          // olur (dosya API'de, link admin.wirbooks.../uploads olur ve 404 verir).
+          // Kökeni BACKEND_PUBLIC_URL veya BACKEND_URL'den türet.
+          const originRaw = String(process.env.BACKEND_PUBLIC_URL || BACKEND_URL || '')
+            .trim()
+            .replace(/\/+$/, '');
+          if (originRaw) {
+            try {
+              const u = new URL(originRaw.includes('://') ? originRaw : `http://${originRaw}`);
+              proxyReq.setHeader('X-Forwarded-Host', u.host);
+              proxyReq.setHeader('X-Forwarded-Proto', u.protocol === 'https:' ? 'https' : 'http');
+            } catch {
+              /* yoksay */
+            }
           }
           const apiKey = normalizeSecret(process.env.API_KEY);
           if (apiKey) {

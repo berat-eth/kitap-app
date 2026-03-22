@@ -9,7 +9,9 @@ async function uploadFile(req, res) {
     const destPath = String(req.file.path || '').replace(/\\/g, '/');
     const subdir = /\/covers\//.test(destPath) ? 'covers' : 'audio';
 
-    const base = String(process.env.UPLOAD_BASE_URL || '')
+    const base = String(
+      process.env.UPLOAD_BASE_URL || process.env.PUBLIC_API_ORIGIN || ''
+    )
       .trim()
       .replace(/\/+$/, '');
     let url;

@@ -1,5 +1,26 @@
 export type BookStatus = 'pending' | 'approved' | 'rejected';
 
+/** API sürecinin çalıştığı sunucu (GET /api/admin/stats → data.server) */
+export interface ServerStatsSnapshot {
+  uptime_seconds: number;
+  node_version: string;
+  platform: string;
+  arch: string;
+  hostname: string;
+  pid: number;
+  memory_heap_used_mb: number;
+  memory_heap_total_mb: number;
+  memory_rss_mb: number;
+  memory_external_mb: number;
+  os_totalmem_mb: number;
+  os_freemem_mb: number;
+  os_memory_used_pct: number;
+  loadavg_1: number | null;
+  loadavg_5: number | null;
+  loadavg_15: number | null;
+  uploads_bytes: number;
+}
+
 export interface AdminStats {
   books_total: number;
   books_pending: number;
@@ -9,6 +30,7 @@ export interface AdminStats {
   categories: number;
   chapters: number;
   favorites: number;
+  server: ServerStatsSnapshot;
 }
 
 /** POST /api/admin/books gövdesi */

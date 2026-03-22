@@ -1,6 +1,63 @@
+const fs = require('fs/promises');
+const os = require('os');
+const path = require('path');
 const pool = require('../db/pool');
 const { logger } = require('../utils/logger');
 const { v4: uuidv4 } = require('uuid');
+
+const UPLOADS_ROOT = path.join(__dirname, '../../uploads');
+
+async function dirSizeBytes(dir) {
+  let total = 0;
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        total += await dirSizeBytes(p);
+      } else if (e.isFile()) {
+        try {
+          const st = await fs.stat(p);
+          total += st.size;
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  } catch {
+    /* klasör yok */
+  }
+  return total;
+}
+
+function buildServerSnapshot(uploadsBytes) {
+  const mem = process.memoryUsage();
+  const totalMem = os.totalmem();
+  const freeMem = os.freemem();
+  const usedSys = totalMem - freeMem;
+  const load = os.loadavg();
+  const win = process.platform === 'win32';
+
+  return {
+    uptime_seconds: Math.floor(process.uptime()),
+    node_version: process.version,
+    platform: process.platform,
+    arch: process.arch,
+    hostname: os.hostname(),
+    pid: process.pid,
+    memory_heap_used_mb: Math.round(mem.heapUsed / 1024 / 1024),
+    memory_heap_total_mb: Math.round(mem.heapTotal / 1024 / 1024),
+    memory_rss_mb: Math.round(mem.rss / 1024 / 1024),
+    memory_external_mb: Math.round((mem.external || 0) / 1024 / 1024),
+    os_totalmem_mb: Math.round(totalMem / 1024 / 1024),
+    os_freemem_mb: Math.round(freeMem / 1024 / 1024),
+    os_memory_used_pct: totalMem > 0 ? Math.round((usedSys / totalMem) * 1000) / 10 : 0,
+    loadavg_1: win ? null : Math.round(load[0] * 100) / 100,
+    loadavg_5: win ? null : Math.round(load[1] * 100) / 100,
+    loadavg_15: win ? null : Math.round(load[2] * 100) / 100,
+    uploads_bytes: uploadsBytes,
+  };
+}
 
 function toStatusLabel(status) {
   const s = String(status || '').toLowerCase();
@@ -71,6 +128,14 @@ async function stats(req, res) {
         (SELECT COUNT(*) FROM chapters) AS chapters,
         (SELECT COUNT(*) FROM device_favorites) AS favorites
     `);
+
+    let uploadsBytes = 0;
+    try {
+      uploadsBytes = await dirSizeBytes(UPLOADS_ROOT);
+    } catch (e) {
+      logger.warn('admin.stats.uploads_size.skip', { message: e.message });
+    }
+
     return res.status(200).json({
       success: true,
       data: {
@@ -82,6 +147,7 @@ async function stats(req, res) {
         categories: Number(row.categories || 0),
         chapters: Number(row.chapters || 0),
         favorites: Number(row.favorites || 0),
+        server: buildServerSnapshot(uploadsBytes),
       },
     });
   } catch (e) {

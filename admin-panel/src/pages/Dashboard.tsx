@@ -1,7 +1,148 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BookOpen, Clock, FolderTree, Heart, Layers, LayoutDashboard, Smartphone, TrendingUp } from 'lucide-react';
+import {
+  BookOpen,
+  Clock,
+  Cpu,
+  FolderTree,
+  HardDrive,
+  Heart,
+  Layers,
+  LayoutDashboard,
+  MemoryStick,
+  Server,
+  Smartphone,
+  TrendingUp,
+} from 'lucide-react';
 import { apiJson, type SuccessWrap } from '../lib/api';
-import type { AdminStats } from '../types';
+import type { AdminStats, ServerStatsSnapshot } from '../types';
+
+function formatUptime(totalSec: number): string {
+  const d = Math.floor(totalSec / 86400);
+  const h = Math.floor((totalSec % 86400) / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const parts: string[] = [];
+  if (d) parts.push(`${d} gün`);
+  if (h) parts.push(`${h} sa`);
+  if (m) parts.push(`${m} dk`);
+  if (!d && !h && !m) parts.push(`${s} sn`);
+  else if (!d && !h && s) parts.push(`${s} sn`);
+  return parts.length ? parts.join(' ') : '0 sn';
+}
+
+function formatStorageBytes(n: number): string {
+  if (n >= 1073741824) return `${(n / 1073741824).toFixed(2)} GB`;
+  if (n >= 1048576) return `${(n / 1048576).toFixed(1)} MB`;
+  if (n >= 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${n} B`;
+}
+
+function ServerStatsPanel({ server }: { server: ServerStatsSnapshot }) {
+  const heapPct =
+    server.memory_heap_total_mb > 0
+      ? Math.min(100, (server.memory_heap_used_mb / server.memory_heap_total_mb) * 100)
+      : 0;
+  const sysPct = Math.min(100, server.os_memory_used_pct);
+  const hasLoad = server.loadavg_1 != null;
+
+  return (
+    <div className="mb-8 rounded-2xl border border-white/10 bg-ink-900/50 p-6 shadow-panel ring-1 ring-white/5">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Server className="h-5 w-5 text-accent" />
+          <h3 className="font-display text-lg font-semibold text-white">Sunucu</h3>
+        </div>
+        <p className="text-sm text-zinc-500">
+          Çalışma süresi:{' '}
+          <span className="font-medium text-zinc-300">{formatUptime(server.uptime_seconds)}</span>
+        </p>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-4 rounded-xl border border-white/5 bg-ink-950/50 p-4">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <Cpu className="h-4 w-4 text-cyan-400" />
+            İşlemci yükü (load avg)
+          </div>
+          {hasLoad ? (
+            <dl className="grid grid-cols-3 gap-2 text-center text-sm">
+              <div className="rounded-lg bg-white/[0.04] px-2 py-2">
+                <dt className="text-[10px] text-zinc-500">1 dk</dt>
+                <dd className="font-mono text-lg font-semibold text-white">{server.loadavg_1}</dd>
+              </div>
+              <div className="rounded-lg bg-white/[0.04] px-2 py-2">
+                <dt className="text-[10px] text-zinc-500">5 dk</dt>
+                <dd className="font-mono text-lg font-semibold text-white">{server.loadavg_5}</dd>
+              </div>
+              <div className="rounded-lg bg-white/[0.04] px-2 py-2">
+                <dt className="text-[10px] text-zinc-500">15 dk</dt>
+                <dd className="font-mono text-lg font-semibold text-white">{server.loadavg_15}</dd>
+              </div>
+            </dl>
+          ) : (
+            <p className="text-sm text-zinc-500">Bu ortamda load average yok (ör. Windows).</p>
+          )}
+          <p className="text-xs text-zinc-600">
+            Node {server.node_version} · {server.platform} ({server.arch})
+          </p>
+        </div>
+
+        <div className="space-y-4 rounded-xl border border-white/5 bg-ink-950/50 p-4">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <MemoryStick className="h-4 w-4 text-violet-400" />
+            Bellek
+          </div>
+          <div>
+            <div className="mb-1 flex justify-between text-xs text-zinc-400">
+              <span>Sistem RAM kullanımı</span>
+              <span className="tabular-nums text-white">{sysPct}%</span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-white/5">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-violet-500 to-accent"
+                style={{ width: `${sysPct}%` }}
+              />
+            </div>
+            <p className="mt-1 text-[11px] text-zinc-600">
+              {server.os_freemem_mb.toLocaleString('tr-TR')} / {server.os_totalmem_mb.toLocaleString('tr-TR')} MB boş / toplam
+            </p>
+          </div>
+          <div>
+            <div className="mb-1 flex justify-between text-xs text-zinc-400">
+              <span>Node heap</span>
+              <span className="tabular-nums text-white">
+                {server.memory_heap_used_mb} / {server.memory_heap_total_mb} MB
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-white/5">
+              <div
+                className="h-full rounded-full bg-emerald-500/90"
+                style={{ width: `${heapPct}%` }}
+              />
+            </div>
+            <p className="mt-1 text-[11px] text-zinc-600">
+              RSS ~{server.memory_rss_mb} MB · external ~{server.memory_external_mb} MB
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3 rounded-xl border border-white/5 bg-ink-950/50 p-4">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <HardDrive className="h-4 w-4 text-amber-400" />
+            Disk (yüklemeler)
+          </div>
+          <p className="text-2xl font-bold tabular-nums text-white">{formatStorageBytes(server.uploads_bytes)}</p>
+          <p className="text-xs text-zinc-500">
+            <code className="rounded bg-white/5 px-1.5 py-0.5 text-zinc-400">uploads/</code> klasörü (kapak + ses)
+          </p>
+          <p className="text-xs text-zinc-600">
+            Süreç PID {server.pid} · {server.hostname}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function formatPct(n: number) {
   return `${n.toFixed(1)}%`;
@@ -194,6 +335,8 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {stats.server ? <ServerStatsPanel server={stats.server} /> : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <BooksStatusVisual stats={stats} />
