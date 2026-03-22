@@ -140,8 +140,8 @@ rm -rf node_modules package-lock.json
 npm cache clean --force
 
 # Doğru React versiyonlarını yükle
-npm install react@18.3.1 react-dom@18.3.1 @types/react@18 @types/react-dom@18
-npm install
+npm install react@18.3.1 react-dom@18.3.1 @types/react@18 @types/react-dom@18 --legacy-peer-deps
+npm install --legacy-peer-deps
 
 echo "  Next.js: .next temizleniyor..."
 node scripts/clean-next.cjs
