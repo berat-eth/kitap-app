@@ -57,7 +57,8 @@ const BACKEND_URL = String(process.env.BACKEND_URL || 'http://127.0.0.1:3001')
 async function main() {
   const app = express();
   app.disable('x-powered-by');
-  app.use(express.json({ limit: '2mb' }));
+  /** Yalnızca login: global json parser proxy isteklerinde gövdeyi tüketir; POST/PUT/DELETE backend'e boş gider. */
+  const jsonParser = express.json({ limit: '2mb' });
 
   app.use(
     session({
@@ -74,7 +75,7 @@ async function main() {
     })
   );
 
-  app.post('/api/auth/login', async (req, res) => {
+  app.post('/api/auth/login', jsonParser, async (req, res) => {
     const envUser = process.env.ADMIN_USERNAME;
     const envPass = process.env.ADMIN_PASSWORD;
     const adminApiKey = normalizeSecret(process.env.ADMIN_API_KEY);

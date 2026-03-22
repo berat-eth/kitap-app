@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react';
 import { apiJson, type SuccessWrap } from '../lib/api';
 import type { AdminBook, AdminChapter, BookStatus, CategoryRow } from '../types';
+import AudioUploadField from '../components/AudioUploadField';
 import MediaUploadButton from '../components/MediaUploadButton';
 
 const NEW_BOOK_ID = 'new';
@@ -406,8 +407,13 @@ export default function BookEdit() {
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-ink-900/40 p-6 shadow-panel">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-display text-lg font-semibold text-white">Bölümler</h3>
+          <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="font-display text-lg font-semibold text-white">Sesli bölümler</h3>
+              <p className="mt-1 text-xs text-zinc-500">
+                Her bölüm için MP3 vb. dosyayı yükleyin veya URL girin; süre mümkünse otomatik dolar.
+              </p>
+            </div>
             <button
               type="button"
               disabled={isNew}
@@ -418,7 +424,7 @@ export default function BookEdit() {
                 }));
                 setAddOpen(true);
               }}
-              className="inline-flex items-center gap-1 rounded-lg bg-accent/15 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/25 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-accent/15 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/25 disabled:cursor-not-allowed disabled:opacity-40"
               title={isNew ? 'Önce kitabı oluşturun' : undefined}
             >
               <Plus className="h-3.5 w-3.5" />
@@ -483,21 +489,21 @@ export default function BookEdit() {
                 onChange={(e) => setEditChForm((c) => ({ ...c, title: e.target.value }))}
                 className="w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-white outline-none"
               />
-              <div className="flex flex-wrap items-center gap-2">
-                <MediaUploadButton
-                  variant="audio"
-                  accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus,.webm,.flac"
-                  label="Ses dosyası yükle (MP3 vb.)"
-                  disabled={busy}
-                  onUploaded={(url) => setEditChForm((c) => ({ ...c, audio_url: url }))}
-                  onAudioDuration={(sec) => {
-                    if (sec != null) setEditChForm((c) => ({ ...c, duration_seconds: String(sec) }));
-                  }}
-                  onError={(m) => setErr(m)}
-                />
-              </div>
+              <AudioUploadField
+                disabled={busy}
+                onUploaded={(url) => setEditChForm((c) => ({ ...c, audio_url: url }))}
+                onAudioDuration={(sec) => {
+                  if (sec != null) setEditChForm((c) => ({ ...c, duration_seconds: String(sec) }));
+                }}
+                onError={(m) => setErr(m)}
+                statusHint={
+                  editChForm.audio_url.trim()
+                    ? 'Ses hazır — aşağıdaki URL alanı güncellendi.'
+                    : undefined
+                }
+              />
               <input
-                placeholder="Ses URL"
+                placeholder="Ses URL (yükleme sonrası otomatik dolar)"
                 value={editChForm.audio_url}
                 onChange={(e) => setEditChForm((c) => ({ ...c, audio_url: e.target.value }))}
                 className="w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-white outline-none"
@@ -544,28 +550,27 @@ export default function BookEdit() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-ink-900 p-6 shadow-panel">
             <h3 className="font-display text-lg font-semibold text-white">Yeni bölüm</h3>
+            <p className="mt-1 text-sm text-zinc-500">Önce ses dosyasını yükleyin veya URL yapıştırın.</p>
             <div className="mt-4 space-y-3">
               <input
-                placeholder="Başlık"
+                placeholder="Bölüm başlığı"
                 value={newCh.title}
                 onChange={(e) => setNewCh((c) => ({ ...c, title: e.target.value }))}
                 className="w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-white outline-none"
               />
-              <div className="flex flex-wrap items-center gap-2">
-                <MediaUploadButton
-                  variant="audio"
-                  accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus,.webm,.flac"
-                  label="Ses dosyası yükle (MP3 vb.)"
-                  disabled={busy}
-                  onUploaded={(url) => setNewCh((c) => ({ ...c, audio_url: url }))}
-                  onAudioDuration={(sec) => {
-                    if (sec != null) setNewCh((c) => ({ ...c, duration_seconds: String(sec) }));
-                  }}
-                  onError={(m) => setErr(m)}
-                />
-              </div>
+              <AudioUploadField
+                disabled={busy}
+                onUploaded={(url) => setNewCh((c) => ({ ...c, audio_url: url }))}
+                onAudioDuration={(sec) => {
+                  if (sec != null) setNewCh((c) => ({ ...c, duration_seconds: String(sec) }));
+                }}
+                onError={(m) => setErr(m)}
+                statusHint={
+                  newCh.audio_url.trim() ? 'Ses yüklendi — kayda hazır.' : undefined
+                }
+              />
               <input
-                placeholder="Ses dosyası URL"
+                placeholder="Ses URL (yükleme sonrası otomatik dolar)"
                 value={newCh.audio_url}
                 onChange={(e) => setNewCh((c) => ({ ...c, audio_url: e.target.value }))}
                 className="w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-white outline-none"

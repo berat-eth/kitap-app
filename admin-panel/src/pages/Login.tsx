@@ -37,10 +37,6 @@ export default function Login() {
             <BookMarked className="h-7 w-7" />
           </div>
           <h1 className="font-display text-2xl font-bold text-white">Wirbooks Admin</h1>
-          <p className="mt-2 text-sm text-zinc-500">
-            Kullanıcı adı ve şifre sunucudaki <code className="text-accent/90">.env</code> dosyasından doğrulanır.
-            Oturum çerezi yalnızca bu sunucuda saklanır; API anahtarı tarayıcıya gönderilmez.
-          </p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <div>

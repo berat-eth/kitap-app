@@ -10,6 +10,7 @@ type Props = {
   onUploaded: (url: string) => void;
   onAudioDuration?: (seconds: number | null) => void;
   onError?: (message: string) => void;
+  buttonClassName?: string;
 };
 
 export default function MediaUploadButton({
@@ -20,6 +21,7 @@ export default function MediaUploadButton({
   onUploaded,
   onAudioDuration,
   onError,
+  buttonClassName,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -58,7 +60,10 @@ export default function MediaUploadButton({
         type="button"
         disabled={disabled || busy}
         onClick={() => inputRef.current?.click()}
-        className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-medium text-zinc-300 hover:border-accent/40 hover:text-white disabled:opacity-50"
+        className={
+          buttonClassName ||
+          'inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-medium text-zinc-300 hover:border-accent/40 hover:text-white disabled:opacity-50'
+        }
       >
         <Upload className="h-3.5 w-3.5 shrink-0" />
         {busy ? 'Yükleniyor…' : label}
