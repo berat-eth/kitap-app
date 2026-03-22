@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "clean": "node scripts/clean-next.cjs",
-    "build": "npm run clean && next build",
+    "build": "npm run clean && NODE_OPTIONS=\"--max-old-space-size=4096\" next build",
     "start": "next start",
     "lint": "eslint"
   },
