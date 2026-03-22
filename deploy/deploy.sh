@@ -134,8 +134,10 @@ rsync -av --delete \
 
 cd "$DEPLOY_DIR/web"
 npm install
-echo "  Next.js: .next temizlenip sıfırdan build alınıyor..."
-NODE_ENV=production npm run build
+echo "  Next.js: .next temizleniyor (rm -rf — Node ile silme bazı sunucularda Bus error verebiliyor)..."
+rm -rf .next
+echo "  Next.js: production build..."
+NODE_ENV=production ./node_modules/.bin/next build
 
 # --- 5. Admin Panel Deploy ---
 echo ""

@@ -80,6 +80,8 @@ sudo bash deploy/deploy.sh
 
 **Not:** Script çalışır çalışmaz mevcut **Wirbooks PM2** süreçleri (`wirbooks-api`, `wirbooks-web`, `wirbooks-admin` ve eski `plaxsy-*` isimleri) durdurulup silinir; build bittikten sonra yeniden başlatılır. Deploy süresince API / web / admin kısa süre hizmet dışı kalabilir.
 
+**Next.js `Bus error (core dumped)`:** Web build aşamasında `.next` klasörü **shell ile `rm -rf`** silinir; ardından doğrudan `next build` çalıştırılır (`npm run build` / `node -e` clean bazı sunucularda Bus error üretebiliyor). Hata sürerse RAM/disk ve `node -v` / mimari (ARM/x64) kontrol edin.
+
 ## Faydalı Komutlar
 
 | Komut | Açıklama |
