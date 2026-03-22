@@ -20,7 +20,7 @@ sudo bash deploy/deploy.sh
 - DNS A kayıtları sunucu IP'sine yönlendirilmiş:
   - `api.wirbooks.com.tr`
   - `admin.wirbooks.com.tr`
-- `/root/data/.env` production değerleriyle hazır — **tek dosya**; API ve admin panel aynı dosyayı okur (`ENV_PATH` ile başka yol da verilebilir). Şablon: repoda `/.env.example`
+- `/root/data/.env` production değerleriyle hazır — **tek dosya**; API ve admin panel aynı dosyayı okur (`ENV_PATH` ile başka yol da verilebilir).
 
 ## `/root/data/.env` (özet)
 
@@ -43,8 +43,6 @@ ADMIN_USERNAME=...
 ADMIN_PASSWORD=...
 # ADMIN_API_KEY yukarıdaki ile aynı olmalı
 ```
-
-Ayrıntılı liste için proje kökündeki **`.env.example`** dosyasına bakın.
 
 ## Sunucu Dizinleri
 
