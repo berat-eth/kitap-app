@@ -1,0 +1,72 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="min-h-[calc(100vh-88px)] flex flex-col lg:flex-row relative pb-36">
+<section class="flex-1 p-6 md:p-12 flex flex-col items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 opacity-20 blur-[120px] -z-10 bg-gradient-to-br from-primary to-surface-container-highest"></div>
+<div class="w-full max-w-4xl flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+<div class="relative group">
+<% if (book.cover) { %>
+<img src="<%= book.cover %>" alt="" class="w-56 md:w-80 lg:w-[420px] aspect-[2/3] object-cover rounded-xl shadow-[0_40px_60px_rgba(0,0,0,0.5)] transition-transform group-hover:scale-[1.02]"/>
+<% } %>
+</div>
+<div class="flex-1 flex flex-col w-full text-center lg:text-left">
+<span class="text-tertiary text-xs tracking-[0.2em] uppercase mb-3">Şu an</span>
+<h1 class="font-headline text-3xl md:text-5xl lg:text-6xl font-bold text-on-surface tracking-tight mb-2"><%= book.title %></h1>
+<p class="font-headline italic text-lg md:text-2xl text-primary/80"><%= book.author %></p>
+<div class="w-full my-8">
+<div class="flex justify-between text-xs tracking-widest text-on-surface/50 uppercase mb-2">
+<span id="t-current">0:00</span>
+<span id="t-chapter" class="text-tertiary normal-case">—</span>
+<span id="t-total">0:00</span>
+</div>
+<div class="relative h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden cursor-pointer" id="seek-wrap">
+<div id="seek-bar" class="absolute top-0 left-0 h-full w-0 bg-gradient-to-r from-primary to-tertiary transition-all"></div>
+</div>
+</div>
+<div class="flex items-center justify-center lg:justify-start gap-6 md:gap-10 flex-wrap">
+<button type="button" id="btn-prev-ch" class="text-on-surface/60 hover:text-on-surface"><span class="material-symbols-outlined text-4xl">skip_previous</span></button>
+<button type="button" id="btn-play" class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-secondary flex items-center justify-center text-on-secondary shadow-lg hover:shadow-[0_0_40px_rgba(251,180,0,0.3)] transition-all">
+<span class="material-symbols-outlined text-4xl md:text-5xl" id="icon-play" style="font-variation-settings:'FILL'1">play_arrow</span>
+</button>
+<button type="button" id="btn-next-ch" class="text-on-surface/60 hover:text-on-surface"><span class="material-symbols-outlined text-4xl">skip_next</span></button>
+<button type="button" id="btn-notes-open" class="text-on-surface/40 hover:text-tertiary flex flex-col items-center text-xs font-bold">
+<span class="material-symbols-outlined text-3xl">edit_note</span>Not</button>
+</div>
+<audio id="audio-el" class="hidden" preload="metadata"></audio>
+</div>
+</div>
+</section>
+<aside class="w-full lg:w-[380px] glass-panel lg:border-l border-outline-variant/15 flex flex-col max-h-[50vh] lg:max-h-none lg:min-h-[calc(100vh-88px)]">
+<div class="p-6 border-b border-outline-variant/15">
+<h2 class="font-headline text-xl text-on-surface font-semibold">İçindekiler</h2>
+<p class="text-on-surface/50 text-sm mt-1"><%= chapters.length %> bölüm</p>
+</div>
+<div class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-1">
+<% chapters.forEach(function(ch, idx) { %>
+<button type="button" class="chapter-pick w-full text-left p-4 rounded-xl hover:bg-surface-container transition-all border border-transparent data-[on]:bg-surface-container-high data-[on]:border-primary/20" data-chapter-id="<%= ch.id %>" data-idx="<%= idx %>">
+<div class="flex justify-between text-xs text-on-surface/40 mb-1"><span>Bölüm <%= idx+1 %></span><span><%= formatDur(ch.durationSec) %></span></div>
+<h3 class="font-headline text-base text-on-surface/90"><%= ch.title %></h3>
+</button>
+<% }); %>
+</div>
+</aside>
+<aside class="fixed top-0 right-0 w-full md:w-[420px] h-full glass-panel border-l border-outline-variant/15 flex flex-col z-[60] shadow-[-20px_0_60px_rgba(0,0,0,0.5)]" id="notes-panel">
+<div class="p-6 border-b border-outline-variant/15 flex justify-between items-center">
+<div>
+<h2 class="font-headline text-xl text-on-surface font-semibold">Notlar</h2>
+<p class="text-on-surface/50 text-sm">Bu kitap için (tarayıcıda saklanır)</p>
+</div>
+<button type="button" id="btn-notes-close" class="p-2 text-on-surface/40 hover:text-tertiary"><span class="material-symbols-outlined">close</span></button>
+</div>
+<div class="p-4 border-b border-outline-variant/15">
+<textarea id="note-input" class="w-full bg-surface-container-high/50 border border-outline-variant/20 rounded-xl p-3 text-on-surface text-sm min-h-[88px] placeholder:text-on-surface/30" placeholder="Düşünceni yaz…"></textarea>
+<button type="button" id="btn-note-save" class="mt-3 px-5 py-2 bg-secondary text-on-secondary text-xs font-bold uppercase rounded-full">Kaydet</button>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-4" id="notes-list"></div>
+</aside>
+</main>
+<%- include('partials/bottom-nav') %>
+<script type="application/json" id="ml-book"><%- JSON.stringify({ id: book.id, title: book.title, author: book.author, cover: book.cover }) %></script>
+<script type="application/json" id="ml-chapters"><%- JSON.stringify(chapters) %></script>
+<script>window.__ML_PAGE = 'player'; window.__ML_INITIAL_CHAPTER = <%- JSON.stringify(initialChapterId) %>;</script>
+<%- include('partials/foot') %>

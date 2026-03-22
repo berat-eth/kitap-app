@@ -3,7 +3,6 @@
 # Wirbooks - Tek Script Canlıya Alma
 # Sunucu kurulumu + Deploy + SSL (Let's Encrypt)
 # API:    api.wirbooks.com.tr
-# Web:    wirbooks.com.tr
 # Admin:  admin.wirbooks.com.tr
 # Kullanım: sudo bash deploy/deploy.sh
 # ============================================================
@@ -15,26 +14,25 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DEPLOY_DIR="/var/www/wirbooks"
 LOG_DIR="/var/log/wirbooks"
 DOMAIN_API="api.wirbooks.com.tr"
-DOMAIN_WEB="wirbooks.com.tr"
 DOMAIN_ADMIN="admin.wirbooks.com.tr"
 DATA_DIR="/root/data"
 ENV_FILE="$DATA_DIR/.env"
 
 # Proje kökü kontrolü
-if [ ! -d "$PROJECT_ROOT/backend" ] || [ ! -d "$PROJECT_ROOT/web" ] || [ ! -d "$PROJECT_ROOT/admin-panel" ]; then
+if [ ! -d "$PROJECT_ROOT/backend" ] || [ ! -d "$PROJECT_ROOT/admin-panel" ]; then
   echo "HATA: Proje dizini bulunamadı. deploy.sh proje kökünden çalıştırılmalı."
-  echo "Beklenen alt dizinler: backend/, web/, admin-panel/"
+  echo "Beklenen alt dizinler: backend/, admin-panel/"
   echo "Örnek: cd /path/to/kitap-app && sudo bash deploy/deploy.sh"
   exit 1
 fi
 
 echo "=============================================="
-echo "  Wirbooks - Canlıya Alma (Tek Script)"
+echo "  Wirbooks - Canlıya Alma (API + Admin)"
 echo "=============================================="
 echo ""
 
 # --- 1. Sunucu Kurulumu ---
-echo "[1/7] Sistem güncelleniyor ve bağımlılıklar kuruluyor..."
+echo "[1/6] Sistem güncelleniyor ve bağımlılıklar kuruluyor..."
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
@@ -80,25 +78,21 @@ echo "  Node.js: $(node -v)"
 
 # --- 2. Dizinler ---
 echo ""
-echo "[2/7] Dizinler oluşturuluyor..."
-mkdir -p "$DEPLOY_DIR/backend" "$DEPLOY_DIR/web" "$DEPLOY_DIR/admin" "$LOG_DIR"
+echo "[2/6] Dizinler oluşturuluyor..."
+mkdir -p "$DEPLOY_DIR/backend" "$DEPLOY_DIR/admin" "$LOG_DIR"
 
 # Env dosyası kontrolü
 if [ ! -f "$ENV_FILE" ]; then
   echo "HATA: Env dosyası bulunamadı: $ENV_FILE"
-  echo "Lütfen $ENV_FILE dosyasını DB + NEXT_PUBLIC + API_KEY + SESSION_SECRET değerleriyle oluşturun."
+  echo "Lütfen $ENV_FILE dosyasını DB + API_KEY + SESSION_SECRET + admin değerleriyle oluşturun."
   exit 1
 fi
 
-# Env'i yükle (build sırasında NEXT_PUBLIC değerleri gerekli)
 set -a
 source "$ENV_FILE"
 set +a
 
-export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://$DOMAIN_API/api}"
-export NEXT_PUBLIC_API_KEY="${NEXT_PUBLIC_API_KEY:-${API_KEY:-}}"
-
-# Eski Wirbooks PM2 süreçleri: deploy başında kaldır (kesinti buradan başlar, sonunda yeniden kurulur)
+# Eski Wirbooks PM2 süreçleri: deploy başında kaldır
 echo ""
 echo "  PM2: eski Wirbooks süreçleri siliniyor (yeniden kurulum öncesi)..."
 PM2_CLEANUP_APPS=(wirbooks-api wirbooks-web wirbooks-admin plaxsy-api plaxsy-web)
@@ -110,7 +104,7 @@ fi
 
 # --- 3. Backend Deploy ---
 echo ""
-echo "[3/7] Backend deploy ediliyor..."
+echo "[3/6] Backend deploy ediliyor..."
 rsync -av --delete \
   --exclude 'node_modules' \
   --exclude '.env' \
@@ -122,45 +116,9 @@ cd "$DEPLOY_DIR/backend"
 npm install --production
 mkdir -p uploads/audio uploads/covers
 
-# --- 4. Web App Deploy ---
+# --- 4. Admin Panel Deploy ---
 echo ""
-echo "[4/7] Web app (Next.js) deploy ediliyor..."
-rsync -av --delete \
-  --exclude 'node_modules' \
-  --exclude '.next' \
-  --exclude '.env.local' \
-  --exclude '.git' \
-  "$PROJECT_ROOT/web/" "$DEPLOY_DIR/web/"
-
-cd "$DEPLOY_DIR/web"
-
-# React versiyonlarını tamamen temizle ve düzelt
-echo "  React versiyonları düzeltiliyor..."
-rm -rf node_modules package-lock.json
-npm cache clean --force
-
-# Doğru React versiyonlarını yükle
-npm install react@18.3.1 react-dom@18.3.1 @types/react@18 @types/react-dom@18 --legacy-peer-deps
-npm install --legacy-peer-deps
-
-echo "  Next.js: .next temizleniyor..."
-node scripts/clean-next.cjs
-
-# Sistem bellek durumunu kontrol et
-AVAILABLE_MEM=$(free -m | awk 'NR==2{printf "%.0f", $7}')
-echo "  Kullanılabilir bellek: ${AVAILABLE_MEM}MB"
-
-echo "  Next.js: production build (düşük bellek sınırı ile)..."
-# Node.js 20 uyumlu bellek optimizasyonu
-if ! NODE_OPTIONS="--max-old-space-size=1024" NODE_ENV=production npm run build; then
-  echo "  HATA: Build başarısız. En düşük bellek sınırı ile deneniyor..."
-  # En düşük bellek sınırı
-  NODE_OPTIONS="--max-old-space-size=512" NODE_ENV=production npm run build
-fi
-
-# --- 5. Admin Panel Deploy ---
-echo ""
-echo "[5/7] Admin panel deploy ediliyor..."
+echo "[4/6] Admin panel deploy ediliyor..."
 rsync -av --delete \
   --exclude 'node_modules' \
   --exclude 'dist' \
@@ -172,11 +130,10 @@ cd "$DEPLOY_DIR/admin"
 npm install --production
 NODE_ENV=production npm run build
 
-# --- 6. Nginx + PM2 ---
+# --- 5. Nginx + PM2 ---
 echo ""
-echo "[6/7] Nginx ve PM2 yapılandırılıyor..."
+echo "[5/6] Nginx ve PM2 yapılandırılıyor..."
 
-# Eski site symlink (yeniden ln -sf öncesi)
 rm -f /etc/nginx/sites-enabled/wirbooks
 
 cat > /etc/nginx/sites-available/wirbooks << NGINXEOF
@@ -198,23 +155,6 @@ server {
     }
     location /uploads {
         alias ${DEPLOY_DIR}/backend/uploads;
-    }
-}
-
-# Ana site (Next.js)
-server {
-    listen 80;
-    server_name ${DOMAIN_WEB} www.${DOMAIN_WEB};
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_cache_bypass \$http_upgrade;
     }
 }
 
@@ -259,24 +199,6 @@ module.exports = {
       merge_logs: true,
     },
     {
-      name: 'wirbooks-web',
-      cwd: '${DEPLOY_DIR}/web',
-      script: 'node_modules/next/dist/bin/next',
-      args: 'start',
-      instances: 1,
-      exec_mode: 'fork',
-      env: {
-        NODE_ENV: 'production',
-        ENV_PATH: '${ENV_FILE}',
-        PORT: 3000,
-        NEXT_PUBLIC_API_URL: '${NEXT_PUBLIC_API_URL}',
-        NEXT_PUBLIC_API_KEY: '${NEXT_PUBLIC_API_KEY}',
-      },
-      error_file: '${LOG_DIR}/web-error.log',
-      out_file: '${LOG_DIR}/web-out.log',
-      merge_logs: true,
-    },
-    {
       name: 'wirbooks-admin',
       cwd: '${DEPLOY_DIR}/admin',
       script: 'server.js',
@@ -304,24 +226,21 @@ pm2 start ecosystem.config.js
 pm2 save
 pm2 startup 2>/dev/null | tail -n 1 | bash 2>/dev/null || true
 
-# --- 7. SSL ---
+# --- 6. SSL ---
 echo ""
-echo "[7/7] SSL sertifikası alınıyor (Let's Encrypt)..."
+echo "[6/6] SSL sertifikası alınıyor (Let's Encrypt)..."
 if certbot --nginx \
   -d "$DOMAIN_API" \
-  -d "$DOMAIN_WEB" -d "www.$DOMAIN_WEB" \
   -d "$DOMAIN_ADMIN" \
   --non-interactive --agree-tos --register-unsafely-without-email --redirect 2>/dev/null; then
   echo "  SSL kuruldu"
 else
   echo "  UYARI: SSL alınamadı. DNS kayıtlarını kontrol edin:"
   echo "    $DOMAIN_API      → sunucu IP"
-  echo "    $DOMAIN_WEB      → sunucu IP"
-  echo "    www.$DOMAIN_WEB  → sunucu IP"
   echo "    $DOMAIN_ADMIN    → sunucu IP"
   echo ""
   echo "  Sonra manuel çalıştırın:"
-  echo "  sudo certbot --nginx -d $DOMAIN_API -d $DOMAIN_WEB -d www.$DOMAIN_WEB -d $DOMAIN_ADMIN"
+  echo "  sudo certbot --nginx -d $DOMAIN_API -d $DOMAIN_ADMIN"
 fi
 
 echo ""
@@ -329,7 +248,6 @@ echo "=============================================="
 echo "  Wirbooks deploy tamamlandı"
 echo "=============================================="
 echo "API:    https://$DOMAIN_API"
-echo "Web:    https://$DOMAIN_WEB"
 echo "Admin:  https://$DOMAIN_ADMIN"
 echo ""
 echo "pm2 status                  - durum"

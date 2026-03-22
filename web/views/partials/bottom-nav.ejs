@@ -1,0 +1,18 @@
+<nav class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex justify-around items-center px-6 py-2 w-[calc(100%-2rem)] max-w-2xl bg-[#142034]/80 backdrop-blur-xl rounded-full shadow-[0_40px_60px_rgba(215,226,255,0.06)]" aria-label="Alt menü">
+<a href="/" class="flex flex-col items-center justify-center p-3 md:p-4 rounded-full transition-all <%= activeBottom === 'now' ? 'text-secondary bg-surface-container-high scale-105' : 'text-on-surface/40 hover:bg-surface-container-high hover:text-secondary' %>">
+<span class="material-symbols-outlined text-xl md:text-2xl <%= activeBottom === 'now' ? '' : '' %>">play_circle</span>
+<span class="text-[10px] uppercase tracking-widest mt-0.5">Dinle</span>
+</a>
+<a href="/library" class="flex flex-col items-center justify-center p-3 md:p-4 rounded-full transition-all <%= activeBottom === 'library' ? 'text-secondary bg-surface-container-high scale-105' : 'text-on-surface/40 hover:bg-surface-container-high hover:text-secondary' %>">
+<span class="material-symbols-outlined text-xl md:text-2xl">library_books</span>
+<span class="text-[10px] uppercase tracking-widest mt-0.5">Kitaplık</span>
+</a>
+<a href="/search" class="flex flex-col items-center justify-center p-3 md:p-4 rounded-full transition-all <%= activeBottom === 'search' ? 'text-secondary bg-surface-container-high scale-105' : 'text-on-surface/40 hover:bg-surface-container-high hover:text-secondary' %>">
+<span class="material-symbols-outlined text-xl md:text-2xl">search</span>
+<span class="text-[10px] uppercase tracking-widest mt-0.5">Ara</span>
+</a>
+<a href="/" class="flex flex-col items-center justify-center p-3 md:p-4 rounded-full text-on-surface/40 hover:bg-surface-container-high hover:text-secondary transition-all">
+<span class="material-symbols-outlined text-xl md:text-2xl">person</span>
+<span class="text-[10px] uppercase tracking-widest mt-0.5">Profil</span>
+</a>
+</nav>

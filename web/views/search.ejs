@@ -1,0 +1,28 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="max-w-4xl mx-auto px-6 py-10 pb-36">
+<h1 class="font-headline text-4xl text-on-surface mb-6">Ara</h1>
+<form action="/search" method="get" class="mb-10 flex flex-wrap gap-3">
+<input type="search" name="q" value="<%= q %>" placeholder="Başlık veya yazar…" class="flex-1 min-w-[200px] bg-surface-container-lowest border border-outline-variant/20 rounded-lg px-4 py-3 text-on-surface placeholder:text-on-surface-variant/50"/>
+<button type="submit" class="px-6 py-3 rounded-full bg-secondary text-on-secondary font-semibold">Ara</button>
+<% if (category) { %><input type="hidden" name="category" value="<%= category %>"/><% } %>
+</form>
+<% if (category && !q) { %><p class="text-on-surface-variant mb-6">Kategori: <strong class="text-tertiary"><%= category %></strong></p><% } %>
+<% if (!books.length) { %>
+<p class="text-on-surface-variant"><%= (q || category) ? 'Sonuç yok.' : 'Aramak için yazın.' %></p>
+<% } else { %>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-6">
+<% books.forEach(function(b) { %>
+<a href="/book/<%= b.id %>" class="group no-underline">
+<div class="aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-surface-container">
+<% if (b.cover) { %><img src="<%= b.cover %>" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform"/><% } %>
+</div>
+<h3 class="text-on-surface font-semibold text-sm truncate"><%= b.title %></h3>
+<p class="text-on-surface-variant text-xs truncate"><%= b.author %></p>
+</a>
+<% }); %>
+</div>
+<% } %>
+</main>
+<%- include('partials/bottom-nav') %>
+<%- include('partials/foot') %>

@@ -1,0 +1,33 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="max-w-[1920px] mx-auto px-6 md:px-12 py-10 flex flex-col lg:flex-row gap-10 pb-36">
+<aside class="w-full lg:w-64 flex-shrink-0 space-y-8">
+<section>
+<h3 class="font-headline text-tertiary text-xs tracking-widest uppercase mb-4 opacity-80">Koleksiyon</h3>
+<p class="text-on-surface-variant text-sm">Favorileriniz Wirbooks hesabınızdaki cihaz kimliği ile eşlenir.</p>
+</section>
+<section class="p-4 rounded-xl bg-surface-container-highest/40 border border-outline-variant/10" id="library-mini-widget" hidden>
+<div class="flex gap-3 mb-3">
+<img class="w-12 h-16 object-cover rounded-sm shadow-xl" alt="" id="lw-cover"/>
+<div class="min-w-0">
+<p class="text-xs text-tertiary font-medium">SON</p>
+<h4 class="text-sm font-semibold truncate text-on-surface" id="lw-title"></h4>
+<p class="text-[10px] text-on-surface/50 truncate" id="lw-author"></p>
+</div>
+</div>
+<a href="#" id="lw-link" class="w-full py-3 rounded-full bg-secondary text-on-secondary font-bold flex items-center justify-center gap-2 text-sm no-underline">Dinle</a>
+</section>
+</aside>
+<section class="flex-1">
+<header class="mb-10">
+<h1 class="font-headline text-4xl md:text-5xl font-bold tracking-tight text-on-surface">Kitaplığım</h1>
+<p class="text-on-surface/50 mt-2 max-w-2xl">Favori işaretlediğiniz kitaplar.</p>
+</header>
+<div id="library-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12">
+<p class="text-on-surface-variant col-span-full" id="library-loading">Yükleniyor…</p>
+</div>
+</section>
+</main>
+<%- include('partials/bottom-nav') %>
+<script>window.__ML_PAGE = 'library';</script>
+<%- include('partials/foot') %>
