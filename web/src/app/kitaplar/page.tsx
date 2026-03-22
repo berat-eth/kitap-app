@@ -4,6 +4,8 @@ import { getBooks, getCategories } from "@/lib/api";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+export const dynamic = 'force-dynamic';
+
 type SearchParams = Promise<{
   q?: string;
   category?: string;

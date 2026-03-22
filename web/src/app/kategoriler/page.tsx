@@ -3,6 +3,8 @@ import { InnerPageHero } from "@/components/inner-page-hero";
 import { getCategories, getBooks } from "@/lib/api";
 import type { Metadata } from "next";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "Kategoriler",
   description: "Tüm sesli kitap kategorilerini keşfedin. Roman, tarih, bilim, kişisel gelişim ve daha fazlası.",

@@ -3,6 +3,8 @@ import { ContentCard } from "@/components/content-card";
 import { InnerPageHero } from "@/components/inner-page-hero";
 import type { Metadata } from "next";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "Dinleme Rehberi",
   description: "Wirbooks ile sesli kitap dinleme: katalog, bölümler, kalite ve mobil uygulama önerileri.",

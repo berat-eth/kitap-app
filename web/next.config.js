@@ -14,9 +14,13 @@ dotenv.config({ path: resolveEnvPath(), override: true });
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  trailingSlash: false,
+  skipTrailingSlashRedirect: true,
   experimental: {
     staticWorkerRequestDeduping: false,
   },
+  // Static generation'ı tamamen devre dışı bırak
+  generateStaticParams: false,
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "localhost", pathname: "/**" },
