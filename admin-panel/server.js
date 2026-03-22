@@ -57,6 +57,8 @@ const BACKEND_URL = String(process.env.BACKEND_URL || 'http://127.0.0.1:3001')
 async function main() {
   const app = express();
   app.disable('x-powered-by');
+  // Nginx TLS sonlandırma: req.secure / Secure cookie doğru çalışsın (oturum kaybolmasın)
+  app.set('trust proxy', 1);
   /** Yalnızca login: global json parser proxy isteklerinde gövdeyi tüketir; POST/PUT/DELETE backend'e boş gider. */
   const jsonParser = express.json({ limit: '2mb' });
 
@@ -165,7 +167,7 @@ async function main() {
       proxyTimeout: 600_000,
       // http-proxy-middleware v3: sadece options.on.proxyReq dinlenir; üst seviye onProxyReq yok sayılır.
       on: {
-        proxyReq(proxyReq) {
+        proxyReq(proxyReq, req) {
           // Admin paneli host'unu iletme: /api/upload yanıtındaki dosya URL'leri yanlış
           // olur (dosya API'de, link admin.wirbooks.../uploads olur ve 404 verir).
           // Kökeni BACKEND_PUBLIC_URL veya BACKEND_URL'den türet.
@@ -185,8 +187,8 @@ async function main() {
           if (apiKey) {
             proxyReq.setHeader('X-API-Key', apiKey);
           }
-          const url = (req.originalUrl || req.url || '').split('?')[0];
-          if (url.includes('/api/admin')) {
+          const pathForAdmin = (req.originalUrl || req.url || '').split('?')[0];
+          if (pathForAdmin.includes('/api/admin')) {
             const adminKey = normalizeSecret(req.session?.adminKey);
             if (adminKey) {
               proxyReq.setHeader('X-Admin-Key', adminKey);
