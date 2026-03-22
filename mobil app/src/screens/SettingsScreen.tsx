@@ -198,7 +198,14 @@ const SettingsScreen = () => {
         
         <TouchableOpacity
           style={[styles.submitBookCard, { backgroundColor: theme.colors.primary }]}
-          onPress={() => navigation.navigate('SubmitBook')}
+          onPress={() => {
+            const stackNav = navigation.getParent();
+            if (stackNav) {
+              stackNav.navigate('SubmitBook' as never);
+            } else {
+              navigation.navigate('SubmitBook' as never);
+            }
+          }}
         >
           <View style={styles.submitBookContent}>
             <View style={styles.submitBookIcon}>

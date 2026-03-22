@@ -1,13 +1,35 @@
 import React, { createContext, useContext, useState, useRef, ReactNode } from 'react';
-import { Audio } from 'expo-av';
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import { AudioPlayerState, Book, Chapter } from '../types';
+
+/** Medya oynatma: hoparlör, tam seviye oturumu (ahize / düşük karışım sorunlarını önler) */
+async function applyAudiobookAudioMode(): Promise<void> {
+  await Audio.setAudioModeAsync({
+    allowsRecordingIOS: false,
+    playsInSilentModeIOS: true,
+    staysActiveInBackground: true,
+    interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+    interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+    shouldDuckAndroid: false,
+    playThroughEarpieceAndroid: false,
+  });
+}
+
+function clampVolume(v: number): number {
+  return Math.min(1, Math.max(0, v));
+}
 
 interface AudioPlayerContextType {
   playerState: AudioPlayerState;
   play: (book: Book, chapter?: Chapter) => Promise<void>;
   pause: () => Promise<void>;
   resume: () => Promise<void>;
-  seek: (position: number) => Promise<void>;
+  /** Mutlak konum (saniye) */
+  seek: (positionSeconds: number) => Promise<void>;
+  /** Seek bar: 0–100 */
+  seekToProgressPercent: (percent: number) => Promise<void>;
+  /** +30 / -15 gibi; mevcut konumu dosyadan okur */
+  skipRelative: (deltaSeconds: number) => Promise<void>;
   setPlaybackRate: (rate: number) => Promise<void>;
   setVolume: (volume: number) => Promise<void>;
   toggleMute: () => Promise<void>;
@@ -49,14 +71,34 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
   const positionUpdateInterval = useRef<NodeJS.Timeout | null>(null);
   const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isMockModeRef = useRef<boolean>(false);
+  /** API’den gelen bölüm süresi (sn) — dosya metadata gelene kadar seek için */
+  const chapterDurationSecondsRef = useRef(0);
+  /** Son bilinen toplam süre (sn) — state gecikmesinde seek için */
+  const knownDurationRef = useRef(0);
+
+  function maxDurationFromLoaded(
+    st: { isLoaded: true; durationMillis?: number; positionMillis?: number },
+    stateFallback: number
+  ): number {
+    const fromFile =
+      typeof st.durationMillis === 'number' && st.durationMillis > 0 ? st.durationMillis / 1000 : 0;
+    return (
+      fromFile ||
+      chapterDurationSecondsRef.current ||
+      knownDurationRef.current ||
+      stateFallback ||
+      0
+    );
+  }
 
   const updatePosition = async () => {
     if (soundRef.current && !isMockModeRef.current) {
       try {
         const status = await soundRef.current.getStatusAsync();
-        if (status.isLoaded) {
+        if (status && status.isLoaded) {
           const position = status.positionMillis ? status.positionMillis / 1000 : 0;
           const duration = status.durationMillis ? status.durationMillis / 1000 : 0;
+          if (duration > 0) knownDurationRef.current = duration;
           setPlayerState(prev => ({
             ...prev,
             position: isNaN(position) ? 0 : position,
@@ -98,10 +140,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
 
   const play = async (book: Book, chapter?: Chapter) => {
     try {
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-      });
+      await applyAudiobookAudioMode();
 
       const chapterToPlay = chapter || book.chapters?.[0];
       if (!chapterToPlay) return;
@@ -131,23 +170,46 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
       isMockModeRef.current = false;
 
       if (soundRef.current) {
-        await soundRef.current.unloadAsync();
+        try {
+          await soundRef.current.unloadAsync();
+        } finally {
+          soundRef.current = null;
+        }
       }
 
+      chapterDurationSecondsRef.current = Math.max(0, chapterToPlay.durationSeconds ?? 0);
+
+      const effectiveVol = playerState.isMuted ? 0 : clampVolume(playerState.volume);
       const { sound } = await Audio.Sound.createAsync(
         { uri: chapterToPlay.audioUrl },
-        { shouldPlay: true, rate: playerState.playbackRate, volume: playerState.volume }
+        { shouldPlay: true, rate: playerState.playbackRate, volume: effectiveVol }
       );
 
       soundRef.current = sound;
+      await sound.setVolumeAsync(effectiveVol);
+
+      const st0 = await sound.getStatusAsync();
+      let initialDur = chapterDurationSecondsRef.current;
+      let initialPos = 0;
+      if (st0.isLoaded) {
+        if (typeof st0.durationMillis === 'number' && st0.durationMillis > 0) {
+          initialDur = st0.durationMillis / 1000;
+          knownDurationRef.current = initialDur;
+        }
+        if (typeof st0.positionMillis === 'number') initialPos = st0.positionMillis / 1000;
+      }
+
       setPlayerState(prev => ({
         ...prev,
         isPlaying: true,
         currentBook: book,
         currentChapter: chapterToPlay,
+        duration: initialDur || prev.duration,
+        position: initialPos,
       }));
 
       startPositionUpdates();
+      void updatePosition();
     } catch (error) {
       // Fallback to mock mode on error (silently)
       console.log('Audio playback failed, using mock mode');
@@ -169,7 +231,12 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
 
   const pause = async () => {
     if (soundRef.current && !isMockModeRef.current) {
-      await soundRef.current.pauseAsync();
+      try {
+        const st = await soundRef.current.getStatusAsync();
+        if (st.isLoaded) await soundRef.current.pauseAsync();
+      } catch {
+        /* ignore */
+      }
       setPlayerState(prev => ({ ...prev, isPlaying: false }));
       stopPositionUpdates();
     } else if (isMockModeRef.current) {
@@ -180,6 +247,13 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
 
   const resume = async () => {
     if (soundRef.current && !isMockModeRef.current) {
+      try {
+        const st = await soundRef.current.getStatusAsync();
+        if (!st.isLoaded) return;
+      } catch {
+        return;
+      }
+      await applyAudiobookAudioMode();
       await soundRef.current.playAsync();
       setPlayerState(prev => ({ ...prev, isPlaying: true }));
       startPositionUpdates();
@@ -189,57 +263,169 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
     }
   };
 
-  const seek = async (position: number) => {
-    const clampedPosition = Math.max(0, Math.min(playerState.duration || 0, position));
-    if (soundRef.current && !isMockModeRef.current) {
-      try {
-        await soundRef.current.setPositionAsync(clampedPosition * 1000);
-        setPlayerState(prev => ({ ...prev, position: clampedPosition }));
-      } catch (error) {
-        console.error('Error seeking:', error);
-      }
-    } else if (isMockModeRef.current) {
-      setPlayerState(prev => ({ ...prev, position: clampedPosition }));
+  const seek = async (positionSeconds: number) => {
+    if (isMockModeRef.current) {
+      setPlayerState(prev => {
+        const d = prev.duration || 3600;
+        const t = d > 0 ? Math.max(0, Math.min(d, positionSeconds)) : Math.max(0, positionSeconds);
+        return { ...prev, position: t };
+      });
+      return;
+    }
+    const sound = soundRef.current;
+    if (!sound) return;
+    try {
+      const status = await sound.getStatusAsync();
+      if (!status.isLoaded) return;
+      const maxSec = maxDurationFromLoaded(status, 0);
+      const target =
+        maxSec > 0 ? Math.max(0, Math.min(maxSec, positionSeconds)) : Math.max(0, positionSeconds);
+      await sound.setPositionAsync(target * 1000);
+      if (maxSec > 0) knownDurationRef.current = maxSec;
+      setPlayerState(prev => ({
+        ...prev,
+        position: target,
+        duration: maxSec || prev.duration,
+      }));
+    } catch (error) {
+      console.error('Error seeking:', error);
+    }
+  };
+
+  const seekToProgressPercent = async (percent: number) => {
+    const p = Math.max(0, Math.min(100, percent));
+    if (isMockModeRef.current) {
+      setPlayerState(prev => {
+        const d = prev.duration || 3600;
+        return { ...prev, position: (p / 100) * d };
+      });
+      return;
+    }
+    const sound = soundRef.current;
+    if (!sound) return;
+    try {
+      const status = await sound.getStatusAsync();
+      if (!status.isLoaded) return;
+      const maxSec = maxDurationFromLoaded(status, 0);
+      if (maxSec <= 0) return;
+      const target = (p / 100) * maxSec;
+      await sound.setPositionAsync(target * 1000);
+      knownDurationRef.current = maxSec;
+      setPlayerState(prev => ({
+        ...prev,
+        position: target,
+        duration: maxSec,
+      }));
+    } catch (e) {
+      console.error('Error seekToProgressPercent:', e);
+    }
+  };
+
+  const skipRelative = async (deltaSeconds: number) => {
+    if (isMockModeRef.current) {
+      setPlayerState(prev => {
+        const d = prev.duration || 3600;
+        const next = prev.position + deltaSeconds;
+        const t = d > 0 ? Math.max(0, Math.min(d, next)) : Math.max(0, next);
+        return { ...prev, position: t };
+      });
+      return;
+    }
+    const sound = soundRef.current;
+    if (!sound) return;
+    try {
+      const status = await sound.getStatusAsync();
+      if (!status.isLoaded) return;
+      const cur = (status.positionMillis ?? 0) / 1000;
+      const maxSec = maxDurationFromLoaded(status, 0);
+      const next = cur + deltaSeconds;
+      const target = maxSec > 0 ? Math.max(0, Math.min(maxSec, next)) : Math.max(0, next);
+      await sound.setPositionAsync(target * 1000);
+      if (maxSec > 0) knownDurationRef.current = maxSec;
+      setPlayerState(prev => ({
+        ...prev,
+        position: target,
+        duration: maxSec || prev.duration,
+      }));
+    } catch (e) {
+      console.error('Error skipRelative:', e);
     }
   };
 
   const setPlaybackRate = async (rate: number) => {
-    if (soundRef.current) {
-      await soundRef.current.setRateAsync(rate, true);
-      setPlayerState(prev => ({ ...prev, playbackRate: rate }));
+    if (soundRef.current && !isMockModeRef.current) {
+      try {
+        const st = await soundRef.current.getStatusAsync();
+        if (st.isLoaded) {
+          await soundRef.current.setRateAsync(rate, true);
+        }
+      } catch {
+        /* ignore */
+      }
     }
+    setPlayerState(prev => ({ ...prev, playbackRate: rate }));
   };
 
   const setVolume = async (volume: number) => {
-    if (soundRef.current) {
-      await soundRef.current.setVolumeAsync(volume);
-      setPlayerState(prev => ({ ...prev, volume }));
+    const v = clampVolume(volume);
+    setPlayerState(prev => ({ ...prev, volume: v }));
+    if (soundRef.current && !isMockModeRef.current) {
+      try {
+        const st = await soundRef.current.getStatusAsync();
+        if (st.isLoaded) await soundRef.current.setVolumeAsync(v);
+      } catch {
+        /* ignore */
+      }
     }
   };
 
   const toggleMute = async () => {
-    if (soundRef.current) {
-      const newMuted = !playerState.isMuted;
-      await soundRef.current.setVolumeAsync(newMuted ? 0 : playerState.volume);
-      setPlayerState(prev => ({ ...prev, isMuted: newMuted }));
+    const nextMuted = !playerState.isMuted;
+    const restoreVol = clampVolume(playerState.volume);
+    setPlayerState(prev => ({ ...prev, isMuted: nextMuted }));
+    if (soundRef.current && !isMockModeRef.current) {
+      try {
+        const st = await soundRef.current.getStatusAsync();
+        if (st.isLoaded) {
+          await soundRef.current.setVolumeAsync(nextMuted ? 0 : restoreVol);
+        }
+      } catch {
+        /* ignore */
+      }
     }
   };
 
   const loadChapter = async (chapter: Chapter) => {
     try {
+      await applyAudiobookAudioMode();
       if (soundRef.current) {
-        await soundRef.current.unloadAsync();
+        try {
+          await soundRef.current.unloadAsync();
+        } finally {
+          soundRef.current = null;
+        }
       }
 
+      chapterDurationSecondsRef.current = Math.max(0, chapter.durationSeconds ?? 0);
+
+      const effectiveVol = playerState.isMuted ? 0 : clampVolume(playerState.volume);
       const { sound } = await Audio.Sound.createAsync(
         { uri: chapter.audioUrl },
-        { shouldPlay: false, rate: playerState.playbackRate, volume: playerState.volume }
+        { shouldPlay: false, rate: playerState.playbackRate, volume: effectiveVol }
       );
 
       soundRef.current = sound;
+      await sound.setVolumeAsync(effectiveVol);
+      const stL = await sound.getStatusAsync();
+      let d = chapterDurationSecondsRef.current;
+      if (stL.isLoaded && typeof stL.durationMillis === 'number' && stL.durationMillis > 0) {
+        d = stL.durationMillis / 1000;
+        knownDurationRef.current = d;
+      }
       setPlayerState(prev => ({
         ...prev,
         currentChapter: chapter,
+        duration: d || prev.duration,
       }));
     } catch (error) {
       console.error('Error loading chapter:', error);
@@ -252,9 +438,8 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
         ch => ch.id === playerState.currentChapter?.id
       );
       if (currentIndex < playerState.currentBook.chapters.length - 1) {
-        const nextChapter = playerState.currentBook.chapters[currentIndex + 1];
-        loadChapter(nextChapter);
-        play(playerState.currentBook, nextChapter);
+        const nextCh = playerState.currentBook.chapters[currentIndex + 1];
+        void play(playerState.currentBook, nextCh);
       }
     }
   };
@@ -265,9 +450,8 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
         ch => ch.id === playerState.currentChapter?.id
       );
       if (currentIndex > 0) {
-        const prevChapter = playerState.currentBook.chapters[currentIndex - 1];
-        loadChapter(prevChapter);
-        play(playerState.currentBook, prevChapter);
+        const prevCh = playerState.currentBook.chapters[currentIndex - 1];
+        void play(playerState.currentBook, prevCh);
       }
     }
   };
@@ -306,7 +490,9 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
         clearTimeout(sleepTimerRef.current);
       }
       if (soundRef.current) {
-        soundRef.current.unloadAsync();
+        void soundRef.current.unloadAsync().finally(() => {
+          soundRef.current = null;
+        });
       }
     };
   }, []);
@@ -319,6 +505,8 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
         pause,
         resume,
         seek,
+        seekToProgressPercent,
+        skipRelative,
         setPlaybackRate,
         setVolume,
         toggleMute,

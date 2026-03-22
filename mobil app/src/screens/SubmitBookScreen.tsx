@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,14 @@ import { Platform } from 'react-native';
 
 type SubmitBookScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SubmitBook'>;
 
+function guessImageMime(uri: string): string {
+  const base = uri.split('?')[0].toLowerCase();
+  if (base.endsWith('.png')) return 'image/png';
+  if (base.endsWith('.webp')) return 'image/webp';
+  if (base.endsWith('.gif')) return 'image/gif';
+  return 'image/jpeg';
+}
+
 interface ChapterInput {
   id: string;
   title: string;
@@ -42,10 +50,21 @@ const SubmitBookScreen = () => {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [coverMime, setCoverMime] = useState('image/jpeg');
   const [chapters, setChapters] = useState<ChapterInput[]>([
     { id: '1', title: '', audioFile: null },
   ]);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      let id = await getDeviceId();
+      if (!id) {
+        const label = Platform.OS === 'android' ? 'Android' : Platform.OS === 'ios' ? 'iOS' : 'Mobil';
+        id = await registerDevice(`${label} cihaz`, label);
+      }
+    })();
+  }, []);
 
   const categories = [
     'Roman',
@@ -69,28 +88,35 @@ const SubmitBookScreen = () => {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+      allowsEditing: Platform.OS === 'ios',
       aspect: [2, 3],
-      quality: 0.8,
+      quality: 0.85,
     });
 
-    if (!result.canceled && result.assets[0]) {
-      setCoverImage(result.assets[0].uri);
+    if (result.canceled) return;
+    const asset = result.assets?.[0];
+    if (asset?.uri) {
+      setCoverImage(asset.uri);
+      const mime =
+        'mimeType' in asset && typeof (asset as { mimeType?: string }).mimeType === 'string'
+          ? (asset as { mimeType: string }).mimeType
+          : guessImageMime(asset.uri);
+      setCoverMime(mime || guessImageMime(asset.uri));
     }
   };
 
   const pickAudioFile = async (chapterId: string) => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: 'audio/*',
+        type: ['audio/*', 'audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'application/octet-stream'],
         copyToCacheDirectory: true,
       });
 
-      if (!result.canceled && result.assets[0]) {
-        setChapters(prev =>
-          prev.map(ch =>
-            ch.id === chapterId ? { ...ch, audioFile: result.assets[0] } : ch
-          )
+      if (result.canceled) return;
+      const asset = result.assets?.[0];
+      if (asset) {
+        setChapters((prev) =>
+          prev.map((ch) => (ch.id === chapterId ? { ...ch, audioFile: asset } : ch))
         );
       }
     } catch (error) {
@@ -174,7 +200,14 @@ const SubmitBookScreen = () => {
       // Kapak yükle
       let coverUrl: string | undefined;
       if (coverImage) {
-        coverUrl = await uploadFile(coverImage, 'image/jpeg', 'cover.jpg');
+        const ext = coverMime.includes('png')
+          ? 'png'
+          : coverMime.includes('webp')
+            ? 'webp'
+            : coverMime.includes('gif')
+              ? 'gif'
+              : 'jpg';
+        coverUrl = await uploadFile(coverImage, coverMime, `cover.${ext}`);
       }
 
       // Bölüm ses dosyalarını yükle

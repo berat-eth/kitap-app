@@ -67,10 +67,12 @@ function mapApiChapterToChapter(api: ApiChapter): Chapter {
     const base = API_CONFIG.baseURL.replace(/\/api\/?$/, '');
     audioUrl = api.audio_url.startsWith('/') ? `${base}${api.audio_url}` : `${base}/${api.audio_url}`;
   }
+  const sec = Math.max(0, Math.floor(Number(api.duration) || 0));
   return {
     id: api.id,
     title: api.title,
     duration: formatDuration(api.duration),
+    durationSeconds: sec,
     audioUrl,
   };
 }

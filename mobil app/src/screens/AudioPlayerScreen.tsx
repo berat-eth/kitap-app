@@ -44,7 +44,8 @@ const AudioPlayerScreen = () => {
     play,
     pause,
     resume,
-    seek,
+    seekToProgressPercent,
+    skipRelative,
     setPlaybackRate,
     setVolume,
     toggleMute,
@@ -266,7 +267,7 @@ const AudioPlayerScreen = () => {
                 progress={progress}
                 height={6}
                 showThumb
-                onSeek={(p) => seek((p / 100) * playerState.duration)}
+                onSeek={(p) => void seekToProgressPercent(p)}
               />
               <View style={styles.timeRow}>
                 <Text style={[styles.timeText, { color: isDark ? '#9ca3af' : '#637588' }]}>
@@ -282,8 +283,8 @@ const AudioPlayerScreen = () => {
             <AudioControls
               isPlaying={playerState.isPlaying}
               onPlayPause={handlePlayPause}
-              onRewind={() => seek(Math.max(0, playerState.position - 15))}
-              onForward={() => seek(Math.min(playerState.duration, playerState.position + 30))}
+              onRewind={() => void skipRelative(-15)}
+              onForward={() => void skipRelative(30)}
               onPrevChapter={previousChapter}
               onNextChapter={nextChapter}
               playbackRate={playerState.playbackRate}

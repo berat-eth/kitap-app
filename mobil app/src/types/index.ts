@@ -20,6 +20,8 @@ export interface Chapter {
   id: string;
   title: string;
   duration: string;
+  /** API duration_seconds — seek bar için zorunlu (duration string 0 saniye hatasını önler) */
+  durationSeconds?: number;
   audioUrl: string;
 }
 

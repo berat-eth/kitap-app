@@ -1,17 +1,47 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 import { apiLogger } from '../utils/logger';
+
+type AppExtra = { apiUrl?: string; apiKey?: string };
+
+function readExtra(): AppExtra {
+  const e = Constants.expoConfig?.extra;
+  if (e && typeof e === 'object') return e as AppExtra;
+  return {};
+}
+
+function trimEndSlash(s: string) {
+  return s.replace(/\/+$/, '');
+}
+
+const extra = readExtra();
+
+const baseFromEnv =
+  process.env.EXPO_PUBLIC_API_URL ?? process.env.EXPO_PUBLIC_API_URL_PROD ?? '';
+const baseFromExtra = extra.apiUrl?.trim() ?? '';
+
+// app.config.js → extra (Metro + .env); yoksa EXPO_PUBLIC_* (EAS / babel)
+const resolvedBase = trimEndSlash(
+  (baseFromExtra || baseFromEnv || 'https://api.wirbooks.com.tr/api').trim()
+);
+
+const resolvedKey = (extra.apiKey ?? process.env.EXPO_PUBLIC_API_KEY ?? '').trim();
 
 // API Configuration - Tüm ayarlar burada
 export const API_CONFIG = {
-  baseURL:
-    process.env.EXPO_PUBLIC_API_URL ??
-    process.env.EXPO_PUBLIC_API_URL_PROD ??
-    'https://api.wirbooks.com.tr/api',
-
-  apiKey: process.env.EXPO_PUBLIC_API_KEY ?? '',
-
+  baseURL: resolvedBase,
+  apiKey: resolvedKey,
   timeout: 60000,
 };
+
+if (__DEV__ && !API_CONFIG.apiKey) {
+  console.warn(
+    '[Wirbooks] X-API-Key boş → API 401 verir. Backend .env içindeki API_KEY ile aynı değeri yazın:\n' +
+      '  mobil app/.env → EXPO_PUBLIC_API_KEY=...\n' +
+      '  (veya repo kökü .env) Sonra Metro’yu tamamen kapatıp `npx expo start -c` ile yeniden başlatın.'
+  );
+}
 
 // Device ID Storage Key
 const DEVICE_ID_KEY = '@sesli_kitap_device_id';
@@ -177,12 +207,12 @@ export const registerDevice = async (
       const trimmed = (text || '').trim();
 
       if (!trimmed) {
-        apiLogger.error('registerDevice.emptyResponse', { status: response.status, contentType });
+        apiLogger.error('registerDevice', 'emptyResponse', { status: response.status, contentType });
         return null;
       }
 
       if (trimmed.startsWith('<')) {
-        apiLogger.error('registerDevice.htmlResponse', {
+        apiLogger.error('registerDevice', 'htmlResponse', {
           status: response.status,
           contentType,
           textSnippet: trimmed.slice(0, 200),
@@ -194,7 +224,7 @@ export const registerDevice = async (
       try {
         data = JSON.parse(trimmed);
       } catch (e) {
-        apiLogger.error('registerDevice.invalidJson', {
+        apiLogger.error('registerDevice', 'invalidJson', {
           status: response.status,
           contentType,
           textSnippet: trimmed.slice(0, 200),
@@ -227,12 +257,30 @@ export const getFullUrl = (endpoint: string): string => {
   return `${API_CONFIG.baseURL}${endpoint}`;
 };
 
+function parseJsonSafe(text: string): { ok: boolean; data: any } {
+  const t = (text || '').trim();
+  if (!t) return { ok: false, data: null };
+  try {
+    return { ok: true, data: JSON.parse(t) };
+  } catch {
+    return { ok: false, data: null };
+  }
+}
+
 // Dosya yükle (cover veya ses)
 export const uploadFile = async (uri: string, type: string, name: string): Promise<string> => {
-  const deviceId = await getDeviceId();
+  let deviceId = await getDeviceId();
+  if (!deviceId) {
+    const p = Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : 'web';
+    deviceId = await registerDevice('Kitap gönder / yükleme', p);
+  }
+  if (!deviceId) {
+    throw new Error('Cihaz kaydı yapılamadı; interneti kontrol edip tekrar deneyin.');
+  }
+
   apiLogger.request('POST', API_ENDPOINTS.UPLOAD, {
     body: { type, name },
-    headers: { 'X-API-Key': '***', 'X-Device-ID': deviceId ? '***' : undefined },
+    headers: { 'X-API-Key': '***', 'X-Device-ID': '***' },
   });
 
   const formData = new FormData();
@@ -244,8 +292,8 @@ export const uploadFile = async (uri: string, type: string, name: string): Promi
 
   const headers: Record<string, string> = {
     'X-API-Key': API_CONFIG.apiKey,
+    'X-Device-ID': deviceId,
   };
-  if (deviceId) headers['X-Device-ID'] = deviceId;
 
   const startTime = Date.now();
   const response = await fetch(`${API_CONFIG.baseURL}${API_ENDPOINTS.UPLOAD}`, {
@@ -254,10 +302,20 @@ export const uploadFile = async (uri: string, type: string, name: string): Promi
     body: formData,
   });
 
-  const data = await response.json();
+  const raw = await response.text();
   const durationMs = Date.now() - startTime;
   apiLogger.response('POST', API_ENDPOINTS.UPLOAD, response.status, durationMs);
 
+  const parsed = parseJsonSafe(raw);
+  if (!parsed.ok) {
+    apiLogger.error('uploadFile', raw.slice(0, 200));
+    throw new Error(
+      response.ok
+        ? 'Sunucu yanıtı okunamadı'
+        : `Yükleme başarısız (HTTP ${response.status})`
+    );
+  }
+  const data = parsed.data;
   if (!data.success || !data.data?.url) {
     apiLogger.error('uploadFile', data.message || 'Dosya yüklenemedi');
     throw new Error(data.message || 'Dosya yüklenemedi');
@@ -280,15 +338,29 @@ export const submitBook = async (payload: {
     headers: { 'Content-Type': 'application/json', 'X-API-Key': '***' },
   });
 
+  let deviceId = await getDeviceId();
+  if (!deviceId) {
+    const p = Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : 'web';
+    deviceId = await registerDevice('Kitap gönder', p);
+  }
+  if (!deviceId) {
+    throw new Error('Cihaz kaydı gerekli. İnternet bağlantınızı kontrol edin.');
+  }
+
   const response = await apiFetch(API_ENDPOINTS.SUBMIT_BOOK, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 
-  const data = await response.json();
-  if (!data.success) {
+  const raw = await response.text();
+  const parsed = parseJsonSafe(raw);
+  if (!parsed.ok) {
+    throw new Error(`Sunucu yanıtı geçersiz (HTTP ${response.status})`);
+  }
+  const data = parsed.data;
+  if (!response.ok || !data.success) {
     apiLogger.error('submitBook', data.message || 'Kitap gönderilemedi');
-    throw new Error(data.message || 'Kitap gönderilemedi');
+    throw new Error(data.message || `Kitap gönderilemedi (HTTP ${response.status})`);
   }
   return data.data;
 };
